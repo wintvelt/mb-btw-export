@@ -34,4 +34,6 @@ jobs:
 
       - run:
           name: Deploy application
-          command: sls deploy --stage dev
+          command: |
+            sls config credentials --provider aws --key ${AWS_ACCESS_KEY_ID} --secret ${AWS_SECRET_ACCESS_KEY} --profile serverless-profile
+            sls deploy --stage dev
