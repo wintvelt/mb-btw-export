@@ -1,0 +1,17 @@
+{
+  "name": "btw-export",
+  "version": "1.0.0",
+  "description": "Lambda function to sync for btw-export from Moneybird",
+  "main": "handler.js",
+  "dependencies": {
+    "chai": "^4.2.0"
+  },
+  "devDependencies": {
+    "mocha": "^7.0.1"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/mocha **/*.spec.js"
+  },
+  "author": "Wouter",
+  "license": "ISC"
+}
