@@ -13,8 +13,8 @@
 
 service: btw-export
 # app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
+app: mb-btw-export
+org: wintvelt
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
