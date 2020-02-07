@@ -33,23 +33,23 @@ To retrieve history and summary of VAT exports.
 Response body structure:
 ```json
 {
-    "last_sync_date": "20200422", // date of last sync with Moneybird
+    "last_sync_date": "20200422",
     "open_stats": {
-        "new_docs_count": 12, // number of new docs after latest export date
-        "late_docs_count": 4, // number of new docs dated before latest export date
-        "changed_docs": 8 // number of docs already exported but changed since latest export
+        "new_docs_count": 12,
+        "late_docs_count": 4,
+        "changed_docs": 8
     },
     "files": [
         {
             "filename": "btw-export 20190131 full.xlsx", 
-            "url": "...", // download link
+            "url": "...",
             "create_date": "20190208",
             "start_date": "20190101",
             "end_date": "20190131"
         },
         { 
             "filename": "btw-export 20190228 new.xlsx", 
-            "url": "...", // download link
+            "url": "...",
             "create_date": "20190306",
             "start_date": "20190101",
             "end_date": "20190228"
@@ -64,9 +64,9 @@ Will create a new export file (see below) for download.
 Required `body` (may be empty object)
 ```json
 { 
-    "start_date": "20190101", // optional, in YYYYMMDD format
-    "end_date": "20190131", // optional, in YYYYMMDD format
-    "full_report": true // optional, to provide full report
+    "start_date": "20190101",
+    "end_date": "20190131",
+    "full_report": true
 }
 ```
 
@@ -91,8 +91,8 @@ Sync call will create a file with the following structure:
 ```json
 [
     {
-        "id": "123456789", // doc id
-        "type": "receipt" // doc type
+        "id": "123456789",
+        "type": "receipt"
     }
 ]
 ```
