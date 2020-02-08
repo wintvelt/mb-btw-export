@@ -64,12 +64,12 @@ functions:
 #    Check the event documentation for details
     events:
       - http:
-          path: {admin-id}/btw-export
+          path: {admin}/btw-export
           method: get
           request:
             parameters:
               paths:
-                admin-id: true
+                admin: true
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)
