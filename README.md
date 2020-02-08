@@ -27,7 +27,7 @@ All endpoints require `headers` with Moneybird Auth Bearer token
 { "Authentication" : "Bearer xxxxxxx" }
 ```
 
-### `/[admin-id]/btw-export` GET
+### `/btw-export/[admin-id]` GET
 To retrieve history and summary of VAT exports.
 
 Will also run sync to get latest Moneybird status.
@@ -60,7 +60,7 @@ Response body structure:
 }
 ```
 
-### `/[admin-id]/btw-export/file` POST
+### `/btw-export/[admin-id]/file` POST
 Will create a new export file (see below) for download.
 
 Will also run sync to get latest Moneybird status.
@@ -85,13 +85,13 @@ Response: `200 OK` with body:
 }
 ```
 
-### `/[admin-id]/btw-export/file/[filename]` DELETE
+### `/btw-export/[admin-id]/file/[filename]` DELETE
 Deletes an export file.
 **Also updates stats**.
 
 Response: `200 OK`
 
-### `/[admin-id]/btw-export/sync` POST
+### `/btw-export/[admin-id]/sync` POST
 Syncs stats with latest Moneybird situation.
 
 Response: `200 OK`
