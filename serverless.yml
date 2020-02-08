@@ -67,8 +67,8 @@ functions:
           path: {admin}/btw-export
           method: get
           request:
-            parameters:
-              paths:
+            parameter:
+              path:
                 admin: true
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
