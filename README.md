@@ -30,10 +30,12 @@ All endpoints require `headers` with Moneybird Auth Bearer token
 ### `/[admin-id]/btw-export` GET
 To retrieve history and summary of VAT exports.
 
+Will also run sync to get latest Moneybird status.
+
 Response body structure:
 ```json
 {
-    "last_sync_date": "20200422",
+    "last_sync_date": "2020-04-22",
     "open_stats": {
         "new_docs_count": 12,
         "late_docs_count": 4,
@@ -41,14 +43,14 @@ Response body structure:
     },
     "files": [
         {
-            "filename": "btw-export 20190131 full.xlsx", 
+            "filename": "btw-export 2019-01-31T130823 full.xlsx", 
             "url": "...",
-            "create_date": "20190208",
-            "start_date": "20190101",
-            "end_date": "20190131"
+            "create_date": "2019-02-08",
+            "start_date": "2019-01-01",
+            "end_date": "2019-01-31"
         },
         { 
-            "filename": "btw-export 20190228 new.xlsx", 
+            "filename": "btw-export 2019-02-28T140900 new.xlsx", 
             "url": "...",
             "create_date": "20190306",
             "start_date": "20190101",
@@ -61,16 +63,27 @@ Response body structure:
 ### `/[admin-id]/btw-export/file` POST
 Will create a new export file (see below) for download.
 
+Will also run sync to get latest Moneybird status.
+
 Required `body` (may be empty object)
 ```json
 { 
-    "start_date": "20190101",
-    "end_date": "20190131",
+    "start_date": "2019-01-01",
+    "end_date": "2019-01-31",
     "full_report": true
 }
 ```
 
-Response: `200 OK`
+Response: `200 OK` with body:
+```json
+{ 
+    "filename": "btw-export 2019-02-28T140900 new.xlsx", 
+    "url": "...",
+    "create_date": "2019-03-06",
+    "start_date": "2019-01-01",
+    "end_date": "2019-02-28"
+}
+```
 
 ### `/[admin-id]/btw-export/file/[filename]` DELETE
 Deletes an export file.
@@ -87,12 +100,41 @@ Response: `200 OK`
 
 ## Under the hood
 
-Sync call will create a file with the following structure:
+Latest situation is in a file `btw-export-latest.json` with the following structure:
 ```json
 [
     {
         "id": "123456789",
-        "type": "receipt"
+        "type": "receipt",
+        "latest_state": {
+            "version": 12345,
+            "date": "2020-02-01",
+            "details": [
+                {
+                    "id": "1345",
+                    "total_price_excl_tax_with_discount_base": "1210.00",
+                    "tax_rate_id": "1234567",
+                    "ledger_account_id": "12324567"
+                }
+            ]
+        },
+        "exports": [
+            {
+                "filename": "btw-export 2019-02-28T140900 new.xlsx",
+                "version": 12345,
+                "date": "2020-02-01",
+                "details": [
+                    {
+                        "id": "1345",
+                        "total_price_excl_tax_with_discount_base": "1210.00",
+                        "tax_rate_id": "1234567",
+                        "ledger_account_id": "12324567"
+                    }
+                ]
+            }
+        ]
     }
 ]
 ```
+
+File is created on first sync, and updated on subsequent syncs.
