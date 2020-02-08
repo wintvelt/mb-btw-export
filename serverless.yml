@@ -64,11 +64,11 @@ functions:
 #    Check the event documentation for details
     events:
       - http:
-          path: {admin}/btw-export
+          path: btw-export/{admin}
           method: get
           request:
-            parameter:
-              path:
+            parameters:
+              paths:
                 admin: true
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
