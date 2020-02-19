@@ -1,5 +1,8 @@
 # BTW-export
 
+TODO:
+- [ ] CHECK: start and end date may not work properly when intermittently syncing with moneybird
+
 API to sync and connect with Moneybird.
 Specifically to process purchase invoices and receipts for the purpose of VAT reporting.
 
