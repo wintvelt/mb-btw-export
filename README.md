@@ -5,7 +5,7 @@ Specifically to process purchase invoices and receipts for the purpose of VAT re
 
 ## Background
 By default, Moneybird does not provide any reporting that takes exports or snapshots into account.
-Purchase invoices and receipts can be changed at any time. Which is great, but not so good for reporting. 
+In Moneybird, purchase invoices and receipts may be changed at any time. Which is great, but not so good for reporting. Changes to a document after it has been exported may get lost in reporting.
 
 #### An example of the issue
 - In January, a receipt is added, with 21% VAT.
