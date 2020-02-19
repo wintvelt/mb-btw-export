@@ -10,7 +10,7 @@ Purchase invoices and receipts can be changed at any time. Which is great, but n
 #### An example of the issue
 - In January, a receipt is added, with 21% VAT.
 - End of January, a report is generated (for submission to tax authority) that contains all receipts, summarized per VAT rule.
-- In February, the receipt is added, and the VAT rule is changed to 0%.
+- In February, the VAT rule on the January receipt is changed to 0%.
 - End of February, the report for tax purposes should include the correction. However, *standard Moneybird cannot report such corrections adequately*
 
 ## Enter BTW-export API
@@ -24,7 +24,7 @@ This function allows to create an export from a Moneybird administration, with t
 ## API
 All endpoints require `headers` with Moneybird Auth Bearer token
 ```json
-{ "Authentication" : "Bearer xxxxxxx" }
+{ "Authorization" : "Bearer xxxxxxx" }
 ```
 
 ### `/btw-export/[admin-id]` GET
