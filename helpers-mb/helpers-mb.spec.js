@@ -43,8 +43,6 @@ describe('Moneybird data fetching tests', () => {
         const params = { ...context, type: 'receipts', ids: testReceiptIds };
         it('successfully retrieves data from Moneybird', async () => {
             const response = await fetch.singleFetch(params);
-            console.log(context);
-            console.log(response);
             expect(response).to.be.an('array').and.have.lengthOf(10);
             const firstItem = response[0];
             expect(firstItem).to.have.property('id');
