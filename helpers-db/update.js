@@ -8,9 +8,9 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
 });
 
-module.exports.promise = ({ id, latest_state }, { tableName }) => {
+module.exports.promise = ({ id, latest_state }, { TableName }) => {
     const params = {
-        TableName: tableName,
+        TableName,
         Key: {
             id,
         },
