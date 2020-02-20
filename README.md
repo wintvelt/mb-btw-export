@@ -3,9 +3,9 @@
 This is work in progress. Not yet ready for public consumption.
 TODO:
 - [x] Setup DynamoDB Table in serverless.yml for state data and export history
+- [x] function to update DynamoDB Table with latest Moneybird
+- [ ] function to fetch latest info from Moneybird, using id-list structure
 - [ ] function to sync ids and versions (calling mb-incoming-sync)
-- [ ] function to fetch latest info from Moneybird
-- [ ] function to update DynamoDB Table with latest Moneybird
 
 API to sync and connect with Moneybird.
 Specifically to process purchase invoices and receipts for the purpose of VAT reporting.
