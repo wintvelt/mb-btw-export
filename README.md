@@ -44,7 +44,6 @@ Will also run sync to get latest Moneybird status.
 Response body structure:
 ```json
 {
-    "last_sync_date": "2020-04-22",
     "open_stats": {
         "new_docs_after_export_count": 12,
         "new_docs_before_export_count": 4,
@@ -112,12 +111,6 @@ It is only possible to delete the latest export file, rolling back snapshots one
 Response: 
 - `200 OK` if all went well.
 - `400 Bad request` if request tried to delete a file other than the latest export.
-
-
-### `/btw-export/[admin-id]/sync` POST
-Syncs stats with latest Moneybird situation.
-
-Response: `200 OK`
 
 ---
 
