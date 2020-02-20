@@ -37,21 +37,46 @@ const stripRecord = (type) => ({ id, date, details }) => (
     {
         id,
         latest_state: {
-            type: type.slice(0,-1),
+            type: type.slice(0, -1),
             date,
             details: details.map(stripDetail)
         }
     }
 );
 
-const typeFetch = async ({ adminCode, access_token, type, idSet }) => {
-    const idList = idsToFetch(idSet);
+const typeFetch = async ({ adminCode, access_token, type, typeChangeSet }) => {
+    const idList = idsToFetch(typeChangeSet);
     const idBatches = slicesOfC(idList);
     const fetchParams = { adminCode, access_token, type };
     const recordBatches = await Promise.all(
         idBatches.map(ids => singleFetch({ ...fetchParams, ids }))
     );
-    const errorFound = recordBatches.find(it => it.error);
-    return errorFound || flatten(recordBatches).map(stripRecord(type));
+    const fetchError = recordBatches.find(it => it.error);
+    return fetchError || flatten(recordBatches).map(stripRecord(type));
 }
 module.exports.typeFetch = typeFetch;
+
+const setDeleted = id => ({ id, latest_state: { isDeleted: true } })
+
+module.exports.fullFetch = async ({ adminCode, access_token, changeSet }) => {
+    const params = { adminCode, access_token };
+    const [receiptInfo, purchInvInfo] = await Promise.all([
+        typeFetch(
+            { ...params, type: 'receipts', typeChangeSet: changeSet.receipts }
+        ),
+        typeFetch(
+            { ...params, type: 'purchase_invoices', typeChangeSet: changeSet.purchase_invoices }
+        )
+    ]);
+    if (receiptInfo.error || purchInvInfo.error) return {
+        error: receiptInfo.error || purchInvInfo.error
+    };
+    const receiptsDeleted = changeSet.receipts.deleted.map(setDeleted);
+    const purchInvDeleted = changeSet.purchase_invoices.deleted.map(setDeleted);
+    return [
+        ...receiptInfo,
+        ...receiptsDeleted,
+        ...purchInvInfo,
+        ...purchInvDeleted
+    ];
+}

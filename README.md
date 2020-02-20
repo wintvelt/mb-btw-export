@@ -164,7 +164,7 @@ File is created on first sync, and updated on subsequent syncs.
 When an export is made for Feb (start + end date in Feb filled out), the following documents are included in export:
 - new docs: with an invoice date in Feb, not previously exported
 - changed docs: with invoice date in Feb, where the last exported state was different (checking price + tax_rate_id in details)
-- deleted docs: with invoice date in Feb, and isDeleted is true, where the last exported state was different
+- deleted docs: with invoice date in Feb, and isDeleted is true, where the last exported state was not isDeleted
 
 In this example, the following documents will ***not*** be included in the export:
 - new docs with an invoice date after Feb or before Feb
