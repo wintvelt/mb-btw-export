@@ -26,7 +26,7 @@ This function allows to create an export from a Moneybird administration, with t
 - with or without end date
 - standard diff report (showing only new and changed from prior exports) or full report (taking all documents as basis)
 
-The export created will include changes from the previous exports too, to make sure that the exported state continues to be in sync with the state of Moneybird.
+The export created will include changes since the previous exports too, to make sure that the exported state continues to be in sync with the state of Moneybird.
 
 ---
 
