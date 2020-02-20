@@ -2,7 +2,7 @@
 
 This is work in progress. Not yet ready for public consumption.
 TODO:
-- [ ] Setup DynamoDB Table in serverless.yml for state data and export history
+- [x] Setup DynamoDB Table in serverless.yml for state data and export history
 - [ ] function to sync ids and versions (calling mb-incoming-sync)
 - [ ] function to fetch latest info from Moneybird
 - [ ] function to update DynamoDB Table with latest Moneybird
