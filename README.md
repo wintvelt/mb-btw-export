@@ -113,6 +113,12 @@ Response:
 - `200 OK` if all went well.
 - `400 Bad request` if request tried to delete a file other than the latest export.
 
+### `/btw-export/[admin-id]/sync` POST
+Runs a sync with Moneybird. Can be invoked in first setup and after interruption of the webhook.
+
+Response: 
+- `200 OK` if all went well.
+
 ---
 
 ## Under the hood

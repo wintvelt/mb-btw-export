@@ -55,7 +55,17 @@ functions:
             parameters:
               paths:
                 admin: true
-
+  sync:
+    handler: handlerSync.main
+    events:
+      - http:
+          path: btw-export/{admin}/sync
+          method: post
+          request:
+            parameters:
+              paths:
+                admin: true
+              
 resources:
   Resources:
     IncomingDynamoDbTable:
