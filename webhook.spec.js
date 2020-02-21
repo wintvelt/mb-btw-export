@@ -14,7 +14,7 @@ const baseBody = {
     entity: {
       id: "116015245643744263"
     },
-    token: process.env.MB_WEBHOOK_TOKEN
+    webhook_token: process.env.MB_WEBHOOK_TOKEN
 };
 const baseEvent = (body) => ({
     pathParameters: { admin: process.env.ADMIN_CODE },
