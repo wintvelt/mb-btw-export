@@ -13,8 +13,7 @@ const baseBody = {
     action: "some_action",
     entity: {
       id: "116015245643744263"
-    },
-    webhook_token: process.env.MB_WEBHOOK_TOKEN
+    }
 };
 const baseEvent = (body) => ({
     pathParameters: { admin: process.env.ADMIN_CODE },
@@ -31,14 +30,5 @@ describe("The webhook function", () => {
         const { body, ...eventWithoutBody } = baseEvent(baseBody);
         const response = await webhook.main(eventWithoutBody);
         expect(response.statusCode).to.equal(401);
-    });
-    it("if token wrong in request, returns 200 or 403 if token not set in env", async () => {
-        const bodyWithWrongToken = { ...baseBody, token: 'wrong' };
-        const response = await webhook.main(baseEvent(bodyWithWrongToken));
-        if (process.env.MB_WEBHOOK_TOKEN) {
-            expect(response.statusCode).to.equal(403);
-        } else {
-            expect(response.statusCode).to.equal(200);
-        }
     });
 });
