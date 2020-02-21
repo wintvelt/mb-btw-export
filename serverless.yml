@@ -57,7 +57,7 @@ functions:
                 admin: true
   sync:
     handler: handlerSync.main
-    timeout: 20
+    timeout: 90
     events:
       - http:
           path: btw-export/{admin}/sync
