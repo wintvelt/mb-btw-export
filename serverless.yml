@@ -47,6 +47,7 @@ functions:
                 admin: true
   webhook:
     handler: webhook.main
+    timeout: 20
     events:
       - http:
           path: btw-export/{admin}/webhook
