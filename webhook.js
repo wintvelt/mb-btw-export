@@ -55,7 +55,10 @@ module.exports.main = async event => {
     const saveParams = {
         ...context,
         adminCode,
-        body: record
+        body: {
+            fromMB: bodyObj,
+            record
+        }
     }
     const saveResponse = await saveFile(saveParams);
     if (saveResponse.error) return response(500, "Error");
