@@ -45,7 +45,7 @@ describe('Dynamo DB tests', () => {
     describe('The update.promise function', () => {
         it('stores items on DynamoDB', async () => {
             const response = await update.promise(params, context);
-            const moreResponse = update.promise(moreParams, context);
+            const moreResponse = await update.promise(moreParams, context);
             const { Attributes } = response;
             expect(response).to.have.property('Attributes');
             expect(Attributes).to.have.property('id');

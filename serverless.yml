@@ -45,6 +45,16 @@ functions:
             parameters:
               paths:
                 admin: true
+  webhook:
+    handler: webhook.main
+    events:
+      - http:
+          path: btw-export/{admin}/webhook
+          method: post
+          request:
+            parameters:
+              paths:
+                admin: true
 
 resources:
   Resources:
