@@ -1,6 +1,5 @@
 'use strict';
 const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
-require('dotenv').config();
 
 var s3 = new AWS.S3({
     region: 'eu-central-1'
@@ -34,8 +33,6 @@ const saveFile = ({ bucket, adminCode, filename, body }) => {
 
 module.exports.main = async event => {
     // get params from event
-    return response(200, event);
-
     if (!event || !event.pathParameters) return response(404, "Not found");
     const { admin } = event.pathParameters;
     const adminCode = admin;
