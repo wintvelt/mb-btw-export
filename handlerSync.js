@@ -17,7 +17,7 @@ module.exports.main = async event => {
         adminCode: event.pathParameters.admin,
         access_token: event.headers.Authorization.slice(6)
     }
-    response = await fullSync(context);
+    const response = await fullSync(context);
     if (response.error) return response(500, response.error);
     return response(200, "OK");
 };
