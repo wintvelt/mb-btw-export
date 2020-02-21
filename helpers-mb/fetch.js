@@ -40,10 +40,11 @@ const stripRecord = (type) => ({ id, date, version, details }) => (
             type: type.slice(0, -1),
             date,
             version,
-            details: details.map(stripDetail)
+            details: details? details.map(stripDetail) : []
         }
     }
 );
+module.exports.stripRecord = stripRecord;
 
 const typeFetch = async ({ adminCode, access_token, type, typeChangeSet }) => {
     const idList = idsToFetch(typeChangeSet);

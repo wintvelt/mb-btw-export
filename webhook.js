@@ -1,5 +1,7 @@
 'use strict';
 const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
+const mbHelpers = require('./helpers-mb/fetch');
+const stripRecord = mbHelpers.stripRecord;
 
 var s3 = new AWS.S3({
     region: 'eu-central-1'
@@ -45,11 +47,15 @@ module.exports.main = async event => {
     }
     const tokenError = (!bodyObj.webhook_token || bodyObj.webhook_token !== process.env.MB_WEBHOOK_TOKEN);
     if (process.env.MB_WEBHOOK_TOKEN && tokenError) return response(403, "Bad request");
-    // save body on S3
+    const entity = bodyObj.entity;
+    if (!entity) return response(200, "OK");
+    const type = bodyObj.entity_type && bodyObj.entity_type.toLowerCase();
+    const record = stripRecord(type)(entity);
+    // save on S3
     const saveParams = {
         ...context,
         adminCode,
-        body: bodyObj
+        body: record
     }
     const saveResponse = await saveFile(saveParams);
     if (saveResponse.error) return response(500, "Error");
