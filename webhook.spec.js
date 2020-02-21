@@ -32,9 +32,13 @@ describe("The webhook function", () => {
         const response = await webhook.main(eventWithoutBody);
         expect(response.statusCode).to.equal(401);
     });
-    it("returns with statusCode of 403 if token is wrong", async () => {
+    it("if token wrong in request, returns 200 or 403 if token not set in env", async () => {
         const bodyWithWrongToken = { ...baseBody, token: 'wrong' };
         const response = await webhook.main(baseEvent(bodyWithWrongToken));
-        expect(response.statusCode).to.equal(403);
+        if (process.env.MB_WEBHOOK_TOKEN) {
+            expect(response.statusCode).to.equal(403);
+        } else {
+            expect(response.statusCode).to.equal(200);
+        }
     });
 });

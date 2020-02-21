@@ -45,7 +45,7 @@ module.exports.main = async event => {
         bodyObj = event.body;
     }
     const tokenError = (!bodyObj.token || bodyObj.token !== process.env.MB_WEBHOOK_TOKEN);
-    if (tokenError) return response(403, "Bad request");
+    if (process.env.MB_WEBHOOK_TOKEN && tokenError) return response(403, "Bad request");
     // save body on S3
     const saveParams = {
         ...context,
