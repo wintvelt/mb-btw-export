@@ -14,7 +14,7 @@ module.exports.main = async event => {
     const isBadRequest = (!event.pathParameters.admin || !event.headers || !event.headers.Authorization);
     if (isBadRequest) return response(401,"Unauthorized");
     const context = {
-        adminCode: admin,
+        adminCode: event.pathParameters.admin,
         access_token: event.headers.Authorization.slice(6)
     }
     response = await fullSync(context);
