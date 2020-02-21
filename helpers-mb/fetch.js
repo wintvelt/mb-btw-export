@@ -20,7 +20,7 @@ const singleFetch = ({ adminCode, access_token, type, ids }) => {
         Authorization: 'Bearer ' + access_token,
         "Content-Type": "application/json",
     };
-    const url = `${baseUrl}/${adminCode}/documents/${type}/synchronization.json`;
+    const url = `${baseUrl}/${adminCode}/documents/${type}s/synchronization.json`;
     const body = JSON.stringify({ ids });
     const response = fetch(url, { headers, method: 'POST', body })
         .then(res => res.json())
@@ -37,7 +37,7 @@ const stripRecord = (type) => ({ id, date, version, details }) => (
     {
         id,
         latest_state: {
-            type: type.slice(0, -1),
+            type: type,
             date,
             version,
             details: details? details.map(stripDetail) : []
@@ -64,10 +64,10 @@ module.exports.fullFetch = async ({ adminCode, access_token, changeSet }) => {
     const params = { adminCode, access_token };
     const [receiptInfo, purchInvInfo] = await Promise.all([
         typeFetch(
-            { ...params, type: 'receipts', typeChangeSet: changeSet.receipts }
+            { ...params, type: 'receipt', typeChangeSet: changeSet.receipts }
         ),
         typeFetch(
-            { ...params, type: 'purchase_invoices', typeChangeSet: changeSet.purchase_invoices }
+            { ...params, type: 'purchase_invoice', typeChangeSet: changeSet.purchase_invoices }
         )
     ]);
     if (receiptInfo.error || purchInvInfo.error) return {

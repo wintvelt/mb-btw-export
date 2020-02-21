@@ -40,7 +40,7 @@ const changeSet = { receipts: testReceiptSet, purchase_invoices: testPurchInvSet
 
 describe('Moneybird data fetching tests', () => {
     describe('The fetch.singleFetch function', () => {
-        const params = { ...context, type: 'receipts', ids: testReceiptIds };
+        const params = { ...context, type: 'receipt', ids: testReceiptIds };
         it('successfully retrieves data from Moneybird', async () => {
             const response = await fetch.singleFetch(params);
             expect(response).to.be.an('array').and.have.lengthOf(10);
@@ -55,7 +55,7 @@ describe('Moneybird data fetching tests', () => {
     });
 
     describe('The fetch.typeFetch function', () => {
-        const params = { ...context, type: 'receipts', typeChangeSet: testReceiptSet };
+        const params = { ...context, type: 'receipt', typeChangeSet: testReceiptSet };
         it('successfully retrieves data from Moneybird', async () => {
             const response = await fetch.typeFetch(params);
             expect(response).to.be.an('array').and.have.lengthOf(8);
