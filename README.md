@@ -4,7 +4,7 @@ This is work in progress. Not yet ready for public consumption.
 TODO:
 - [x] Setup DynamoDB Table in serverless.yml for state data and export history
 - [x] function to update DynamoDB Table with latest Moneybird state - single
-- [ ] dynamoDB update function for multiple updates
+- [x] dynamoDB update function for multiple updates
 - [x] function to fetch latest info from Moneybird, using id-list structure
 - [ ] function to sync ids and versions (calling mb-incoming-sync)
 
@@ -13,7 +13,7 @@ Specifically to process purchase invoices and receipts for the purpose of VAT re
 
 ## Background
 By default, Moneybird does not provide any reporting that takes exports or snapshots into account.
-In Moneybird, purchase invoices and receipts may be changed at any time. Which is great, but not so good for reporting. Changes to a document after it has been exported may get lost in reporting.
+In Moneybird, purchase invoices and receipts may be changed at any time. Which is great, but not so good for reporting. Changes to a document after it has been exported may get lost.
 
 #### An example of the issue
 - In January, a receipt is added, with 21% VAT.
@@ -125,6 +125,7 @@ State data and export history situation is stored in the following structure:
         "latest_state": {
             "type": "receipt",
             "date": "2020-02-01",
+            "version": 2234,
             "details": [
                 {
                     "id": "1345",
@@ -145,6 +146,7 @@ State data and export history situation is stored in the following structure:
                 },
                 "type": "receipt",
                 "date": "2020-02-01",
+                "version": 2234,
                 "details": [
                     {
                         "id": "1345",

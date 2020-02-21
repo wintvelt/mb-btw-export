@@ -33,12 +33,13 @@ const stripDetail = ({ id, total_price_excl_tax_with_discount_base, tax_rate_id,
     { id, total_price_excl_tax_with_discount_base, tax_rate_id, ledger_account_id }
 );
 
-const stripRecord = (type) => ({ id, date, details }) => (
+const stripRecord = (type) => ({ id, date, version, details }) => (
     {
         id,
         latest_state: {
             type: type.slice(0, -1),
             date,
+            version,
             details: details.map(stripDetail)
         }
     }
