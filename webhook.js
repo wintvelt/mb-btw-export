@@ -48,14 +48,14 @@ module.exports.main = async event => {
     const tokenError = (!bodyObj.webhook_token || bodyObj.webhook_token !== process.env.MB_WEBHOOK_TOKEN);
     if (process.env.MB_WEBHOOK_TOKEN && tokenError) return response(403, "Bad request");
     const entity = bodyObj.entity;
-    if (!entity || !entity.webhook_token) return response(200, "OK");
+    if (!entity) return response(200, "OK");
     const type = bodyObj.entity_type && bodyObj.entity_type.toLowerCase();
     const record = stripRecord(type)(entity);
     // save on S3
     const saveParams = {
         ...context,
         adminCode,
-        body: record
+        body: {bodyObj, record}
     }
     const saveResponse = await saveFile(saveParams);
     if (saveResponse.error) return response(500, "Error");
