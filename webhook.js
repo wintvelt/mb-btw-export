@@ -34,8 +34,6 @@ const saveFile = ({ bucket, adminCode, filename, body }) => {
 
 module.exports.main = async event => {
     // get params from event
-    return response(200, event);
-
     if (!event || !event.pathParameters) return response(404, "Not found");
     const { admin } = event.pathParameters;
     const adminCode = admin;
