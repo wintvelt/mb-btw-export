@@ -47,7 +47,6 @@ functions:
                 admin: true
   webhook:
     handler: webhook.main
-    timeout: 20
     events:
       - http:
           path: btw-export/{admin}/webhook
@@ -58,6 +57,7 @@ functions:
                 admin: true
   sync:
     handler: handlerSync.main
+    timeout: 20
     events:
       - http:
           path: btw-export/{admin}/sync
