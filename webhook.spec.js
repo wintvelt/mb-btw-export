@@ -6,22 +6,35 @@ const expect = chai.expect;
 
 const webhook = require('./webhook');
 
+const baseBody = {
+    administration_id: "116015326147118082",
+    entity_type: "Receipt",
+    entity_id: "116015245643744263",
+    action: "some_action",
+    entity: {
+      id: "116015245643744263"
+    },
+    token: process.env.MB_WEBHOOK_TOKEN
+};
+const baseEvent = (body) => ({
+    pathParameters: { admin: process.env.ADMIN_CODE },
+    httpMethod: 'POST',
+    body: JSON.stringify(body)
+});
+
 describe("The webhook function", () => {
-    const baseEvent = {
-        pathParameters: { admin: process.env.ADMIN_CODE },
-        httpMethod: 'POST',
-        body: JSON.stringify({
-            administration_id: "116015326147118082",
-            entity_type: "Receipt",
-            entity_id: "116015245643744263",
-            action: "some_action",
-            entity: {
-              id: "116015245643744263"
-            }
-        })
-    }
     it("returns with statusCode of 200", async () => {
-        const response = await webhook.main(baseEvent);
+        const response = await webhook.main(baseEvent(baseBody));
         expect(response.statusCode).to.equal(200);
+    });
+    it("returns with statusCode of 401 if body is missing", async () => {
+        const { body, ...eventWithoutBody } = baseEvent(baseBody);
+        const response = await webhook.main(eventWithoutBody);
+        expect(response.statusCode).to.equal(401);
+    });
+    it("returns with statusCode of 403 if token is wrong", async () => {
+        const bodyWithWrongToken = { ...baseBody, token: 'wrong' };
+        const response = await webhook.main(baseEvent(bodyWithWrongToken));
+        expect(response.statusCode).to.equal(403);
     });
 });
