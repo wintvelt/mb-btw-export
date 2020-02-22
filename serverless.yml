@@ -57,7 +57,7 @@ functions:
                 admin: true
   sync:
     handler: handlerSync.main
-    timeout: 90
+    timeout: 20
     events:
       - http:
           path: btw-export/{admin}/sync
@@ -74,12 +74,10 @@ resources:
       DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
-          -
-            AttributeName: id
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-          -
-            AttributeName: id
+          - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
