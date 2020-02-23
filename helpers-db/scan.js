@@ -16,7 +16,7 @@ const scan = (params) => {
 module.exports.scan = scan;
 
 const scanVersionsParams = {
-    ProjectionExpression: "id, latest_state",
+    ProjectionExpression: "id, exports",
 };
 
 const scanVersionsOnce = ({ TableName }, ExclusiveStartKey) => {
@@ -27,8 +27,6 @@ const scanVersionsOnce = ({ TableName }, ExclusiveStartKey) => {
     };
     return scan(params);
 };
-
-const updateDbLatest = (dbLatest, newItems) => {}
 
 module.exports.scanVersions = async ({ TableName }) => {
     // let dbLatest = { receipts: [], purchase_invoices: [] };
@@ -42,7 +40,7 @@ module.exports.scanVersions = async ({ TableName }) => {
             dbLatest = { error: scanResult.error }
         } else {
             dbLatest = [...dbLatest, ...scanResult.Items];
-            ExclusiveStartKesy = scanResult.LastEvaluatedKey;
+            ExclusiveStartKey = scanResult.LastEvaluatedKey;
             shouldDoScan = !!ExclusiveStartKey;
         }
     }

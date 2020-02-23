@@ -8,19 +8,19 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
 });
 
-module.exports.promise = ({ id, latest_state }, { TableName }) => {
+module.exports.promise = ({ id, exportStates }, { TableName }) => {
     const params = {
         TableName,
         Key: {
             id,
         },
         ExpressionAttributeNames: {
-            '#ls': 'latest_state',
+            '#es': 'exportStates',
         },
         ExpressionAttributeValues: {
-            ':latest_state': latest_state,
+            ':exportStates': exportStates,
         },
-        UpdateExpression: 'SET #ls = :latest_state',
+        UpdateExpression: 'SET #es = :exportStates',
         ReturnValues: 'ALL_NEW',
     };
 

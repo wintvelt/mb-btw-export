@@ -9,7 +9,8 @@ const scan = require('./scan');
 const updateAll = require('./update-all');
 
 const testEnv = {
-    DYNAMODB_TABLE: 'btw-export-dev'
+    DYNAMODB_TABLE_DOCS: 'btw-export-dev-docs',
+    DYNAMODB_TABLE_EXPORTS: 'btw-export-dev-exports',
 };
 
 const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
@@ -19,15 +20,16 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
 });
 
 describe('Dynamo DB tests', () => {
-    const latest_state = {
+    const unExported = {
+        id: 'unExported',
         type: 'receipt',
         version: 12345,
         date: '2020-01-08'
-    }
-    const context = { TableName: testEnv.DYNAMODB_TABLE }
-    const params = { id: '1234', latest_state }
-    const moreParams = { id: '1235', latest_state: { ...latest_state, type: 'purchase_invoice' } }
-    const evenMoreParams = { id: '1236', latest_state: { isDeleted: true } };
+    };
+    const context = { TableName: testEnv.DYNAMODB_TABLE_DOCS }
+    const params = { id: '1234', exportStates: [unExported] }
+    const moreParams = { id: '1235', exportStates: [{ ...unExported, type: 'purchase_invoice' }] }
+    const evenMoreParams = { id: '1236', exportStates: [{ id: 'unExported', isDeleted: true }] };
     const batchList = [params, moreParams, evenMoreParams];
 
     after(async () => {
@@ -48,9 +50,10 @@ describe('Dynamo DB tests', () => {
             const moreResponse = await update.promise(moreParams, context);
             const { Attributes } = response;
             expect(response).to.have.property('Attributes');
-            expect(Attributes).to.have.property('id');
-            expect(Attributes.latest_state).to.have.property('type');
-            expect(Attributes.latest_state.type).to.equal('receipt');
+            expect(Attributes).to.have.property('exportStates');
+            expect(Attributes.exportStates).to.be.an('array');
+            expect(Attributes.exportStates[0]).to.have.property('type');
+            expect(Attributes.exportStates[0].type).to.equal('receipt');
         });
         it('throws error if tablename is wrong', async () => {
             const response = await update.promise(params, { tableName: 'wrong' });
@@ -65,6 +68,12 @@ describe('Dynamo DB tests', () => {
             expect(response.Items).to.be.an('array');
         });
     });
+
+    describe('The scan.scanVersions function', () => {
+        it('returns an array', async () => {
+            const response = await scan.scanVersions(context)
+        })
+    })
 
     describe('The updateAll.promise function', () => {
         it('stores items on dynamoDB', async () => {
