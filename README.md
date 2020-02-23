@@ -130,8 +130,9 @@ State data and export history situation is stored in the following structure:
         "id": "123456789",
         "latest_state": {
             "type": "receipt",
-            "date": "2020-02-01",
             "version": 2234,
+            "date": "2020-02-01",
+            "isDeleted": false,
             "details": [
                 {
                     "id": "1345",
@@ -151,8 +152,9 @@ State data and export history situation is stored in the following structure:
                     "end_date": "2019-02-28"
                 },
                 "type": "receipt",
-                "date": "2020-02-01",
                 "version": 2234,
+                "date": "2020-02-01",
+                "isDeleted": false,
                 "details": [
                     {
                         "id": "1345",

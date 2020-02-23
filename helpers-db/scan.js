@@ -8,8 +8,43 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
 });
 
-module.exports.promise = (params) => {
+const scan = (params) => {
     return dynamoDb.scan(params)
         .promise()
         .catch(error => ({ error: error.message }));
 };
+module.exports.scan = scan;
+
+const scanVersionsParams = {
+    ProjectionExpression: "id, latest_state",
+};
+
+const scanVersionsOnce = ({ TableName }, ExclusiveStartKey) => {
+    const params = {
+        ...scanVersionsParams,
+        TableName,
+        ExclusiveStartKey
+    };
+    return scan(params);
+};
+
+const updateDbLatest = (dbLatest, newItems) => {}
+
+module.exports.scanVersions = async ({ TableName }) => {
+    // let dbLatest = { receipts: [], purchase_invoices: [] };
+    let dbLatest = [];
+    let shouldDoScan = true;
+    let ExclusiveStartKey = undefined;
+    while (shouldDoScan) {
+        const scanResult = await scanVersionsOnce({ TableName }, ExclusiveStartKey);
+        if (scanResult.error) {
+            shouldDoScan = false;
+            dbLatest = { error: scanResult.error }
+        } else {
+            dbLatest = [...dbLatest, ...scanResult.Items];
+            ExclusiveStartKesy = scanResult.LastEvaluatedKey;
+            shouldDoScan = !!ExclusiveStartKey;
+        }
+    }
+    return dbLatest;
+}

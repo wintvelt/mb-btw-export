@@ -58,9 +58,9 @@ describe('Dynamo DB tests', () => {
         });
     });
 
-    describe('The scan.promise function', () => {
+    describe('The scan.scan function', () => {
         it('retrieves items from dynamoDB', async () => {
-            const response = await scan.promise(context);
+            const response = await scan.scan(context);
             expect(response).to.have.property('Items');
             expect(response.Items).to.be.an('array');
         });
