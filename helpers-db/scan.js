@@ -16,7 +16,7 @@ const scan = (params) => {
 module.exports.scan = scan;
 
 const scanVersionsParams = {
-    ProjectionExpression: "id, exports",
+    ProjectionExpression: "id, exportStates",
 };
 
 const scanVersionsOnce = ({ TableName }, ExclusiveStartKey) => {
@@ -28,7 +28,32 @@ const scanVersionsOnce = ({ TableName }, ExclusiveStartKey) => {
     return scan(params);
 };
 
-module.exports.scanVersions = async ({ TableName }) => {
+const makeVersionSet = (dbLatest) => {
+    const dbLength = dbLatest.length;
+    let result = {
+        receipts: [],
+        purchase_invoices: []
+    };
+    for (let i = 0; i < dbLength; i++) {
+        const item = dbLatest[i];
+        const latestState = item.exportStates && item.exportStates[0];
+        if (!latestState) {
+            result = { error: `Doc database is corrupted at id ${item.id}` }
+            break;
+        }
+        const type = latestState.type + 's';
+        if (!latestState.isDeleted) {
+            result[type].push({
+                id: item.id,
+                version: latestState.version
+            });
+        }
+    }
+    return result;
+}
+module.exports.makeVersionSet = makeVersionSet;
+
+const scanVersions = async ({ TableName }) => {
     // let dbLatest = { receipts: [], purchase_invoices: [] };
     let dbLatest = [];
     let shouldDoScan = true;
@@ -45,4 +70,10 @@ module.exports.scanVersions = async ({ TableName }) => {
         }
     }
     return dbLatest;
+}
+module.exports.scanVersions = scanVersions;
+
+module.exports.scanDbVersions = async ({ TableName }) => {
+    const dbLatest = await scanVersions({ TableName });
+    return makeVersionSet(dbLatest);
 }

@@ -6,7 +6,12 @@ TODO:
 - [x] function to update DynamoDB Table with latest Moneybird state - single
 - [x] dynamoDB update function for multiple updates
 - [x] function to fetch latest info from Moneybird, using id-list structure
-- [ ] function to sync ids and versions (calling mb-incoming-sync)
+- [ ] function to update a single db item with latest (update or deleted) or exportState (change helpers-db/update)
+    - check helpers-sync/getSyncUpdates for input format
+- [ ] function (with input = single id db record) to update an single id in unexported in exportsTable (update helpers-db/update)
+    - add id, and also changeType [added|changed|deleted]
+    - for deleted, add type and date from latest export state
+- [ ] create `/btw-export/[admin-id] GET` with only `unexported` stats
 
 API to sync and connect with Moneybird.
 Specifically to process purchase invoices and receipts for the purpose of VAT reporting.
@@ -45,7 +50,7 @@ Will also run sync to get latest Moneybird status.
 Response body structure:
 ```json
 {
-    "open_stats": {
+    "unexported": {
         "new_docs_after_export_count": 12,
         "new_docs_before_export_count": 4,
         "changed_docs": 8,
