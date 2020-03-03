@@ -6,10 +6,10 @@ TODO:
 - [x] function to update DynamoDB Table with latest Moneybird state - single
 - [x] dynamoDB update function for multiple updates
 - [x] function to fetch latest info from Moneybird, using id-list structure
-- [ ] function to update a single db item with latest (update or deleted) or exportState (change helpers-db/update)
+- [x] function to update a single db item with latest (update or deleted) or exportState (change helpers-db/update)
     - check helpers-sync/getSyncUpdates for input format
-- [ ] function (with input = single id db record) to update an single id in unexported in exportsTable (update helpers-db/update)
-    - add id, and also changeType [added|changed|deleted]
+- [x] function (with input = single id db record) to update an single id in unexported in exportsTable (update helpers-db/update)
+    - add id and state
     - for deleted, add type and date from latest export state
 - [ ] create `/btw-export/[admin-id] GET` with only `unexported` stats
 

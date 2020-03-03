@@ -1,9 +1,9 @@
 // helpers-db/update-all.js
-const update = require('./update');
+const docTable = require('./docTable');
 
 module.exports.promise = async (batchList, context) => {
     const results = await Promise.all(
-        batchList.map(record => update.promise(record, context))
+        batchList.map(record => docTable.updateSingle(record, context))
     );
     const errorFound = results.find(item => item.error);
     if (errorFound) return { error: errorFound.error }
