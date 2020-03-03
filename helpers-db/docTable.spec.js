@@ -5,7 +5,7 @@ const chai = require('chai');
 const expect = chai.expect;
 
 const docTable = require('./docTable');
-const scan = require('./scan');
+const scan = require('./docTable-scan');
 // const updateAll = require('./update-all');
 
 const testEnv = {
@@ -30,7 +30,6 @@ const newDocUpdate2 = { id: '1235', key: 'latestState', newState: { ...baseState
 const expDocUpdate = { id: '1235', key: 'testExport1', newState: { ...baseState, type: 'purchase_invoice' } };
 const delDocUpdate = { id: '1234', key: 'latestState', newState: { isDeleted: true } };
 const stateRemoveUpdate = { id: '1235', key: 'testExport1' };
-// const batchList = [params, moreParams, evenMoreParams];
 
 describe('Dynamo DB docTable tests', () => {
     before(async () => {
@@ -83,43 +82,6 @@ describe('Dynamo DB docTable tests', () => {
     //         const wrongBatchList = [...batchList, {}];
     //         const response = await updateAll.promise(wrongBatchList, context);
     //         expect(response).to.have.property('error');
-    //     });
-    // });
-
-    // describe('The scan.scan function', () => {
-    //     it('retrieves items from dynamoDB', async () => {
-    //         const response = await scan.scan(context);
-    //         expect(response).to.have.property('Items');
-    //         expect(response.Items).to.be.an('array');
-    //     });
-    // });
-
-    // describe('The scan.scanVersions function', () => {
-    //     it('returns an array', async () => {
-    //         const response = await scan.scanVersions(context);
-    //         expect(response).to.be.an('array');
-    //     })
-    // });
-
-    // describe('The scan.makeVersionSet function', () => {
-    //     it('normally returns an object with ids and versions', () => {
-    //         const response = scan.makeVersionSet(batchList);
-    //         expect(response).to.have.property('receipts');
-    //         expect(response.receipts).to.be.an('array').and.have.lengthOf(1);
-    //         expect(response.receipts[0]).to.have.property('version');
-    //     });
-    //     it('returns an error if 1 of the records has no exportStates', () => {
-    //         const corruptBatchList = [...batchList, { id: '4567' }];
-    //         const response = scan.makeVersionSet(corruptBatchList);
-    //         expect(response).to.have.property('error');
-    //     });
-    // });
-
-    // describe('The scan.scanDbVersions function', () => {
-    //     it('normally returns an object with array for receipts and purchase invoices', async () => {
-    //         const response = await scan.scanDbVersions(context);
-    //         expect(response).to.have.property('receipts');
-    //         expect(response.receipts).to.be.an('array');
     //     });
     // });
 });

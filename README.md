@@ -11,6 +11,17 @@ TODO:
 - [x] function (with input = single id db record) to update an single id in unexported in exportsTable (update helpers-db/update)
     - add id and state
     - for deleted, add type and date from latest export state
+- [x] sync function now makes complete changeSet (with input from db and moneybird)
+
+- [ ] create sync function that does db updates based on changeset (up to max)
+    - [ ] upgrade limitedChangeSet function in sync
+    - [ ] add tests for limitedChangeSet
+- [ ] create function for single latestState update for both Db-docs and db-exports table
+- [ ] create function for stats update after single Db update
+- [ ] update webhook for new db structure, to do single update
+
+- [ ] create `/btw-export/[admin-id]/sync` POST endpoint
+
 - [ ] create `/btw-export/[admin-id] GET` with only `unexported` stats
 
 API to sync and connect with Moneybird.
@@ -122,7 +133,9 @@ Response:
 Runs a sync with Moneybird. Can be invoked in first setup and after interruption of the webhook.
 
 Response: 
-- `200 OK` if all went well.
+- `200 OK` if all went well. Always has `body` in response.
+    - body may be empty object (full sync was completed), 
+    - or contain `maxExceeded: true`: in which case sync incomplete, and needs to be run again (may be required multiple times)
 
 ---
 
@@ -188,3 +201,17 @@ In this example, the following documents will ***not*** be included in the expor
 - deleted docs with an invoice date before or after Feb
 
 But this is OK: they will continue to be available for a future export.
+
+### Function structure
+
+`sync.getChangeSet`:
+- gets MB receipt and purchase invoice latest versions (all) (`sync.mbSync`)
+- gets DB docs latestState (maybe all) 
+    - compare versions of DB records (exclude isDeleted)
+        - add db record not in MB to 'deleted'
+        - add db record newer in MB to 'changed'
+    - if not last from DB: run again with more DB docs
+- after last DB docs are processed
+- select all MB docs not in DB
+- add to 'new'
+- return the changeSet (ready for MB fetch and update)

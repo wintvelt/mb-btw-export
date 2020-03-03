@@ -1,61 +1,28 @@
 // helpers-sync/sync.js
 // to sync database with moneybird latest state
-const fetch = require('node-fetch');
-const scan = require('../helpers-db/scan');
-const mbHelpers = require('../helpers-mb/fetch');
+const dbScan = require('../helpers-db/docTable-scan');
+const mbDocs = require('../helpers-mb/fetchDocs');
+const mbScan = require('../helpers-mb/fetchVersions');
 
-const baseUrl = 'https://moneybird.com/api/v2';
-
-const dedupe = (list) => {
-    let outList = [];
-    for (let i = 0; i < list.length; i++) {
-        const item = list[i];
-        if (i === 0 || item.id !== list[i - 1].id) {
-            outList.push(item)
-        }
-    }
-    return outList;
-}
-
-const changes = (oldList = [], newList = []) => {
-    const newItems = newList.filter(item => !oldList.find(it => it.id === item.id));
-    const deletedItems = oldList.filter(item => !newList.find(it => it.id === item.id));
-    const changedItems = newList.filter(item => !!oldList.find(it => (it.id === item.id && it.version < item.version)));
+const changesPartial = (partialOldList = [], fullNewList = []) => {
+    const deletedItems = partialOldList.filter(item => !fullNewList.find(it => it.id === item.id));
+    const changedItems = fullNewList.filter(item => (
+        !!partialOldList.find(it => (it.id === item.id && it.version < item.version))
+    ));
     return {
-        added: newItems.map(item => item.id),
         changed: changedItems.map(item => item.id),
         deleted: deletedItems.map(item => item.id)
     }
 }
-module.exports.changes = changes;
+module.exports.changesPartial = changesPartial;
 
-const mbTypeSync = async ({ adminCode, access_token, type }) => {
-    const headers = {
-        Authorization: 'Bearer ' + access_token,
-        "Content-Type": "application/json",
-    };
-    const filter = encodeURI('filter=state:saved|open|late|paid|pending_payment');
-    const url = `${baseUrl}/${adminCode}/documents/${type}/synchronization.json?${filter}`;
-    const response = fetch(url, { headers, method: 'GET' })
-        .then(res => res.json())
-        .catch(error => ({ error: error.message }));
-    return response;
-}
-module.exports.mbTypeSync = mbTypeSync;
-
-const mbSync = async ({ adminCode, access_token }) => {
-    const [receipts, purchase_invoices] = await Promise.all([
-        mbTypeSync({ adminCode, access_token, type: 'receipts' }),
-        mbTypeSync({ adminCode, access_token, type: 'purchase_invoices' }),
-    ]);
-    const possibleError = receipts.error || purchase_invoices.error;
-    if (possibleError) return { error: possibleError };
+const changesNew = (fullOldList = [], fullNewList = []) => {
+    const newItems = fullNewList.filter(item => !fullOldList.find(it => it.id === item.id));
     return {
-        receipts: dedupe(receipts),
-        purchase_invoices: dedupe(purchase_invoices)
+        added: newItems.map(item => item.id),
     }
 }
-module.exports.mbSync = mbSync;
+module.exports.changesNew = changesNew;
 
 const limitChanges = (changeSet, maxUpdates) => {
     const maxExceeded = (
@@ -81,22 +48,50 @@ const limitChanges = (changeSet, maxUpdates) => {
     return [limitedChangeSet, maxExceeded];
 }
 
-module.exports.getSyncUpdates = async ({ adminCode, access_token, TableName, maxUpdates }) => {
-    const [dbVersions, mbVersions] = await Promise.all([
-        scan.scanDbVersions({ TableName }),
-        mbSync({ adminCode, access_token }),
-    ]);
-    const possibleError = mbVersions.error || dbVersions.error;
-    if (possibleError) return { error: possibleError };
-    const changeSet = {
-        receipts: changes(dbVersions.receipts, mbVersions.receipts),
-        purchase_invoices: changes(dbVersions.purchase_invoices, mbVersions.purchase_invoices),
-    }
-    const [limitedChangeSet, maxExceeded] = limitChanges(changeSet, maxUpdates);
-    const docUpdates = await mbHelpers.fullFetch({ adminCode, access_token, changeSet: limitedChangeSet });
-    if (docUpdates.error) return { error: docUpdates.error }
-    return {
-        docUpdates,
-        maxExceeded
-    }
+module.exports.getChangeSet = async ({ adminCode, access_token, TableName, maxUpdates }) => {
+    let changeSet = { receipts: {}, purchase_invoices: {} };
+    let fullDbVersions = { receipts: [], purchase_invoices: [] };
+    let ExclusiveStartKey;
+    const mbVersions = await mbScan.mbSync({ adminCode, access_token });
+    if (mbVersions.error) return { error: mbVersions.error };
+    const mbReceiptVersions = mbVersions.receipts;
+    const mbPurchase_invoiceVersions = mbVersions.purchase_invoices;
+
+    do {
+        const dbResult = await dbScan.scanVersions({
+            TableName,
+            ExclusiveStartKey
+        });
+        if (dbResult.error) return { error: dbResult.error };
+        const { dbVersions, LastEvaluatedKey } = dbResult;
+        const partialSet = {
+            receipts: changes(dbVersions.receipts, mbReceiptVersions),
+            purchase_invoices: changes(dbVersions.purchase_invoices, mbPurchase_invoiceVersions)
+        };
+        changeSet.receipts = {
+            changed: [...changeSet.receipts.changed, ...partialSet.receipts.changed],
+            deleted: [...changeSet.receipts.deleted, ...partialSet.receipts.deleted]
+        };
+        changeSet.purchase_invoices = {
+            changed: [...changeSet.purchase_invoices.changed, ...partialSet.purchase_invoices.changed],
+            deleted: [...changeSet.purchase_invoices.deleted, ...partialSet.purchase_invoices.deleted]
+        };
+        fullDbVersions.receipts = [...fullDbVersions.receipts, ...dbVersions.receipts];
+        fullDbVersions.purchase_invoices = [...fullDbVersions.purchase_invoices, ...dbVersions.purchase_invoices];
+        ExclusiveStartKey = LastEvaluatedKey;
+    } while (ExclusiveStartKey);
+
+    const newReceipts = changesNew(fullDbVersions.receipts, mbVersions.receipts);
+    const newPurchase_invoices = changesNew(fullDbVersions.purchase_invoices, mbVersions.purchase_invoices);
+    changeSet.receipts.added = newReceipts.added;
+    changeSet.purchase_invoices = newPurchase_invoices.added;
+
+    return changeSet;
+    // const [limitedChangeSet, maxExceeded] = limitChanges(changeSet, maxUpdates);
+    // const docUpdates = await mbDocs.fullFetch({ adminCode, access_token, changeSet: limitedChangeSet });
+    // if (docUpdates.error) return { error: docUpdates.error }
+    // return {
+    //     docUpdates,
+    //     maxExceeded
+    // }
 }

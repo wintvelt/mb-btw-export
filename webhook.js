@@ -1,6 +1,6 @@
 'use strict';
 const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
-const mbHelpers = require('./helpers-mb/fetch');
+const mbHelpers = require('./helpers-mb/fetchDocs');
 const stripRecord = mbHelpers.stripRecord;
 
 var s3 = new AWS.S3({
