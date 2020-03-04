@@ -25,31 +25,44 @@ const changesNew = (fullOldList = [], fullNewList = []) => {
 module.exports.changesNew = changesNew;
 
 const limitChanges = (changeSet, maxUpdates) => {
-    const maxExceeded = (
-        changeSet.receipts.added.length > maxUpdates ||
-        changeSet.receipts.changed.length > maxUpdates ||
-        changeSet.receipts.deleted.length > maxUpdates ||
-        changeSet.purchase_invoices.added.length > maxUpdates ||
-        changeSet.purchase_invoices.changed.length > maxUpdates ||
-        changeSet.purchase_invoices.deleted.length > maxUpdates
-    )
+    const lengths = [
+        changeSet.receipts.added.length,
+        changeSet.receipts.changed.length,
+        changeSet.receipts.deleted.length,
+        changeSet.purchase_invoices.added.length,
+        changeSet.purchase_invoices.changed.length,
+        changeSet.purchase_invoices.deleted.length
+    ];
+    const lengthsCumStart = [
+        0,
+        lengths[0],
+        lengths[0] + lengths[1],
+        lengths[0] + lengths[1] + lengths[2],
+        lengths[0] + lengths[1] + lengths[2] + lengths[3],
+        lengths[0] + lengths[1] + lengths[2] + lengths[3] + lengths[4],
+    ];
+    const maxExceeded = (lengthsCumStart[5] + lengths[5] > maxUpdates);
     const limitedChangeSet = {
         receipts: {
             added: changeSet.receipts.added.slice(0, maxUpdates),
-            changed: changeSet.receipts.changed.slice(0, maxUpdates),
-            deleted: changeSet.receipts.deleted.slice(0, maxUpdates),
+            changed: changeSet.receipts.changed.slice(0, Math.max(0, maxUpdates - lengthsCumStart[1])),
+            deleted: changeSet.receipts.deleted.slice(0, Math.max(0, maxUpdates - lengthsCumStart[2])),
         },
         purchase_invoices: {
-            added: changeSet.purchase_invoices.added.slice(0, maxUpdates),
-            changed: changeSet.purchase_invoices.changed.slice(0, maxUpdates),
-            deleted: changeSet.purchase_invoices.deleted.slice(0, maxUpdates),
+            added: changeSet.purchase_invoices.added.slice(0, Math.max(0, maxUpdates - lengthsCumStart[3])),
+            changed: changeSet.purchase_invoices.changed.slice(0, Math.max(0, maxUpdates - lengthsCumStart[4])),
+            deleted: changeSet.purchase_invoices.deleted.slice(0, Math.max(0, maxUpdates - lengthsCumStart[5])),
         }
     }
-    return [limitedChangeSet, maxExceeded];
+    return { limitedChangeSet, maxExceeded };
 }
+module.exports.limitChanges = limitChanges;
 
-module.exports.getChangeSet = async ({ adminCode, access_token, TableName, maxUpdates }) => {
-    let changeSet = { receipts: {}, purchase_invoices: {} };
+const getChangeSet = async ({ adminCode, access_token, TableName }) => {
+    let changeSet = {
+        receipts: { added: [], changed: [], deleted: [] },
+        purchase_invoices: { added: [], changed: [], deleted: [] }
+    };
     let fullDbVersions = { receipts: [], purchase_invoices: [] };
     let ExclusiveStartKey;
     const mbVersions = await mbScan.mbSync({ adminCode, access_token });
@@ -63,10 +76,10 @@ module.exports.getChangeSet = async ({ adminCode, access_token, TableName, maxUp
             ExclusiveStartKey
         });
         if (dbResult.error) return { error: dbResult.error };
-        const { dbVersions, LastEvaluatedKey } = dbResult;
+        const { items: dbVersions, LastEvaluatedKey } = dbResult;
         const partialSet = {
-            receipts: changes(dbVersions.receipts, mbReceiptVersions),
-            purchase_invoices: changes(dbVersions.purchase_invoices, mbPurchase_invoiceVersions)
+            receipts: changesPartial(dbVersions.receipts, mbReceiptVersions),
+            purchase_invoices: changesPartial(dbVersions.purchase_invoices, mbPurchase_invoiceVersions)
         };
         changeSet.receipts = {
             changed: [...changeSet.receipts.changed, ...partialSet.receipts.changed],
@@ -84,14 +97,19 @@ module.exports.getChangeSet = async ({ adminCode, access_token, TableName, maxUp
     const newReceipts = changesNew(fullDbVersions.receipts, mbVersions.receipts);
     const newPurchase_invoices = changesNew(fullDbVersions.purchase_invoices, mbVersions.purchase_invoices);
     changeSet.receipts.added = newReceipts.added;
-    changeSet.purchase_invoices = newPurchase_invoices.added;
+    changeSet.purchase_invoices.added = newPurchase_invoices.added;
 
     return changeSet;
-    // const [limitedChangeSet, maxExceeded] = limitChanges(changeSet, maxUpdates);
-    // const docUpdates = await mbDocs.fullFetch({ adminCode, access_token, changeSet: limitedChangeSet });
-    // if (docUpdates.error) return { error: docUpdates.error }
-    // return {
-    //     docUpdates,
-    //     maxExceeded
-    // }
+}
+module.exports.getChangeSet = getChangeSet;
+
+module.exports.getDocUpdates = async ({ adminCode, access_token, TableName, maxUpdates }) => {
+    const changeSet = await getChangeSet({ adminCode, access_token, TableName });
+    const { limitedChangeSet, maxExceeded } = limitChanges(changeSet, maxUpdates);
+    const docUpdates = await mbDocs.fullFetch({ adminCode, access_token, changeSet: limitedChangeSet });
+    if (docUpdates.error) return { error: docUpdates.error }
+    return {
+        docUpdates,
+        maxExceeded
+    }
 }

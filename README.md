@@ -13,9 +13,10 @@ TODO:
     - for deleted, add type and date from latest export state
 - [x] sync function now makes complete changeSet (with input from db and moneybird)
 
-- [ ] create sync function that does db updates based on changeset (up to max)
-    - [ ] upgrade limitedChangeSet function in sync
-    - [ ] add tests for limitedChangeSet
+- [x] tests for getChangeSet
+- [x] create sync function that creates docUpdates based on changeset (up to max)
+    - [x] upgrade limitedChangeSet function in sync
+    - [x] add tests for limitedChangeSet
 - [ ] create function for single latestState update for both Db-docs and db-exports table
 - [ ] create function for stats update after single Db update
 - [ ] update webhook for new db structure, to do single update
