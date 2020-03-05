@@ -5,7 +5,6 @@ const chai = require('chai');
 const expect = chai.expect;
 
 const docTable = require('./docTable');
-const scan = require('./docTable-scan');
 // const updateAll = require('./update-all');
 
 const testEnv = {
@@ -47,7 +46,6 @@ describe('Dynamo DB docTable tests', () => {
     describe('The docTable.updateSingle function', () => {
         it('creates item in docTable for latestState of new doc', async () => {
             const result = await docTable.updateSingle(newDocUpdate, context);
-            console.log(result);
             expect(result.Attributes).to.have.property('id');
         });
         it('retains export history when updating latest state of a doc', async () => {

@@ -61,7 +61,7 @@ describe('Moneybird data fetching tests', () => {
             expect(response).to.be.an('array').and.have.lengthOf(8);
             const firstItem = response[0];
             expect(firstItem).to.have.property('id');
-            expect(firstItem.latest_state).to.have.property('date');
+            expect(firstItem.latestState).to.have.property('date');
             expect(firstItem).to.not.have.property('events');
         });
         it('returns empty list if input is empty', async () => {
@@ -81,7 +81,7 @@ describe('Moneybird data fetching tests', () => {
         it('successfully creates a latest state list from Moneybird data', async () => {
             const response = await fetchDocs.fullFetch(params);
             expect(response).to.be.an('array').and.have.lengthOf(16);
-            const deletedItems = response.filter(it => it.latest_state.isDeleted);
+            const deletedItems = response.filter(it => it.latestState.isDeleted);
             expect(deletedItems).to.have.lengthOf(3);
         });
         it('returns empty list if changeset is empty', async () => {

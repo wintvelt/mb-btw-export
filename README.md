@@ -17,7 +17,7 @@ TODO:
 - [x] create sync function that creates docUpdates based on changeset (up to max)
     - [x] upgrade limitedChangeSet function in sync
     - [x] add tests for limitedChangeSet
-- [ ] create function for single latestState update for both Db-docs and db-exports table
+- [x] create function for single latestState update for both db-docs and db-exports table
 - [ ] create function for stats update after single Db update
 - [ ] update webhook for new db structure, to do single update
 

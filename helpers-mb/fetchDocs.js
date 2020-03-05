@@ -36,7 +36,7 @@ const stripDetail = ({ id, total_price_excl_tax_with_discount_base, tax_rate_id,
 const stripRecord = (type) => ({ id, date, version, details }) => (
     {
         id,
-        latest_state: {
+        latestState: {
             type: type,
             date,
             version,
@@ -58,7 +58,7 @@ const typeFetch = async ({ adminCode, access_token, type, typeChangeSet }) => {
 }
 module.exports.typeFetch = typeFetch;
 
-const setDeleted = id => ({ id, latest_state: { isDeleted: true } })
+const setDeleted = id => ({ id, latestState: { isDeleted: true } })
 
 module.exports.fullFetch = async ({ adminCode, access_token, changeSet }) => {
     const params = { adminCode, access_token };

@@ -13,7 +13,7 @@
     "mocha": "^7.0.1"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha \"**/*.spec.js\""
+    "test": "./node_modules/.bin/mocha \"**/*.spec.js\" --timeout 5000"
   },
   "author": "Wouter",
   "license": "ISC"
