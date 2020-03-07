@@ -13,6 +13,7 @@ const testEnv = {
     DYNAMODB_TABLE_DOCS: 'btw-export-dev-docs',
     DYNAMODB_TABLE_EXPORTS: 'btw-export-dev-exports',
 };
+const adminCode = process.env.ADMIN_CODE;
 
 const testDb = (process.env.TEST_DB_ON && process.env.TEST_DB_ON !== "false");
 const testIf = (testFunc) => {
@@ -37,6 +38,7 @@ const context = {
     exportTableName: testEnv.DYNAMODB_TABLE_EXPORTS
 }
 const newLatestStateRecord = {
+    adminCode,
     id: '1234',
     latestState: { type: 'receipt', date: '2020-01-08', version: 13, details: [baseDetails] }
 };
@@ -48,6 +50,7 @@ describe('Dynamo DB update tests', testIf(() => {
                 ...newLatestStateRecord,
                 ...context
             });
+            console.log(result);
             expect(result).to.have.property('id');
             expect(result).to.have.property('latestState');
             expect(result.latestState.version).to.equal(13);
@@ -56,7 +59,7 @@ describe('Dynamo DB update tests', testIf(() => {
             // update the database
             const result = await dynamoDb.delete({
                 TableName: testEnv.DYNAMODB_TABLE_DOCS,
-                Key: { id: '1234' }
+                Key: { adminCode, id: '1234' }
             })
                 .promise()
                 .catch(error => ({ error: error.message }));
@@ -66,7 +69,8 @@ describe('Dynamo DB update tests', testIf(() => {
             const params = {
                 TableName: testEnv.DYNAMODB_TABLE_EXPORTS,
                 Key: {
-                    id: 'unexported',
+                    adminCode,
+                    state: 'unexported',
                 },
                 ExpressionAttributeNames: {
                     '#id1': '1234'
@@ -77,7 +81,7 @@ describe('Dynamo DB update tests', testIf(() => {
             const result = await dynamoDb.update(params)
                 .promise()
                 .catch(error => ({ error: error.message }));
-            expect(result.Attributes.id).to.equal('unexported');
+            expect(result.Attributes.state).to.equal('unexported');
         });
     });
 }));

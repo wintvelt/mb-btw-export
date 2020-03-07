@@ -5,10 +5,11 @@
 const docTable = require('./docTable');
 const exportTable = require('./exportTable');
 
-module.exports.updateSingle = async ({ id, latestState, docTableName, exportTableName }) => {
+module.exports.updateSingle = async ({ adminCode, id, latestState, docTableName, exportTableName }) => {
     const docUpdateResult = await docTable.updateSingle({
+        adminCode,
         id,
-        key: 'latestState',
+        state: 'latestState',
         newState: latestState
     }, { TableName: docTableName });
     if (docUpdateResult.error) return { error: docUpdateResult.error };

@@ -40,42 +40,24 @@ module.exports.updateSingleUnexported = (docRecord, { TableName }) => {
     const deletedNeverExported = (docRecord.latestState.isDeleted && !latestExportFacts);
     const isUnexported = (!deletedWasExported && latestHash !== latestExportHash);
     const shouldBeInUnexported = (isUnexported && !deletedNeverExported);
-    const updateOperation = (shouldBeInUnexported)?
+    const updateOperation = (shouldBeInUnexported) ?
         'SET #docId = :newState'
         : 'REMOVE #docId';
 
     const params = {
         TableName,
         Key: {
-            id: 'unexported',
+            adminCode: docRecord.adminCode,
+            state: 'unexported',
         },
         UpdateExpression: updateOperation,
         ExpressionAttributeNames: {
             '#docId': docRecord.id,
         },
-        ExpressionAttributeValues: shouldBeInUnexported ?
+        ExpressionAttributeValues: (shouldBeInUnexported) ?
             {
                 ':newState': { ...latestExportFacts, ...docRecord.latestState },
             } : null,
-        ReturnValues: 'ALL_NEW',
-    };
-
-    // update the database
-    return dynamoDb.update(params)
-        .promise()
-        .catch(error => ({ error: error.message }));
-};
-
-module.exports.removeState = ({ id, key }, { TableName }) => {
-    const params = {
-        TableName,
-        Key: {
-            id,
-        },
-        ExpressionAttributeNames: {
-            '#state': key,
-        },
-        UpdateExpression: 'REMOVE #state',
         ReturnValues: 'ALL_NEW',
     };
 

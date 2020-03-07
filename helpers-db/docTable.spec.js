@@ -32,22 +32,23 @@ const baseState = {
     version: 12345,
     date: '2020-01-08'
 };
+const adminCode = process.env.ADMIN_CODE;
 const context = { TableName: testEnv.DYNAMODB_TABLE_DOCS }
-const newDocUpdate = { id: '1234', key: 'latestState', newState: baseState }
-const newDocUpdate2 = { id: '1235', key: 'latestState', newState: { ...baseState, type: 'purchase_invoice' } };
-const expDocUpdate = { id: '1235', key: 'testExport1', newState: { ...baseState, type: 'purchase_invoice' } };
-const delDocUpdate = { id: '1234', key: 'latestState', newState: { isDeleted: true } };
-const stateRemoveUpdate = { id: '1235', key: 'testExport1' };
+const newDocUpdate = { adminCode, id: '1234', state: 'latestState', newState: baseState }
+const newDocUpdate2 = { adminCode, id: '1235', state: 'latestState', newState: { ...baseState, type: 'purchase_invoice' } };
+const expDocUpdate = { adminCode, id: '1235', state: 'testExport1', newState: { ...baseState, type: 'purchase_invoice' } };
+const delDocUpdate = { adminCode, id: '1234', state: 'latestState', newState: { isDeleted: true } };
+const stateRemoveUpdate = { adminCode, id: '1235', key: 'testExport1' };
 
 describe('Dynamo DB docTable tests', testIf(() => {
     before(async () => {
         await docTable.updateSingle(newDocUpdate2, context);
     })
     after(async () => {
-        await dynamoDb.delete({ ...context, Key: { id: '1234' } })
+        await dynamoDb.delete({ ...context, Key: { adminCode, id: '1234' } })
             .promise()
             .catch(error => ({ error: error.message }));
-        await dynamoDb.delete({ ...context, Key: { id: '1235' } })
+        await dynamoDb.delete({ ...context, Key: { adminCode, id: '1235' } })
             .promise()
             .catch(error => ({ error: error.message }));
     });

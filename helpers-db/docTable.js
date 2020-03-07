@@ -8,14 +8,15 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
 });
 
-module.exports.updateSingle = ({ id, key, newState }, { TableName }) => {
+module.exports.updateSingle = ({ adminCode, id, state, newState }, { TableName }) => {
     const params = {
         TableName,
         Key: {
+            adminCode,
             id,
         },
         ExpressionAttributeNames: {
-            '#state': key,
+            '#state': state,
         },
         ExpressionAttributeValues: {
             ':newState': newState,
@@ -30,10 +31,11 @@ module.exports.updateSingle = ({ id, key, newState }, { TableName }) => {
         .catch(error => ({ error: error.message }));
 };
 
-module.exports.removeState = ({ id, key }, { TableName }) => {
+module.exports.removeState = ({ adminCode, id, key }, { TableName }) => {
     const params = {
         TableName,
         Key: {
+            adminCode,
             id,
         },
         ExpressionAttributeNames: {
