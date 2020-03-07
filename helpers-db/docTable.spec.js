@@ -3,6 +3,9 @@
 const mocha = require('mocha');
 const chai = require('chai');
 const expect = chai.expect;
+require('dotenv').config();
+
+const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 
 const docTable = require('./docTable');
 // const updateAll = require('./update-all');
@@ -12,7 +15,13 @@ const testEnv = {
     DYNAMODB_TABLE_EXPORTS: 'btw-export-dev-exports',
 };
 
-const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
+const testDb = (process.env.TEST_DB_ON && process.env.TEST_DB_ON !== "false");
+const testIf = (testFunc) => {
+    if (testDb) return testFunc;
+    return () => {
+        it('database tests did not run', () => {});
+    }
+}
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
@@ -30,7 +39,7 @@ const expDocUpdate = { id: '1235', key: 'testExport1', newState: { ...baseState,
 const delDocUpdate = { id: '1234', key: 'latestState', newState: { isDeleted: true } };
 const stateRemoveUpdate = { id: '1235', key: 'testExport1' };
 
-describe('Dynamo DB docTable tests', () => {
+describe('Dynamo DB docTable tests', testIf(() => {
     before(async () => {
         await docTable.updateSingle(newDocUpdate2, context);
     })
@@ -82,4 +91,4 @@ describe('Dynamo DB docTable tests', () => {
     //         expect(response).to.have.property('error');
     //     });
     // });
-});
+}));

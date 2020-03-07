@@ -12,6 +12,18 @@ const context = {
     access_token: process.env.ACCESS_TOKEN,
     TableName: 'btw-export-dev-docs'
 }
+const testMb = (process.env.TEST_MB_ON && process.env.TEST_MB_ON !== "false");
+const testDb = (process.env.TEST_MB_ON && process.env.TEST_DB_ON !== "false");
+const testIf = (testFunc) => {
+    if (testMb && testDb) return testFunc;
+    const mbString = testMb? '': 'moneybird';
+    const dbString = testDb? '': 'database';
+    const andString = (testMb && testDb)? '' : ' and ';
+    return () => {
+        it(`${mbString}${andString}${dbString} tests off, so sync tests did not run`, () => {});
+    }
+}
+
 
 const oldList = [
     { id: '1', version: '1' },
@@ -32,7 +44,7 @@ const limitChangeSet = {
     purchase_invoices: { added: [], changed: [], deleted: [12] }
 }
 
-describe('Sync Functions', () => {
+describe('Sync Functions', testIf(() => {
     describe("The changesPartial function", () => {
         const changeSet = sync.changesPartial(oldList, newList);
         it("does not contains any new items", () => {
@@ -93,5 +105,4 @@ describe('Sync Functions', () => {
             expect(maxExceeded).to.be.a('boolean');
         });
     });
-
-})
+}));

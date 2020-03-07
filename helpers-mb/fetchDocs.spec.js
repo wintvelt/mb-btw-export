@@ -7,6 +7,13 @@ require('dotenv').config();
 
 const fetchDocs = require('./fetchDocs');
 
+const testMb = (process.env.TEST_MB_ON && process.env.TEST_MB_ON !== "false");
+const testIf = (testFunc) => {
+    if (testMb) return testFunc;
+    return () => {
+        it('moneybird tests did not run', () => {});
+    }
+}
 const context = {
     adminCode: process.env.ADMIN_CODE,
     access_token: process.env.ACCESS_TOKEN
@@ -38,7 +45,7 @@ const testPurchInvSet = {
 
 const changeSet = { receipts: testReceiptSet, purchase_invoices: testPurchInvSet };
 
-describe('Moneybird data fetching tests', () => {
+describe('Moneybird data fetching tests', testIf(() => {
     describe('The fetchDocs.singleFetch function', () => {
         const params = { ...context, type: 'receipt', ids: testReceiptIds };
         it('successfully retrieves data from Moneybird', async () => {
@@ -100,4 +107,4 @@ describe('Moneybird data fetching tests', () => {
             expect(response).to.have.property('error');
         });
     })
-});
+}));

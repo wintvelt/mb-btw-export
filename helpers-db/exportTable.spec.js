@@ -3,6 +3,9 @@
 const mocha = require('mocha');
 const chai = require('chai');
 const expect = chai.expect;
+require('dotenv').config();
+
+const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 
 const exportTable = require('./exportTable');
 
@@ -10,8 +13,13 @@ const testEnv = {
     DYNAMODB_TABLE_DOCS: 'btw-export-dev-docs',
     DYNAMODB_TABLE_EXPORTS: 'btw-export-dev-exports',
 };
-
-const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
+const testDb = (process.env.TEST_DB_ON && process.env.TEST_DB_ON !== "false");
+const testIf = (testFunc) => {
+    if (testDb) return testFunc;
+    return () => {
+        it('database tests did not run', () => {});
+    }
+}
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
@@ -60,7 +68,7 @@ const neverExportedDeletedRecord = {
     latestState: { isDeleted: true }
 };
 
-describe('Dynamo DB exportTable tests', () => {
+describe('Dynamo DB exportTable tests', testIf(() => {
     describe('The exportTable.updateSingleUnexported function', () => {
         before(async () => {
             await Promise.all([
@@ -116,4 +124,4 @@ describe('Dynamo DB exportTable tests', () => {
             // expect(newItem).to.not.have.property('1238');
         });
     });
-});
+}));

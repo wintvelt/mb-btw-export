@@ -3,17 +3,27 @@
 const mocha = require('mocha');
 const chai = require('chai');
 const expect = chai.expect;
+require('dotenv').config();
+
+const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 
 const docTable = require('./docTable');
 const scan = require('./docTable-scan');
 // const updateAll = require('./update-all');
+
+const testDb = (process.env.TEST_DB_ON && process.env.TEST_DB_ON !== "false");
+const testIf = (testFunc) => {
+    if (testDb) return testFunc;
+    return () => {
+        it('database tests did not run', () => {});
+    }
+}
 
 const testEnv = {
     DYNAMODB_TABLE_DOCS: 'btw-export-dev-docs',
     DYNAMODB_TABLE_EXPORTS: 'btw-export-dev-exports',
 };
 
-const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
@@ -31,7 +41,7 @@ const batchList = [
     { id: '1236', latestState: { ...baseState, isDeleted: true } }
 ]
 
-describe('Dynamo DB docTable-scan tests', () => {
+describe('Dynamo DB docTable-scan tests', testIf(() => {
     describe('The scan function', () => {
         it('retrieves items from dynamoDB', async () => {
             const response = await scan.scan(context);
@@ -63,4 +73,4 @@ describe('Dynamo DB docTable-scan tests', () => {
             expect(items.receipts).to.be.an('array');
         });
     });
-});
+}));

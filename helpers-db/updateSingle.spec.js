@@ -3,6 +3,9 @@
 const mocha = require('mocha');
 const chai = require('chai');
 const expect = chai.expect;
+require('dotenv').config();
+
+const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 
 const updateSingle = require('./updateSingle');
 
@@ -11,7 +14,13 @@ const testEnv = {
     DYNAMODB_TABLE_EXPORTS: 'btw-export-dev-exports',
 };
 
-const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
+const testDb = (process.env.TEST_DB_ON && process.env.TEST_DB_ON !== "false");
+const testIf = (testFunc) => {
+    if (testDb) return testFunc;
+    return () => {
+        it('database tests did not run', () => {});
+    }
+}
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
@@ -32,7 +41,7 @@ const newLatestStateRecord = {
     latestState: { type: 'receipt', date: '2020-01-08', version: 13, details: [baseDetails] }
 };
 
-describe('Dynamo DB update tests', () => {
+describe('Dynamo DB update tests', testIf(() => {
     describe('The updateSingle function', () => {
         it('returns a full doc record if the udpate was successful', async () => {
             const result = await updateSingle.updateSingle({
@@ -69,7 +78,6 @@ describe('Dynamo DB update tests', () => {
                 .promise()
                 .catch(error => ({ error: error.message }));
             expect(result.Attributes.id).to.equal('unexported');
-
         });
     });
-});
+}));

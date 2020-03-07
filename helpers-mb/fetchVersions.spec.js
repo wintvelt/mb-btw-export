@@ -13,7 +13,15 @@ const context = {
     TableName: 'btw-export-dev-docs'
 }
 
-describe('Moneybird sync (fetchVersions) Functions', () => {
+const testMb = (process.env.TEST_MB_ON && process.env.TEST_MB_ON !== "false");
+const testIf = (testFunc) => {
+    if (testMb) return testFunc;
+    return () => {
+        it('moneybird tests did not run', () => {});
+    }
+}
+
+describe('Moneybird sync (fetchVersions) Functions', testIf(() => {
     describe('The mbTypeSync function', () => {
         it('retrieves set of doc ids from moneybird sync', async () => {
             const response = await fetchVersions.mbTypeSync({ ...context, type: 'receipts' });
@@ -39,4 +47,4 @@ describe('Moneybird sync (fetchVersions) Functions', () => {
             expect(response).to.be.have.property('error');
         })
     });
-})
+}));
