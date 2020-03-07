@@ -37,8 +37,10 @@ module.exports.updateSingleUnexported = (docRecord, { TableName }) => {
         isDeleted: docRecord.latestState.isDeleted,
     });
     const deletedWasExported = (docRecord.latestState.isDeleted && latestExportFacts && latestExportFacts.isDeleted);
+    const deletedNeverExported = (docRecord.latestState.isDeleted && !latestExportFacts);
     const isUnexported = (!deletedWasExported && latestHash !== latestExportHash);
-    const updateOperation = isUnexported ?
+    const shouldBeInUnexported = (isUnexported && !deletedNeverExported);
+    const updateOperation = (shouldBeInUnexported)?
         'SET #docId = :newState'
         : 'REMOVE #docId';
 
@@ -51,7 +53,7 @@ module.exports.updateSingleUnexported = (docRecord, { TableName }) => {
         ExpressionAttributeNames: {
             '#docId': docRecord.id,
         },
-        ExpressionAttributeValues: isUnexported ?
+        ExpressionAttributeValues: shouldBeInUnexported ?
             {
                 ':newState': { ...latestExportFacts, ...docRecord.latestState },
             } : null,

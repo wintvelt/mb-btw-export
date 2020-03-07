@@ -18,7 +18,9 @@ TODO:
     - [x] upgrade limitedChangeSet function in sync
     - [x] add tests for limitedChangeSet
 - [x] create function for single latestState update for both db-docs and db-exports table
-- [ ] create function for stats update after single Db update
+- [x] what if latestState = deleted for record that was never exported?
+    - for docTable this is fine: record is created with only latestState = { isDeleted }
+    - for exportTable: fixed
 - [ ] update webhook for new db structure, to do single update
 
 - [ ] create `/btw-export/[admin-id]/sync` POST endpoint
@@ -56,8 +58,6 @@ All endpoints require `headers` with Moneybird Auth Bearer token
 
 ### `/btw-export/[admin-id]` GET
 To retrieve history and summary of VAT exports.
-
-Will also run sync to get latest Moneybird status.
 
 Response body structure:
 ```json

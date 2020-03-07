@@ -55,6 +55,10 @@ const newUnchangedDeletedStateRecord = {
     testExport1: { type: 'receipt', date: '2020-01-08', version: 10, details: [baseDetails] },
     testExport2: { type: 'receipt', date: '2020-01-08', isDeleted: true }
 };
+const neverExportedDeletedRecord = {
+    id: '1238',
+    latestState: { isDeleted: true }
+};
 
 describe('Dynamo DB exportTable tests', () => {
     describe('The exportTable.updateSingleUnexported function', () => {
@@ -104,6 +108,12 @@ describe('Dynamo DB exportTable tests', () => {
             const result = await exportTable.updateSingleUnexported(newUnchangedDeletedStateRecord, context);
             const newItem = result.Attributes;
             expect(newItem).to.not.have.property('1237');
+        });
+        it('removes docId from unexported list if the latestState is deleted and never exported', async () => {
+            const result = await exportTable.updateSingleUnexported(neverExportedDeletedRecord, context);
+            console.log(result);
+            // const newItem = result.Attributes;
+            // expect(newItem).to.not.have.property('1238');
         });
     });
 });

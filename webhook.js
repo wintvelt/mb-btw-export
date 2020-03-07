@@ -1,11 +1,7 @@
 'use strict';
-const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
+const dbUpdates = require('./helpers-db/updateSingle');
 const mbHelpers = require('./helpers-mb/fetchDocs');
 const stripRecord = mbHelpers.stripRecord;
-
-var s3 = new AWS.S3({
-    region: 'eu-central-1'
-});
 
 const response = (statusCode, bodyOrString) => {
     const body = typeof bodyOrString === 'string' ?
@@ -18,19 +14,8 @@ const response = (statusCode, bodyOrString) => {
 }
 
 const context = {
-    bucket: 'mb-incoming-sync-files',
-    filename: 'webhook'
-};
-
-const saveFile = ({ bucket, adminCode, filename, body }) => {
-    const Key = `${adminCode}/${filename}.json`;
-    return s3.putObject({
-        Bucket: bucket,
-        Key,
-        Body: JSON.stringify(body, null, 2),
-        ContentType: 'application/json'
-    }).promise()
-        .catch(error => ({ error: error.message }));
+    docTableName: process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs',
+    exportTableName: process.env.DYNAMODB_EXPORT_TABLE || 'btw-export-dev-docs',
 }
 
 module.exports.main = async event => {
@@ -38,7 +23,7 @@ module.exports.main = async event => {
     if (!event || !event.pathParameters) return response(404, "Not found");
     const { admin } = event.pathParameters;
     const adminCode = admin;
-    if (!event.body) return response(401, "Missing authorization");
+    if (!event.body) return response(400, "Bad request");
     let bodyObj;
     try {
         bodyObj = JSON.parse(event.body);
@@ -46,7 +31,7 @@ module.exports.main = async event => {
         bodyObj = event.body;
     }
     const tokenError = (!bodyObj.webhook_token || bodyObj.webhook_token !== process.env.MB_WEBHOOK_TOKEN);
-    if (process.env.MB_WEBHOOK_TOKEN && tokenError) return response(403, "Bad request");
+    if (process.env.MB_WEBHOOK_TOKEN && tokenError) return response(400, "Bad request");
     const entity = bodyObj.entity;
     if (!entity || !bodyObj.webhook_token) return response(200, "OK");
     const type = bodyObj.entity_type && bodyObj.entity_type.toLowerCase();
