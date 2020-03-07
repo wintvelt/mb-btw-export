@@ -40,5 +40,6 @@ jobs:
               echo "deploying app"
               sls deploy --stage dev
             else
-              echo "no deployment, we are on branch $CIRCLE_BRANCH"
-            fi
+            echo "deploying app"
+            sls deploy --stage dev
+          fi
