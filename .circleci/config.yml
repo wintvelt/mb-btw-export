@@ -40,6 +40,6 @@ jobs:
               echo "deploying app"
               sls deploy --stage dev
             else
-            echo "deploying app"
-            sls deploy --stage dev
-          fi
+              echo "deploying non-master app"
+              sls deploy --stage dev
+            fi 
