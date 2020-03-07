@@ -9,7 +9,9 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
 });
 
 module.exports.updateSingleUnexported = (docRecord, { TableName }) => {
-    const allExportKeys = Object.keys(docRecord).filter(key => key !== 'id' && key !== 'latestState');
+    const allExportKeys = Object.keys(docRecord).filter(key => (
+        key !== 'id' && key !== 'latestState' && key !== 'adminCode'
+    ));
     let latestExportHash;
     let latestExportVersion;
     let latestExportFacts;
@@ -44,7 +46,7 @@ module.exports.updateSingleUnexported = (docRecord, { TableName }) => {
         'SET #docId = :newState'
         : 'REMOVE #docId';
 
-    const params = {
+    const unexportedParams = {
         TableName,
         Key: {
             adminCode: docRecord.adminCode,
@@ -62,7 +64,7 @@ module.exports.updateSingleUnexported = (docRecord, { TableName }) => {
     };
 
     // update the database
-    return dynamoDb.update(params)
+    return dynamoDb.update(unexportedParams)
         .promise()
         .catch(error => ({ error: error.message }));
 };

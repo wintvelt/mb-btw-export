@@ -122,9 +122,8 @@ describe('Dynamo DB exportTable tests', testIf(() => {
         });
         it('removes docId from unexported list if the latestState is deleted and never exported', async () => {
             const result = await exportTable.updateSingleUnexported(neverExportedDeletedRecord, context);
-            console.log(result);
-            // const newItem = result.Attributes;
-            // expect(newItem).to.not.have.property('1238');
+            const newItem = result.Attributes;
+            expect(newItem).to.not.have.property('1238');
         });
     });
 }));

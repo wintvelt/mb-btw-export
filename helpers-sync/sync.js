@@ -71,7 +71,8 @@ const getChangeSet = async ({ adminCode, access_token, TableName }) => {
     const mbPurchase_invoiceVersions = mbVersions.purchase_invoices;
 
     do {
-        const dbResult = await dbScan.scanVersions({
+        const dbResult = await dbScan.queryVersions({
+            adminCode,
             TableName,
             ExclusiveStartKey
         });

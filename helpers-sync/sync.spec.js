@@ -13,12 +13,12 @@ const context = {
     TableName: 'btw-export-dev-docs'
 }
 const testMb = (process.env.TEST_MB_ON && process.env.TEST_MB_ON !== "false");
-const testDb = (process.env.TEST_MB_ON && process.env.TEST_DB_ON !== "false");
+const testDb = (process.env.TEST_DB_ON && process.env.TEST_DB_ON !== "false");
 const testIf = (testFunc) => {
     if (testMb && testDb) return testFunc;
     const mbString = testMb? '': 'moneybird';
     const dbString = testDb? '': 'database';
-    const andString = (testMb && testDb)? '' : ' and ';
+    const andString = (!testMb && !testDb)? ' and ' : '';
     return () => {
         it(`${mbString}${andString}${dbString} tests off, so sync tests did not run`, () => {});
     }

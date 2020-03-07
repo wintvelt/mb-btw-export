@@ -8,24 +8,30 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
 });
 
-const scan = (params) => {
-    return dynamoDb.scan(params)
+const query = (params) => {
+    return dynamoDb.query(params)
         .promise()
         .catch(error => ({ error: error.message }));
 };
-module.exports.scan = scan;
 
-const scanVersionsParams = {
-    ProjectionExpression: "id, latestState",
+const queryVersionsParams = {
+    ProjectionExpression: "adminCode, id, latestState",
+    KeyConditionExpression: '#adminCode = :adminCode',
+    ExpressionAttributeNames: {
+        '#adminCode': 'adminCode'
+    },
 };
 
-const scanVersionsOnce = ({ TableName }, ExclusiveStartKey) => {
+const queryVersionsOnce = ({ adminCode, TableName }, ExclusiveStartKey) => {
     const params = {
-        ...scanVersionsParams,
+        ...queryVersionsParams,
+        ExpressionAttributeValues: {
+            ':adminCode': adminCode
+        },
         TableName,
         ExclusiveStartKey
     };
-    return scan(params);
+    return query(params);
 };
 
 const makeVersionSet = (dbLatest) => {
@@ -53,8 +59,8 @@ const makeVersionSet = (dbLatest) => {
 }
 module.exports.makeVersionSet = makeVersionSet;
 
-module.exports.scanVersions = async ({ TableName, ExclusiveStartKey }) => {
-    const dbLatest = await scanVersionsOnce({ TableName, ExclusiveStartKey });
+module.exports.queryVersions = async ({ adminCode, TableName, ExclusiveStartKey }) => {
+    const dbLatest = await queryVersionsOnce({ adminCode, TableName, ExclusiveStartKey });
     return {
         items: makeVersionSet(dbLatest.Items),
         LastEvaluatedKey: dbLatest.LastEvaluatedKey

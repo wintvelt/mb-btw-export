@@ -45,12 +45,26 @@ const newLatestStateRecord = {
 
 describe('Dynamo DB update tests', testIf(() => {
     describe('The updateSingle function', () => {
+        after(async () => {
+            const params = {
+                TableName: testEnv.DYNAMODB_TABLE_EXPORTS,
+                Key: {
+                    adminCode,
+                    state: 'latestState',
+                },
+                ExpressionAttributeNames: {
+                    '#id1': '1234'
+                },
+                UpdateExpression: 'REMOVE #id1',
+                ReturnValues: 'ALL_NEW',
+            };
+            await dynamoDb.update(params).promise();
+        });
         it('returns a full doc record if the udpate was successful', async () => {
             const result = await updateSingle.updateSingle({
                 ...newLatestStateRecord,
                 ...context
             });
-            console.log(result);
             expect(result).to.have.property('id');
             expect(result).to.have.property('latestState');
             expect(result.latestState.version).to.equal(13);

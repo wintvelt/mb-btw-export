@@ -23,7 +23,7 @@ const testEnv = {
     DYNAMODB_TABLE_DOCS: 'btw-export-dev-docs',
     DYNAMODB_TABLE_EXPORTS: 'btw-export-dev-exports',
 };
-
+const adminCode = process.env.ADMIN_CODE;
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
@@ -34,7 +34,7 @@ const baseState = {
     version: 12345,
     date: '2020-01-08'
 };
-const context = { TableName: testEnv.DYNAMODB_TABLE_DOCS }
+const context = { adminCode, TableName: testEnv.DYNAMODB_TABLE_DOCS }
 const batchList = [
     { id: '1234', latestState: baseState },
     { id: '1235', latestState: { ...baseState, type: 'purchase_invoice' } },
@@ -42,14 +42,6 @@ const batchList = [
 ]
 
 describe('Dynamo DB docTable-scan tests', testIf(() => {
-    describe('The scan function', () => {
-        it('retrieves items from dynamoDB', async () => {
-            const response = await scan.scan(context);
-            expect(response).to.have.property('Items');
-            expect(response.Items).to.be.an('array');
-        });
-    });
-
     describe('The makeVersionSet function', () => {
         it('normally returns an object with ids and versions', () => {
             const response = scan.makeVersionSet(batchList);
@@ -64,9 +56,9 @@ describe('Dynamo DB docTable-scan tests', testIf(() => {
         });
     });
 
-    describe('The scanVersions function', () => {
+    describe('The queryVersions function', () => {
         it('normally returns an object with array for receipts and purchase invoices', async () => {
-            const response = await scan.scanVersions(context);
+            const response = await scan.queryVersions(context);
             expect(response).to.have.property('LastEvaluatedKey');
             const items = response.items;
             expect(items).to.have.property('receipts');
