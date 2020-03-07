@@ -36,13 +36,13 @@ module.exports.main = async event => {
     if (!entity || !bodyObj.webhook_token) return response(200, "OK");
     const type = bodyObj.entity_type && bodyObj.entity_type.toLowerCase();
     const record = stripRecord(type)(entity);
-    // save on S3
-    const saveParams = {
-        ...context,
+    const params = {
         adminCode,
-        body: record
+        id: record.id,
+        latestState: record.latestState,
+        ...context
     }
-    const saveResponse = await saveFile(saveParams);
-    if (saveResponse.error) return response(500, "Error");
+    const updateResponse = await dbUpdates.updateSingle(params);
+    if (updateResponse.error) return response(500, "Error");
     return response(200, "OK");
 }
