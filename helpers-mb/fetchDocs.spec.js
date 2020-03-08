@@ -83,7 +83,7 @@ describe('Moneybird data fetching tests', testIf(() => {
         });
     });
 
-    describe('The fetch.fullFetch function', () => {
+    describe('The fetchDocs.fullFetch function', () => {
         const params = { ...context, changeSet };
         it('successfully creates a latest state list from Moneybird data', async () => {
             const response = await fetchDocs.fullFetch(params);
@@ -99,6 +99,7 @@ describe('Moneybird data fetching tests', testIf(() => {
             }
             const paramsWithEmpty = { ...params, changeSet: emptyChangeSet }
             const response = await fetchDocs.fullFetch(paramsWithEmpty);
+            if (response.error) console.log(response);
             expect(response).to.be.an('array').and.be.empty;
         });
         it('returns an error if moneybird fetch failed', async () => {

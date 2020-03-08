@@ -30,6 +30,7 @@ module.exports.main = async event => {
     } catch (_) {
         bodyObj = event.body;
     }
+    console.log({ requestBody: bodyObj });
     const tokenError = (!bodyObj.webhook_token || bodyObj.webhook_token !== process.env.MB_WEBHOOK_TOKEN);
     if (process.env.MB_WEBHOOK_TOKEN && tokenError) return response(400, "Bad request");
     const entity = bodyObj.entity;

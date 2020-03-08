@@ -4,7 +4,7 @@ const expect = chai.expect;
 
 const handler = require('./handlerList');
 
-describe("The handler function", () => {
+describe("The handlerList function", () => {
     it("returns a message", async () => {
         const response = await handler.listing(undefined);
         let body = JSON.parse(response.body);

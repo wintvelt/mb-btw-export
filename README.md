@@ -21,7 +21,7 @@ TODO:
 - [x] what if latestState = deleted for record that was never exported?
     - for docTable this is fine: record is created with only latestState = { isDeleted }
     - for exportTable: fixed
-- [ ] update webhook for new db structure, to do single update
+- [x] update webhook for new db structure, to do single update
 
 - [ ] create `/btw-export/[admin-id]/sync` POST endpoint
 
