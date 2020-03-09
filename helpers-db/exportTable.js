@@ -1,5 +1,6 @@
 // helpers-db/exportTable.js
 // to read/write DynamoDB exportTable
+const itemFuncs = require('./exportTable-item');
 
 'use strict';
 const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
@@ -8,58 +9,72 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
 });
 
-module.exports.updateSingleUnexported = (docRecord, { TableName }) => {
-    const allExportKeys = Object.keys(docRecord).filter(key => (
-        key !== 'id' && key !== 'latestState' && key !== 'adminCode'
-    ));
-    let latestExportHash;
-    let latestExportVersion;
-    let latestExportFacts;
-    for (let i = 0; i < allExportKeys.length; i++) {
-        const key = allExportKeys[i];
-        const state = docRecord[key];
-        if (!latestExportVersion || state.isDeleted || state.version > latestExportVersion) {
-            latestExportHash = JSON.stringify({
-                type: state.type,
-                details: state.details,
-                isDeleted: state.isDeleted,
-            });
-            latestExportFacts = {
-                type: state.type,
-                date: state.date,
-                isDeleted: state.isDeleted
-            }
-            latestExportVersion = state.version;
+
+const updateToText = (doc, i) => (
+    '#docIdToSet' + i + ' = :newState' + i
+)
+const removeToText = (docId, i) => (
+    '#docIdToDel' + i
+)
+
+const makeUnexported = (docRecordList) => {
+    let setUpdateList = [];
+    let removeUpdateList = [];
+    const docListLength = docRecordList.length;
+    for (let i = 0; i < docListLength; i++) {
+        const docRecord = docRecordList[i];
+        const { updateOperation, docId, newState } = itemFuncs.makeSingleUnexported(docRecord);
+        if (updateOperation === 'SET') {
+            setUpdateList.push({ docId, newState });
+        } else {
+            removeUpdateList.push(docId);
         }
-        if (state.isDeleted) break;
     }
-    const latestHash = JSON.stringify({
-        type: docRecord.latestState.type,
-        details: docRecord.latestState.details,
-        isDeleted: docRecord.latestState.isDeleted,
-    });
-    const deletedWasExported = (docRecord.latestState.isDeleted && latestExportFacts && latestExportFacts.isDeleted);
-    const deletedNeverExported = (docRecord.latestState.isDeleted && !latestExportFacts);
-    const isUnexported = (!deletedWasExported && latestHash !== latestExportHash);
-    const shouldBeInUnexported = (isUnexported && !deletedNeverExported);
-    const updateOperation = (shouldBeInUnexported) ?
-        'SET #docId = :newState'
-        : 'REMOVE #docId';
+    let ExpressionAttributeNames = {};
+    let ExpressionAttributeValues = {};
+    const setListLength = setUpdateList.length;
+    for (let i = 0; i < setListLength; i++) {
+        const setUpdate = setUpdateList[i];
+        ExpressionAttributeNames['#docIdToSet' + i] = setUpdate.docId;
+        ExpressionAttributeValues[':newState' + i] = setUpdate.newState;
+    }
+    const removeListLength = removeUpdateList.length;
+    for (let i = 0; i < removeListLength; i++) {
+        const idToRemove = removeUpdateList[i];
+        ExpressionAttributeNames['#docIdToDel' + i] = idToRemove;
+    }
+    const setUpdateExpression = 'SET ' + setUpdateList.map(updateToText).join(', ');
+    const removeUpdateExpression = 'REMOVE ' + removeUpdateList.map(removeToText).join(', ');
+    const hasSet = (setListLength > 0);
+    const hasRemove = (removeListLength > 0);
+    const hasSetAndRemove = (hasSet && hasRemove);
+    const UpdateExpression =
+        (hasSet ? setUpdateExpression : '') +
+        (hasSetAndRemove ? ' ' : '') +
+        (hasRemove ? removeUpdateExpression : '');
+    return {
+        ExpressionAttributeNames,
+        ExpressionAttributeValues: (hasSet ? ExpressionAttributeValues : null),
+        UpdateExpression
+    }
+}
+module.exports.makeUnexported = makeUnexported;
+
+module.exports.updateUnexported = (docRecordList, { TableName }) => {
+    if (docRecordList.length === 0) return { error: 'empty update list for exports table' };
+    const adminCode = docRecordList[0].adminCode;
+    const { ExpressionAttributeNames, ExpressionAttributeValues, UpdateExpression } =
+        makeUnexported(docRecordList);
 
     const unexportedParams = {
         TableName,
         Key: {
-            adminCode: docRecord.adminCode,
+            adminCode: adminCode,
             state: 'unexported',
         },
-        UpdateExpression: updateOperation,
-        ExpressionAttributeNames: {
-            '#docId': docRecord.id,
-        },
-        ExpressionAttributeValues: (shouldBeInUnexported) ?
-            {
-                ':newState': { ...latestExportFacts, ...docRecord.latestState },
-            } : null,
+        UpdateExpression,
+        ExpressionAttributeNames,
+        ExpressionAttributeValues,
         ReturnValues: 'ALL_NEW',
     };
 
@@ -67,4 +82,4 @@ module.exports.updateSingleUnexported = (docRecord, { TableName }) => {
     return dynamoDb.update(unexportedParams)
         .promise()
         .catch(error => ({ error: error.message }));
-};
+}

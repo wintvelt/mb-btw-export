@@ -28,8 +28,8 @@ const event = {
 
 describe("The handlerSync function", testIf(() => {
     it("does a sync", async () => {
-        const response = await handler.main(event);
-        let body = JSON.parse(response.body);
-        console.log(body);
+        // const response = await handler.main(event);
+        // let body = JSON.parse(response.body);
+        // console.log(body);
     }).timeout(20000);
 }));

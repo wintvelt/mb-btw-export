@@ -7,8 +7,7 @@ require('dotenv').config();
 
 const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 
-const exportTable = require('./exportTable');
-const exportTableItem = require('./exportTable-item');
+const exportTable = require('./exportTable-item');
 
 const testEnv = {
     DYNAMODB_TABLE_DOCS: 'btw-export-dev-docs',
@@ -20,7 +19,7 @@ const testDb = (process.env.TEST_DB_ON && process.env.TEST_DB_ON !== "false");
 const testIf = (testFunc) => {
     if (testDb) return testFunc;
     return () => {
-        it('database tests did not run', () => { });
+        it('database tests did not run', () => {});
     }
 }
 
@@ -56,31 +55,28 @@ const newDeletedStateRecord = {
     latestState: { isDeleted: true },
     testExport1: { type: 'receipt', date: '2020-01-08', version: 10, details: [baseDetails] }
 };
+const otherRecordBefore = {
+    adminCode, id: '1237',
+    latestState: { type: 'receipt', date: '2020-01-08', isDeleted: true }
+};
+const newUnchangedDeletedStateRecord = {
+    adminCode, id: '1237',
+    latestState: { isDeleted: true },
+    testExport1: { type: 'receipt', date: '2020-01-08', version: 10, details: [baseDetails] },
+    testExport2: { type: 'receipt', date: '2020-01-08', isDeleted: true }
+};
 const neverExportedDeletedRecord = {
     adminCode, id: '1238',
     latestState: { isDeleted: true }
 };
-const docRecords = [newChangedStateRecord, newUnchangedStateRecord, newDeletedStateRecord, neverExportedDeletedRecord];
 
-describe('Dynamo DB exportTable tests', () => {
-    describe('The makeUnexported function', () => {
-        it('prepares parameters for udpate correctly', () => {
-            const result = exportTable.makeUnexported(docRecords);
-            const updExpr = 'SET #docIdToSet0 = :newState0, #docIdToSet1 = :newState1 REMOVE #docIdToDel0, #docIdToDel1';
-            expect(result.UpdateExpression).to.equal(updExpr);
-            const names = result.ExpressionAttributeNames;
-            expect(names['#docIdToSet0']).to.equal('1234');
-            expect(names['#docIdToSet1']).to.equal('1236');
-            expect(names['#docIdToDel0']).to.equal('1235');
-            expect(names['#docIdToDel1']).to.equal('1238');
-            const newState1 = result.ExpressionAttributeValues[':newState1'];
-            expect(newState1).to.have.property('isDeleted');
-        });
-    });
-
-    describe('The updateUnexported function', testIf(() => {
+describe('Dynamo DB exportTable-item tests', testIf(() => {
+    describe('The updateSingleUnexported function', () => {
         before(async () => {
-            await exportTableItem.updateSingleUnexported(recordBefore, context);
+            await Promise.all([
+                exportTable.updateSingleUnexported(recordBefore, context),
+                exportTable.updateSingleUnexported(otherRecordBefore, context),
+            ]);
         });
         after(async () => {
             const params = {
@@ -92,7 +88,7 @@ describe('Dynamo DB exportTable tests', () => {
                 ExpressionAttributeNames: {
                     '#id1': '1234',
                     '#id2': '1236',
-                },
+                },        
                 UpdateExpression: 'REMOVE #id1, #id2',
                 ReturnValues: 'ALL_NEW',
             };
@@ -102,12 +98,32 @@ describe('Dynamo DB exportTable tests', () => {
                 .promise()
                 .catch(error => ({ error: error.message }));
         });
-        it('Does 1 update of the unexported item in the exports table', async () => {
-            const result = await exportTable.updateUnexported(docRecords, context);
-            const newRecord = result.Attributes;
-            expect(newRecord).to.have.property('1234');
-            expect(newRecord).to.have.property('1236');
-            expect(newRecord['1236']).to.have.property('isDeleted');
+        it('adds docId to unexported list if the latestState is unexported', async () => {
+            const result = await exportTable.updateSingleUnexported(newChangedStateRecord, context);
+            const newItem = result.Attributes;
+            expect(newItem.state).to.equal('unexported');
+            expect(newItem).to.have.property('1234');
         });
-    }));
-});
+        it('removes docId from unexported list if the latestState is same as last export', async () => {
+            const result = await exportTable.updateSingleUnexported(newUnchangedStateRecord, context);
+            const newItem = result.Attributes;
+            expect(newItem).to.not.have.property('1235');
+        });
+        it('adds docId to unexported list with state isDeleted if the latestState is deleted', async () => {
+            const result = await exportTable.updateSingleUnexported(newDeletedStateRecord, context);
+            const newItem = result.Attributes;
+            expect(newItem).to.have.property('1236');
+            expect(newItem['1236']).to.have.property('isDeleted');
+        });
+        it('removes docId from unexported list if the latestState is deleted and last export also', async () => {
+            const result = await exportTable.updateSingleUnexported(newUnchangedDeletedStateRecord, context);
+            const newItem = result.Attributes;
+            expect(newItem).to.not.have.property('1237');
+        });
+        it('removes docId from unexported list if the latestState is deleted and never exported', async () => {
+            const result = await exportTable.updateSingleUnexported(neverExportedDeletedRecord, context);
+            const newItem = result.Attributes;
+            expect(newItem).to.not.have.property('1238');
+        });
+    });
+}));

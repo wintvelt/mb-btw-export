@@ -23,7 +23,8 @@ TODO:
     - for exportTable: fixed
 - [x] update webhook for new db structure, to do single update
 
-- [ ] create `/btw-export/[admin-id]/sync` POST endpoint
+- [x] create `/btw-export/[admin-id]/sync` POST endpoint
+- [ ] create fix to update exports table unexported with latest state from docs table
 
 - [ ] create `/btw-export/[admin-id] GET` with only `unexported` stats
 

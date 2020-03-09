@@ -3,7 +3,7 @@
 'use strict';
 
 const docTable = require('./docTable');
-const exportTable = require('./exportTable');
+const exportTable = require('./exportTable-item');
 
 module.exports.updateSingle = async ({ adminCode, id, latestState, docTableName, exportTableName }) => {
     const docUpdateResult = await docTable.updateSingle({
