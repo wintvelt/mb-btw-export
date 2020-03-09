@@ -1,10 +1,13 @@
 'use strict';
 const sync = require('./helpers-sync/sync');
-const dbUpdate = require('./helpers-db/updateSingle');
+const docTable = require('./helpers-db/docTable');
+const exportTable = require('./helpers-db/exportTable');
 
 const docTableName = process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs';
+const contextDoc = { TableName: docTableName };
 const exportTableName = process.env.DYNAMODB_EXPORT_TABLE || 'btw-export-dev-exports';
-const maxUpdates = 50;
+const contextExport = { TableName: exportTableName };
+const maxUpdates = 100;
 
 const response = (statusCode, bodyOrString) => {
     const body = typeof bodyOrString === 'string' ?
@@ -25,23 +28,24 @@ module.exports.main = async event => {
         TableName: docTableName,
         maxUpdates
     }
-    const result = await sync.getDocUpdates(params);
-    if (result.error) return response(500, result.error);
-    const { docUpdates, maxExceeded } = result;
-    const docUpdatesCount = docUpdates.length;
-    let docResult;
-    for (let i = 0; i < docUpdatesCount; i++) {
-        const docUpdate = docUpdates[i];
-        const docParams = {
+    const resultFromDbAndMb = await sync.getDocUpdates(params);
+    if (resultFromDbAndMb.error) return response(500, resultFromDbAndMb.error);
+    const { docUpdates, maxExceeded } = resultFromDbAndMb;
+    const docResults = await Promise.all(docUpdates.map(docUpdate => {
+        const params = {
             adminCode,
             id: docUpdate.id,
-            latestState: docUpdate.latestState,
-            docTableName,
-            exportTableName
+            state: 'latestState',
+            newState: docUpdate.latestState
         }
-        docResult = await dbUpdate.updateSingle(docParams);
-        if (docResult.error) break;
-    }
-    if (docResult.error) return response(500, docResult.error);
+        return docTable.updateSingle(params, contextDoc);
+    }));
+    const errorFound = docResults.find(docResult => docResult.error);
+    if (errorFound) return response(500, { error: errorFound.error });
+    const docRecords = docResults.map(docResult => docResult.Attributes);
+
+    const exportResult = await exportTable.updateUnexported(docRecords, contextExport);
+    if (exportResult.error) return response(500, { error: exportResult.error });
+
     return response(200, { maxExceeded });
 };

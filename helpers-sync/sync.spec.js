@@ -47,7 +47,7 @@ const limitChangeSet = {
 describe('Sync Functions', testIf(() => {
     describe("The changesPartial function", () => {
         const changeSet = sync.changesPartial(oldList, newList);
-        it("does not contains any new items", () => {
+        it("does not contain any new items", () => {
             expect(changeSet).to.not.have.property('added');
         });
         it("contains items changed - with newer version", () => {
