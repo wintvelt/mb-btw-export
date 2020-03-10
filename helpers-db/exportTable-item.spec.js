@@ -113,7 +113,7 @@ describe('Dynamo DB exportTable-item tests', testIf(() => {
             const result = await exportTable.updateSingleUnexported(newDeletedStateRecord, context);
             const newItem = result.Attributes;
             expect(newItem).to.have.property('1236');
-            expect(newItem['1236']).to.have.property('isDeleted');
+            expect(newItem['1236'].latestState).to.have.property('isDeleted');
         });
         it('removes docId from unexported list if the latestState is deleted and last export also', async () => {
             const result = await exportTable.updateSingleUnexported(newUnchangedDeletedStateRecord, context);

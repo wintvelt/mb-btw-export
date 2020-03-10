@@ -74,7 +74,7 @@ describe('Dynamo DB exportTable tests', () => {
             expect(names['#docIdToDel0']).to.equal('1235');
             expect(names['#docIdToDel1']).to.equal('1238');
             const newState1 = result.ExpressionAttributeValues[':newState1'];
-            expect(newState1).to.have.property('isDeleted');
+            expect(newState1.latestState).to.have.property('isDeleted');
         });
     });
 
@@ -107,7 +107,7 @@ describe('Dynamo DB exportTable tests', () => {
             const newRecord = result.Attributes;
             expect(newRecord).to.have.property('1234');
             expect(newRecord).to.have.property('1236');
-            expect(newRecord['1236']).to.have.property('isDeleted');
+            expect(newRecord['1236'].latestState).to.have.property('isDeleted');
         });
     }));
 });

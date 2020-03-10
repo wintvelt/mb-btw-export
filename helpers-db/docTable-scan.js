@@ -47,7 +47,7 @@ const makeVersionSet = (dbLatest) => {
             result = { error: `Doc database is corrupted at id ${item.id}` }
             break;
         }
-        const type = latestState.type + 's';
+        const type = (latestState.type === 'receipt') ? 'receipts' : 'purchase_invoices';
         if (!latestState.isDeleted) {
             result[type].push({
                 id: item.id,

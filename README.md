@@ -24,9 +24,19 @@ TODO:
 - [x] update webhook for new db structure, to do single update
 
 - [x] create `/btw-export/[admin-id]/sync` POST endpoint
-- [ ] create fix to update exports table unexported with latest state from docs table
+- [x] create fix to update exports table unexported with latest state from docs table
 
-- [ ] create `/btw-export/[admin-id] GET` with only `unexported` stats
+- [ ] implement `/btw-export/[admin-id]/file` POST endpoint
+    - [x] add diffing algorithm for latestState -/- lastExportedState
+    - [ ] add selection of unexported states based on start-date and end-date (json)
+    - [ ] add create and S3-save of excel-file with new state info
+        - [ ] create S3 bucket/ folder for btw-export xlsx files
+    - [ ] implement end-point handler to save file (and add to serverless.yml)
+
+- [ ] create `/btw-export/[admin-id] GET`
+    - [ ] implement stats function for 1 exportTable record (unexported)
+    - [ ] implement query for all exportTable records
+    - [ ] implement latestExportDate in stats
 
 API to sync and connect with Moneybird.
 Specifically to process purchase invoices and receipts for the purpose of VAT reporting.
@@ -91,14 +101,12 @@ Response body structure:
 ### `/btw-export/[admin-id]/file` POST
 Will create a new export file (see below) for download.
 
-Will first run sync to get latest Moneybird status.
-
 Required `body` (may be empty object)
 ```json
 { 
     "start_date": "2019-01-01",
     "end_date": "2019-01-31",
-    "full_report": true
+    "is_full_report": true
 }
 ```
 For normal operations, only include `end_date`
@@ -137,7 +145,7 @@ Runs a sync with Moneybird. Can be invoked in first setup and after interruption
 Response: 
 - `200 OK` if all went well. Always has `body` in response.
     - body may be empty object (full sync was completed), 
-    - or contain `maxExceeded: true`: in which case sync incomplete, and needs to be run again (may be required multiple times)
+    - or body contains `maxExceeded: true`: in which case sync incomplete, and needs to be run again (may be required multiple times)
 
 ---
 

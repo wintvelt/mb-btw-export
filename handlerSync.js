@@ -7,7 +7,7 @@ const docTableName = process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs';
 const contextDoc = { TableName: docTableName };
 const exportTableName = process.env.DYNAMODB_EXPORT_TABLE || 'btw-export-dev-exports';
 const contextExport = { TableName: exportTableName };
-const maxUpdates = 100;
+const maxUpdates = 10;
 
 const response = (statusCode, bodyOrString) => {
     const body = typeof bodyOrString === 'string' ?
