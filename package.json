@@ -5,6 +5,7 @@
   "main": "handler.js",
   "dependencies": {
     "aws-sdk": "^2.634.0",
+    "exceljs": "^3.8.1",
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {

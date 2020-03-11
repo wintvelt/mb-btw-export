@@ -17,7 +17,7 @@ provider:
     DYNAMODB_DOC_TABLE: ${self:service}-${opt:stage, self:provider.stage}-docs
     DYNAMODB_EXPORT_TABLE: ${self:service}-${opt:stage, self:provider.stage}-exports
     TEST_DB_ON: false
-    TEST_MB_sON: false
+    TEST_MB_ON: false
 
   iamRoleStatements:
     - Effect: Allow

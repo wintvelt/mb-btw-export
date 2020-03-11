@@ -43,6 +43,7 @@ module.exports.getDocsToExport = async ({ adminCode, start_date, end_date, is_fu
     return filteredDocs.map((doc) => ({
         id: doc.id,
         type: doc.latestState.type,
+        date: doc.latestState.date,
         exportState: (is_full_report)? 
             exporTableDiff.diff(null, doc.latestState)
             : doc.latestStateDiff

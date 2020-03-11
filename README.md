@@ -28,10 +28,12 @@ TODO:
 
 - [ ] implement `/btw-export/[admin-id]/file` POST endpoint
     - [x] add diffing algorithm for latestState -/- lastExportedState
-    - [ ] add selection of unexported states based on start-date and end-date (json)
-    - [ ] add create and S3-save of excel-file with new state info
-        - [ ] create S3 bucket/ folder for btw-export xlsx files
-    - [ ] implement end-point handler to save file (and add to serverless.yml)
+    - [x] add selection of unexported states based on start-date and end-date (json)
+    - [x] add create and S3-save of excel-file with new state info
+        - [x] add create xls buffer
+        - [x] create S3 bucket/ folder for btw-export xlsx files (still in old bucket)
+    - [ ] add function 
+    - [ ] implement end-point handler (and add to serverless.yml) to run export
 
 - [ ] create `/btw-export/[admin-id] GET`
     - [ ] implement stats function for 1 exportTable record (unexported)
