@@ -46,7 +46,8 @@ module.exports.getDocsToExport = async ({ adminCode, start_date, end_date, is_fu
         date: doc.latestState.date,
         exportState: (is_full_report)? 
             exporTableDiff.diff(null, doc.latestState)
-            : doc.latestStateDiff
+            : doc.latestStateDiff,
+        latestState: doc.latestState
     }));
 }
 
