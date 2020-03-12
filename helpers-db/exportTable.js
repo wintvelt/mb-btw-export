@@ -11,10 +11,10 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
 
 
 const updateToText = (doc, i) => (
-    '#docIdToSet' + i + ' = :newState' + i
+    '#idS' + i + ' = :ns' + i
 )
 const removeToText = (docId, i) => (
-    '#docIdToDel' + i
+    '#idD' + i
 )
 
 const makeUnexported = (docRecordList) => {
@@ -35,13 +35,13 @@ const makeUnexported = (docRecordList) => {
     const setListLength = setUpdateList.length;
     for (let i = 0; i < setListLength; i++) {
         const setUpdate = setUpdateList[i];
-        ExpressionAttributeNames['#docIdToSet' + i] = setUpdate.docId;
-        ExpressionAttributeValues[':newState' + i] = setUpdate.newState;
+        ExpressionAttributeNames['#idS' + i] = setUpdate.docId;
+        ExpressionAttributeValues[':ns' + i] = setUpdate.newState;
     }
     const removeListLength = removeUpdateList.length;
     for (let i = 0; i < removeListLength; i++) {
         const idToRemove = removeUpdateList[i];
-        ExpressionAttributeNames['#docIdToDel' + i] = idToRemove;
+        ExpressionAttributeNames['#idD' + i] = idToRemove;
     }
     const setUpdateExpression = 'SET ' + setUpdateList.map(updateToText).join(', ');
     const removeUpdateExpression = 'REMOVE ' + removeUpdateList.map(removeToText).join(', ');
@@ -98,8 +98,8 @@ const makeExport = (docRecordList) => {
     const setListLength = setUpdateList.length;
     for (let i = 0; i < setListLength; i++) {
         const setUpdate = setUpdateList[i];
-        ExpressionAttributeNames['#docIdToSet' + i] = setUpdate.docId;
-        ExpressionAttributeValues[':newState' + i] = setUpdate.exportState;
+        ExpressionAttributeNames['#idS' + i] = setUpdate.docId;
+        ExpressionAttributeValues[':ns' + i] = setUpdate.exportState;
     }
     const UpdateExpression = 'SET ' + setUpdateList.map(updateToText).join(', ');
     return {
@@ -139,7 +139,7 @@ const makeRemove = (docRecordList) => {
     let ExpressionAttributeNames = {};
     for (let i = 0; i < docListLength; i++) {
         const idToRemove = docRecordList[i].id;
-        ExpressionAttributeNames['#docIdToDel' + i] = idToRemove;
+        ExpressionAttributeNames['#idD' + i] = idToRemove;
     }
     const UpdateExpression = 'REMOVE ' + docRecordList.map(removeToText).join(', ');
     return {
