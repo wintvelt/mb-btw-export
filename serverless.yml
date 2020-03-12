@@ -71,7 +71,18 @@ functions:
             parameters:
               paths:
                 admin: true
-              
+  export:
+    handler: handlerExport.main
+    timeout: 20
+    events:
+      - http:
+          path: btw-export/{admin}/export
+          method: post
+          request:
+            parameters:
+              paths:
+                admin: true
+                            
 resources:
   Resources:
     IncomingDynamoDbTable:

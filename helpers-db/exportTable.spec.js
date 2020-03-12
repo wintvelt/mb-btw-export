@@ -38,23 +38,26 @@ const context = { TableName: testEnv.DYNAMODB_TABLE_EXPORTS }
 const newChangedStateRecord = {
     adminCode, id: '1234',
     latestState: { type: 'receipt', date: '2020-01-08', version: 12, details: [{ ...baseDetails, tax_rate_id: '0' }] },
-    testExport1: { type: 'receipt', date: '2020-01-08', version: 10, details: [baseDetails] }
+    testExport1: { latestState: { type: 'receipt', date: '2020-01-08', version: 10, details: [baseDetails] } }
 };
 const recordBefore = {
     adminCode, id: '1235',
     latestState: { type: 'receipt', date: '2020-01-08', version: 13, details: [baseDetails] },
-    testExport2: { type: 'receipt', date: '2020-01-08', version: 10, details: [{ ...baseDetails, tax_rate_id: '0' }] },
+    testExport2:
+        { latestState: { type: 'receipt', date: '2020-01-08', version: 10, details: [{ ...baseDetails, tax_rate_id: '0' }] } },
 };
 const newUnchangedStateRecord = {
     adminCode, id: '1235',
     latestState: { type: 'receipt', date: '2020-01-08', version: 14, details: [baseDetails] },
-    testExport1: { type: 'receipt', date: '2020-01-08', version: 13, details: [baseDetails] },
-    testExport2: { type: 'receipt', date: '2020-01-08', version: 10, details: [{ ...baseDetails, tax_rate_id: '0' }] },
+    testExport1: { latestState: { type: 'receipt', date: '2020-01-08', version: 13, details: [baseDetails] } },
+    testExport2: {
+        latestState: { type: 'receipt', date: '2020-01-08', version: 10, details: [{ ...baseDetails, tax_rate_id: '0' }] }
+    },
 };
 const newDeletedStateRecord = {
     adminCode, id: '1236',
     latestState: { isDeleted: true },
-    testExport1: { type: 'receipt', date: '2020-01-08', version: 10, details: [baseDetails] }
+    testExport1: { latestState: { type: 'receipt', date: '2020-01-08', version: 10, details: [baseDetails] } }
 };
 const neverExportedDeletedRecord = {
     adminCode, id: '1238',
@@ -64,7 +67,7 @@ const docRecords = [newChangedStateRecord, newUnchangedStateRecord, newDeletedSt
 
 describe('Dynamo DB exportTable tests', () => {
     describe('The makeUnexported function', () => {
-        it('prepares parameters for udpate correctly', () => {
+        it('prepares parameters for update correctly', () => {
             const result = exportTable.makeUnexported(docRecords);
             const updExpr = 'SET #docIdToSet0 = :newState0, #docIdToSet1 = :newState1 REMOVE #docIdToDel0, #docIdToDel1';
             expect(result.UpdateExpression).to.equal(updExpr);
@@ -104,6 +107,45 @@ describe('Dynamo DB exportTable tests', () => {
         });
         it('Does 1 update of the unexported item in the exports table', async () => {
             const result = await exportTable.updateUnexported(docRecords, context);
+            const newRecord = result.Attributes;
+            expect(newRecord).to.have.property('1234');
+            expect(newRecord).to.have.property('1236');
+            expect(newRecord['1236'].latestState).to.have.property('isDeleted');
+        });
+    }));
+
+    describe('The makeExport function', () => {
+        it('prepares parameters for udpate correctly', () => {
+            const result = exportTable.makeExport(docRecords);
+            const names = result.ExpressionAttributeNames;
+            expect(names['#docIdToSet0']).to.equal('1234');
+            expect(names['#docIdToSet1']).to.equal('1235');
+            expect(names['#docIdToSet2']).to.equal('1236');
+            expect(names['#docIdToSet3']).to.equal('1238');
+            const newState1 = result.ExpressionAttributeValues[':newState1'];
+            expect(newState1.latestState).to.have.property('details');
+        });
+    });
+
+    describe('The updateExport function', testIf(() => {
+        const filename = 'test-export.xlsx';
+        after(async () => {
+            const params = {
+                TableName: testEnv.DYNAMODB_TABLE_EXPORTS,
+                Key: {
+                    adminCode,
+                    state: filename,
+                },
+                ReturnValues: 'NONE',
+            };
+
+            // update the database
+            await dynamoDb.delete(params)
+                .promise()
+                .catch(error => ({ error: error.message }));
+        });
+        it('Does 1 update of the exported item in the exports table', async () => {
+            const result = await exportTable.updateExport(docRecords, filename, context);
             const newRecord = result.Attributes;
             expect(newRecord).to.have.property('1234');
             expect(newRecord).to.have.property('1236');

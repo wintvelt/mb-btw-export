@@ -12,16 +12,17 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
 const filterDate = (start_date, end_date) => (item) => {
     const { latestState } = item;
     return (!start_date || latestState.date >= start_date)
-        && (!end_date || latestState.end_date <= end_date)
+        && (!end_date || latestState.date <= end_date)
 }
 
 const doubleStr = (num) => (
     (num < 10) ? '0' + num : '' + num
-)
+);
+module.exports.doubleStr = doubleStr;
 
 const dateStr = (date) => (
     date.getFullYear() + '-' + doubleStr(date.getMonth() + 1) + '-' + doubleStr(date.getDate())
-)
+);
 
 module.exports.getDocsToExport = async ({ adminCode, start_date, end_date, is_full_report = false, TableName }) => {
     const getExportParams = {
@@ -33,6 +34,8 @@ module.exports.getDocsToExport = async ({ adminCode, start_date, end_date, is_fu
         .catch(error => ({ error: error.message }));;
     if (fetchedExport.error) return { error: fetchedExport.error };
     const unexportedDocObj = fetchedExport.Item;
+    if (!unexportedDocObj) return [];
+
     const unexportedDocs = Object.keys(unexportedDocObj)
         .filter(key => key !== 'adminCode' && key !== 'state')
         .map(id => ({ id, ...unexportedDocObj[id]}));
@@ -42,12 +45,12 @@ module.exports.getDocsToExport = async ({ adminCode, start_date, end_date, is_fu
     const filteredDocs = unexportedDocs.filter(filterDate(safeStartDate, end_date));
     return filteredDocs.map((doc) => ({
         id: doc.id,
+        adminCode,
         type: doc.latestState.type,
         date: doc.latestState.date,
-        exportState: (is_full_report)? 
+        latestDiff: (is_full_report)? 
             exporTableDiff.diff(null, doc.latestState)
-            : doc.latestStateDiff,
+            : doc.latestDiff,
         latestState: doc.latestState
     }));
 }
-

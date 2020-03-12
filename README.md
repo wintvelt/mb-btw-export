@@ -32,15 +32,11 @@ TODO:
     - [x] add create and S3-save of excel-file with new state info
         - [x] add create xls buffer
         - [x] create S3 bucket/ folder for btw-export xlsx files (still in old bucket)
-    - [ ] add function to update db (in endpoint handler?)
-        - [ ] function to add the latestState of docRecords to 1 new exported record (1 update) - add to exportTable:addExported
-        - [ ] function to remove all ids from the unexported state (1 update) - add to exportTable:removeExported
+    - [ ] implements endpoint handler for exports
+        - [x] function to add the latestState of docRecords to 1 new exported record (1 update)
+        - [x] function to remove all ids from the unexported state (1 update) - add to exportTable:removeExported
         - [x] function to add the exported latestState to all individual docs (many updates) docTable.updateSingle
-    - [ ] implement end-point handler (and add to serverless.yml) to run export
-        - getDocsToExport
-        - docs gebruiken om excel te maken en op te slaan
-        - docs gebruiken om 1 regel aan exportTable toe te voegen
-        - docs gebruiken om alle individuele ids in docTable te updaten
+        - [ ] check throttling or maxUpdates
 
 - [ ] create `/btw-export/[admin-id] GET`
     - [ ] implement stats function for 1 exportTable record (unexported)

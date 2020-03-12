@@ -19,7 +19,7 @@ const testDb = (process.env.TEST_DB_ON && process.env.TEST_DB_ON !== "false");
 const testIf = (testFunc) => {
     if (testDb) return testFunc;
     return () => {
-        it('database tests did not run', () => {});
+        it('database tests did not run', () => { });
     }
 }
 
@@ -37,23 +37,30 @@ const context = { TableName: testEnv.DYNAMODB_TABLE_EXPORTS }
 const newChangedStateRecord = {
     adminCode, id: '1234',
     latestState: { type: 'receipt', date: '2020-01-08', version: 12, details: [{ ...baseDetails, tax_rate_id: '0' }] },
-    testExport1: { type: 'receipt', date: '2020-01-08', version: 10, details: [baseDetails] }
+    testExport1:
+        { latestState: { type: 'receipt', date: '2020-01-08', version: 10, details: [baseDetails] } }
 };
 const recordBefore = {
     adminCode, id: '1235',
     latestState: { type: 'receipt', date: '2020-01-08', version: 13, details: [baseDetails] },
-    testExport2: { type: 'receipt', date: '2020-01-08', version: 10, details: [{ ...baseDetails, tax_rate_id: '0' }] },
+    testExport2: {
+        latestState: { type: 'receipt', date: '2020-01-08', version: 10, details: [{ ...baseDetails, tax_rate_id: '0' }] }
+    },
 };
 const newUnchangedStateRecord = {
     adminCode, id: '1235',
     latestState: { type: 'receipt', date: '2020-01-08', version: 14, details: [baseDetails] },
-    testExport1: { type: 'receipt', date: '2020-01-08', version: 13, details: [baseDetails] },
-    testExport2: { type: 'receipt', date: '2020-01-08', version: 10, details: [{ ...baseDetails, tax_rate_id: '0' }] },
+    testExport1: {
+        latestState: { type: 'receipt', date: '2020-01-08', version: 13, details: [baseDetails] }
+    },
+    testExport2: {
+        latestState: { type: 'receipt', date: '2020-01-08', version: 10, details: [{ ...baseDetails, tax_rate_id: '0' }] }
+    },
 };
 const newDeletedStateRecord = {
     adminCode, id: '1236',
     latestState: { isDeleted: true },
-    testExport1: { type: 'receipt', date: '2020-01-08', version: 10, details: [baseDetails] }
+    testExport1: { latestState: { type: 'receipt', date: '2020-01-08', version: 10, details: [baseDetails] } }
 };
 const otherRecordBefore = {
     adminCode, id: '1237',
@@ -62,8 +69,8 @@ const otherRecordBefore = {
 const newUnchangedDeletedStateRecord = {
     adminCode, id: '1237',
     latestState: { isDeleted: true },
-    testExport1: { type: 'receipt', date: '2020-01-08', version: 10, details: [baseDetails] },
-    testExport2: { type: 'receipt', date: '2020-01-08', isDeleted: true }
+    testExport1: { latestState: { type: 'receipt', date: '2020-01-08', version: 10, details: [baseDetails] } },
+    testExport2: { latestState: { type: 'receipt', date: '2020-01-08', isDeleted: true } }
 };
 const neverExportedDeletedRecord = {
     adminCode, id: '1238',
@@ -88,7 +95,7 @@ describe('Dynamo DB exportTable-item tests', testIf(() => {
                 ExpressionAttributeNames: {
                     '#id1': '1234',
                     '#id2': '1236',
-                },        
+                },
                 UpdateExpression: 'REMOVE #id1, #id2',
                 ReturnValues: 'ALL_NEW',
             };

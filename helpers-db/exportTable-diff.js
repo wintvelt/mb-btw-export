@@ -16,16 +16,17 @@ for all remaining old lines, make deleted line
 
 const getLatestExport = (docRecord) => {
     const allExportKeys = Object.keys(docRecord).filter(key => (
-        key !== 'id' && key !== 'latestState' && key !== 'adminCode' && key !== 'latestStateDiff'
+        key !== 'id' && key !== 'latestState' && key !== 'adminCode' && key !== 'latestDiff'
     ));
     let latestExportState = null;
     for (let i = 0; i < allExportKeys.length; i++) {
         const key = allExportKeys[i];
         const state = docRecord[key];
-        if (!latestExportState || state.isDeleted || state.version > latestExportState.version) {
+        if (!latestExportState || state.latestState.isDeleted 
+            || state.latestState.version > latestExportState.latestState.version) {
             latestExportState = state;
         }
-        if (state.isDeleted) break;
+        if (state.latestState.isDeleted) break;
     }
     return latestExportState;
 };
@@ -41,11 +42,13 @@ const sameType = (oldDetail, newDetail) => (
 );
 
 const diff = (oldState, newState) => {
+    let diffArray = [];
+    if ((!oldState || oldState.isDeleted) && newState.isDeleted) return diffArray;
+
     const oldDetails = (oldState && oldState.details) ? [...oldState.details] : [];
     let oldAmounts = oldDetails.map(mapAmount);
     const newDetails = (newState.details) ? newState.details : [];
     const newAmounts = newDetails.map(mapAmount);
-    let diffArray = [];
     const newDetailsLength = newAmounts.length;
     for (let i = 0; i < newDetailsLength; i++) {
         const newDetail = newAmounts[i];
@@ -82,6 +85,6 @@ const diff = (oldState, newState) => {
 module.exports.diff = diff;
 
 module.exports.diffState = (docRecord) => {
-    const latestExportState = getLatestExport(docRecord);
-    return diff(latestExportState, docRecord.latestState);
+    const latestExport = getLatestExport(docRecord);
+    return diff(latestExport? latestExport.latestState : null, docRecord.latestState);
 }

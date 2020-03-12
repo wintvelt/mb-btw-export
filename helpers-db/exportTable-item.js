@@ -11,32 +11,19 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
 });
 
 const makeSingleUnexported = (docRecord) => {
-    const latestHash = JSON.stringify({
-        type: docRecord.latestState.type,
-        details: docRecord.latestState.details,
-        isDeleted: docRecord.latestState.isDeleted,
-    });
-    const latestExportState = exportTableDiff.getLatestExport(docRecord);
-    const latestExportHash = (latestExportState) ? JSON.stringify({
-        type: latestExportState.type,
-        details: latestExportState.details,
-        isDeleted: latestExportState.isDeleted,
-    }) : null;
-    const latestExportFacts = (latestExportState) ? {
-        type: latestExportState.type,
-        date: latestExportState.date,
-        isDeleted: latestExportState.isDeleted
-    } : null;
-    const deletedWasExported = (docRecord.latestState.isDeleted && latestExportFacts && latestExportFacts.isDeleted);
-    const deletedNeverExported = (docRecord.latestState.isDeleted && !latestExportFacts);
-    const isUnexported = (!deletedWasExported && latestHash !== latestExportHash);
-    const shouldBeInUnexported = (isUnexported && !deletedNeverExported);
+    const latestExport = exportTableDiff.getLatestExport(docRecord);
+    const latestDiff = exportTableDiff.diffState(docRecord);
+    const shouldBeInUnexported = (latestDiff.length > 0);
+    const latestExportFacts = { 
+        type: latestExport && latestExport.latestState.type,
+        date: latestExport && latestExport.latestState.date,
+    }
     const updateOperation = (shouldBeInUnexported) ? "SET" : "REMOVE";
     const docId = docRecord.id;
     const newState = (shouldBeInUnexported) ?
         { 
             latestState: { ...latestExportFacts, ...docRecord.latestState },
-            latestStateDiff: exportTableDiff.diffState(docRecord)
+            latestDiff
         }
         : null;
     return {

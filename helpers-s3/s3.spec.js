@@ -13,7 +13,7 @@ var AWSS3 = new AWS.S3({
 const s3 = require('./s3');
 const excel = require('../helpers-excel/excel');
 
-const bucketName = 'moblybird-export-files';
+const bucketName = process.env.PUBLIC_BUCKETNAME;
 
 const context = {
     adminCode: process.env.ADMIN_CODE,
@@ -26,7 +26,7 @@ const testDocs = [
         id: '282167354227426465',
         date: '2020-01-01',
         type: 'purchase_invoice',
-        exportState: [{
+        latestDiff: [{
             tax_rate_id: '243231935134958924',
             ledger_account_id: '249402224261727583',
             change: 'added',
@@ -37,7 +37,7 @@ const testDocs = [
         id: '282168015182628005',
         date: '2020-01-02',
         type: 'receipt',
-        exportState: [{
+        latestDiff: [{
             tax_rate_id: '249388000037832645',
             ledger_account_id: '249402226459542918',
             change: 'added',
