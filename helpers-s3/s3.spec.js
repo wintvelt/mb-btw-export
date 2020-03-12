@@ -13,7 +13,7 @@ var AWSS3 = new AWS.S3({
 const s3 = require('./s3');
 const excel = require('../helpers-excel/excel');
 
-const bucketName = process.env.PUBLIC_BUCKETNAME;
+const bucketName = process.env.PUBLIC_BUCKETNAME || 'moblybird-export-files';
 
 const context = {
     adminCode: process.env.ADMIN_CODE,
