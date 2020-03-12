@@ -122,7 +122,7 @@ describe('Dynamo DB exportTable tests', () => {
             expect(names['#idS1']).to.equal('1235');
             expect(names['#idS2']).to.equal('1236');
             expect(names['#idS3']).to.equal('1238');
-            const newState1 = result.ExpressionAttributeValues[':newState1'];
+            const newState1 = result.ExpressionAttributeValues[':ns1'];
             expect(newState1.latestState).to.have.property('details');
         });
     });
