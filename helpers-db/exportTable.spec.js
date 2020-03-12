@@ -69,14 +69,14 @@ describe('Dynamo DB exportTable tests', () => {
     describe('The makeUnexported function', () => {
         it('prepares parameters for update correctly', () => {
             const result = exportTable.makeUnexported(docRecords);
-            const updExpr = 'SET #docIdToSet0 = :newState0, #docIdToSet1 = :newState1 REMOVE #docIdToDel0, #docIdToDel1';
+            const updExpr = 'SET #idS0 = :ns0, #idS1 = :ns1 REMOVE #idD0, #idD1';
             expect(result.UpdateExpression).to.equal(updExpr);
             const names = result.ExpressionAttributeNames;
-            expect(names['#docIdToSet0']).to.equal('1234');
-            expect(names['#docIdToSet1']).to.equal('1236');
-            expect(names['#docIdToDel0']).to.equal('1235');
-            expect(names['#docIdToDel1']).to.equal('1238');
-            const newState1 = result.ExpressionAttributeValues[':newState1'];
+            expect(names['#idS0']).to.equal('1234');
+            expect(names['#idS1']).to.equal('1236');
+            expect(names['#idD0']).to.equal('1235');
+            expect(names['#idD1']).to.equal('1238');
+            const newState1 = result.ExpressionAttributeValues[':ns1'];
             expect(newState1.latestState).to.have.property('isDeleted');
         });
     });
@@ -115,13 +115,13 @@ describe('Dynamo DB exportTable tests', () => {
     }));
 
     describe('The makeExport function', () => {
-        it('prepares parameters for udpate correctly', () => {
+        it('prepares parameters for update correctly', () => {
             const result = exportTable.makeExport(docRecords);
             const names = result.ExpressionAttributeNames;
-            expect(names['#docIdToSet0']).to.equal('1234');
-            expect(names['#docIdToSet1']).to.equal('1235');
-            expect(names['#docIdToSet2']).to.equal('1236');
-            expect(names['#docIdToSet3']).to.equal('1238');
+            expect(names['#idS0']).to.equal('1234');
+            expect(names['#idS1']).to.equal('1235');
+            expect(names['#idS2']).to.equal('1236');
+            expect(names['#idS3']).to.equal('1238');
             const newState1 = result.ExpressionAttributeValues[':newState1'];
             expect(newState1.latestState).to.have.property('details');
         });
