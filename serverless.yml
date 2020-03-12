@@ -4,7 +4,7 @@ service: btw-export
 app: mb-btw-export
 
 custom:
-  bucket: mb-incoming-sync-files
+  bucket: moblybird-export-files
 
 provider:
   name: aws
