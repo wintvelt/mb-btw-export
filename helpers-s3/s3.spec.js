@@ -67,7 +67,8 @@ describe('AWS s3 tests', () => {
                 contentType: 'application/json'
             }
             const result = await s3.save(saveParams);
-            expect(result).to.have.property('ETag')
+            if (result.error) console.log(result);
+            expect(result).to.have.property('ETag');
         });
         it('saves a test excel on S3', async () => {
             const xlsRows = await excel.makeXlsRows({ exportDocs: testDocs, ...context });
@@ -80,6 +81,7 @@ describe('AWS s3 tests', () => {
                 contentType: 'application/octet-stream'
             }
             const result = await s3.save(saveParams);
+            if (result.error) console.log(result);
             expect(result).to.have.property('ETag');
         });
     });
