@@ -26,17 +26,20 @@ TODO:
 - [x] create `/btw-export/[admin-id]/sync` POST endpoint
 - [x] create fix to update exports table unexported with latest state from docs table
 
-- [ ] implement `/btw-export/[admin-id]/file` POST endpoint
+- [ ] implement `/btw-export/[admin-id]/export` POST endpoint
     - [x] add diffing algorithm for latestState -/- lastExportedState
     - [x] add selection of unexported states based on start-date and end-date (json)
     - [x] add create and S3-save of excel-file with new state info
         - [x] add create xls buffer
         - [x] create S3 bucket/ folder for btw-export xlsx files (still in old bucket)
-    - [ ] implements endpoint handler for exports
+    - [x] implements endpoint handler for exports
         - [x] function to add the latestState of docRecords to 1 new exported record (1 update)
         - [x] function to remove all ids from the unexported state (1 update) - add to exportTable:removeExported
         - [x] function to add the exported latestState to all individual docs (many updates) docTable.updateSingle
-        - [ ] check throttling or maxUpdates
+    - [ ] improve max volume for exports
+        - [ ] cut exportTable update into chunks of 50 (watch for race conditions)
+        - [ ] bundle id states in lists per weekday
+        - [ ] exported states per id as JSON.strings
 
 - [ ] create `/btw-export/[admin-id] GET`
     - [ ] implement stats function for 1 exportTable record (unexported)
@@ -103,7 +106,7 @@ Response body structure:
 }
 ```
 
-### `/btw-export/[admin-id]/file` POST
+### `/btw-export/[admin-id]/export` POST
 Will create a new export file (see below) for download.
 
 Required `body` (may be empty object)

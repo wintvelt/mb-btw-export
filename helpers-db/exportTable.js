@@ -114,7 +114,7 @@ module.exports.updateExport = (docRecordList, filename, { TableName }) => {
     if (docRecordList.length === 0) return { error: 'empty update list for exports table' };
     const adminCode = docRecordList[0].adminCode;
     const { ExpressionAttributeNames, ExpressionAttributeValues, UpdateExpression } =
-        makeExport(docRecordList.slice(0,200));
+        makeExport(docRecordList);
 
     const exportParams = {
         TableName,
