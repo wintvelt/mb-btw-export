@@ -15,7 +15,6 @@ provider:
 
   environment:
     DYNAMODB_DOC_TABLE: ${self:service}-${opt:stage, self:provider.stage}-docs
-    DYNAMODB_EXPORT_TABLE: ${self:service}-${opt:stage, self:provider.stage}-exports
     TEST_DB_ON: false
     TEST_MB_ON: false
 
@@ -30,7 +29,6 @@ provider:
         - dynamodb:DeleteItem
       Resource: 
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_DOC_TABLE}"
-        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_EXPORT_TABLE}"
     - Effect: Allow
       Action:
         - s3:GetObject
@@ -90,34 +88,32 @@ resources:
       DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
+          - AttributeName: adminCodeState
+            AttributeType: S
           - AttributeName: adminCode
+            AttributeType: S
+          - AttributeName: stateName
             AttributeType: S
           - AttributeName: id
             AttributeType: S
         KeySchema:
-          - AttributeName: adminCode
+          - AttributeName: adminCodeState
             KeyType: HASH
           - AttributeName: id
             KeyType: RANGE
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
         TableName: ${self:provider.environment.DYNAMODB_DOC_TABLE}
-    ExportsDynamoDbTable:
-      Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Retain
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: adminCode
-            AttributeType: S
-          - AttributeName: state
-            AttributeType: S
-        KeySchema:
-          - AttributeName: adminCode
-            KeyType: HASH
-          - AttributeName: state
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_EXPORT_TABLE}
+        GlobalSecondaryIndexes:
+          - IndexName: stateIndex
+            KeySchema:
+            - AttributeName: adminCode
+              KeyType: HASH
+            - AttributeName: stateName
+              KeyType: RANGE
+            Projection:
+              ProjectionType: KEYS_ONLY
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5

@@ -1,23 +1,15 @@
 // test for getting moneybird data
 'use strict';
-const mocha = require('mocha');
 const chai = require('chai');
 const expect = chai.expect;
-require('dotenv').config();
+const testhelpers = require('../helpers/test');
+const testIfMb = testhelpers.testIfMb;
+const adminCode = testhelpers.adminCode;
+const access_token = testhelpers.access_token;
+
+const context = { adminCode, access_token };
 
 const fetchDocs = require('./fetchDocs');
-
-const testMb = (process.env.TEST_MB_ON && process.env.TEST_MB_ON !== "false");
-const testIf = (testFunc) => {
-    if (testMb) return testFunc;
-    return () => {
-        it('moneybird tests did not run', () => {});
-    }
-}
-const context = {
-    adminCode: process.env.ADMIN_CODE,
-    access_token: process.env.ACCESS_TOKEN
-}
 
 const testReceiptIds = [
     '281006246928057913',
@@ -45,7 +37,7 @@ const testPurchInvSet = {
 
 const changeSet = { receipts: testReceiptSet, purchase_invoices: testPurchInvSet };
 
-describe('Moneybird data fetching tests', testIf(() => {
+describe('Moneybird data fetching tests', testIfMb(() => {
     describe('The fetchDocs.singleFetch function', () => {
         const params = { ...context, type: 'receipt', ids: testReceiptIds };
         it('successfully retrieves data from Moneybird', async () => {

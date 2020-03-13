@@ -1,29 +1,15 @@
 // test for syncing moneybird data
 'use strict';
-const mocha = require('mocha');
 const chai = require('chai');
 const expect = chai.expect;
-require('dotenv').config();
+const testhelpers = require('../helpers/test');
+const testIfDbMb = testhelpers.testIfDbMb;
+const adminCode = testhelpers.adminCode;
+const access_token = testhelpers.access_token;
 
 const sync = require('./sync');
 
-const context = {
-    adminCode: process.env.ADMIN_CODE,
-    access_token: process.env.ACCESS_TOKEN,
-    TableName: 'btw-export-dev-docs'
-}
-const testMb = (process.env.TEST_MB_ON && process.env.TEST_MB_ON !== "false");
-const testDb = (process.env.TEST_DB_ON && process.env.TEST_DB_ON !== "false");
-const testIf = (testFunc) => {
-    if (testMb && testDb) return testFunc;
-    const mbString = testMb? '': 'moneybird';
-    const dbString = testDb? '': 'database';
-    const andString = (!testMb && !testDb)? ' and ' : '';
-    return () => {
-        it(`${mbString}${andString}${dbString} tests off, so sync tests did not run`, () => {});
-    }
-}
-
+const context = { adminCode, access_token };
 
 const oldList = [
     { id: '1', version: '1' },
@@ -44,7 +30,7 @@ const limitChangeSet = {
     purchase_invoices: { added: [], changed: [], deleted: [12] }
 }
 
-describe('Sync Functions', testIf(() => {
+describe('Sync Functions', () => {
     describe("The changesPartial function", () => {
         const changeSet = sync.changesPartial(oldList, newList);
         it("does not contain any new items", () => {
@@ -83,7 +69,7 @@ describe('Sync Functions', testIf(() => {
         });
     });
 
-    describe('The getChangeSet function', () => {
+    describe('The getChangeSet function', testIfDbMb(() => {
         it('returns a changeSet', async () => {
             const changeSet = await sync.getChangeSet(context);
             expect(changeSet).to.have.property('receipts');
@@ -93,9 +79,9 @@ describe('Sync Functions', testIf(() => {
             expect(changeSet).to.have.property('purchase_invoices');
             expect(changeSet.purchase_invoices.added).to.be.an('array');
         });
-    });
+    }));
 
-    describe('The getDocUpdates function', () => {
+    describe('The getDocUpdates function', testIfDbMb(() => {
         it('returns docUpdates array and maxExceeded boolean', async () => {
             const result = await sync.getDocUpdates({ ...context, maxUpdates: 10 });
             expect(result).to.have.property('docUpdates');
@@ -104,5 +90,5 @@ describe('Sync Functions', testIf(() => {
             expect(docUpdates).to.be.an('array');
             expect(maxExceeded).to.be.a('boolean');
         });
-    });
-}));
+    }));
+});

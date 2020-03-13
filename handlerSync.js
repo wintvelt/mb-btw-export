@@ -1,12 +1,9 @@
 'use strict';
 const sync = require('./helpers-sync/sync');
-const docTable = require('./helpers-db/docTable');
-const exportTable = require('./helpers-db/exportTable');
+const latest = require('./helpers-db/latestState');
+const unexported = require('./helpers-db/unexported');
 
 const docTableName = process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs';
-const contextDoc = { TableName: docTableName };
-const exportTableName = process.env.DYNAMODB_EXPORT_TABLE || 'btw-export-dev-exports';
-const contextExport = { TableName: exportTableName };
 const maxUpdates = 100;
 
 const response = (statusCode, bodyOrString) => {
@@ -31,21 +28,25 @@ module.exports.main = async event => {
     const resultFromDbAndMb = await sync.getDocUpdates(params);
     if (resultFromDbAndMb.error) return response(500, resultFromDbAndMb.error);
     const { docUpdates, maxExceeded } = resultFromDbAndMb;
-    const docResults = await Promise.all(docUpdates.map(docUpdate => {
+
+    const stateResults = await Promise.all(docUpdates.map(docUpdate => {
         const params = {
             adminCode,
             id: docUpdate.id,
-            state: 'latestState',
+            stateName: 'latestState',
+            itemName: 'state',
             newState: docUpdate.latestState
         }
-        return docTable.updateSingle(params, contextDoc);
+        return latest.updateSingle(params);
     }));
-    const errorFound = docResults.find(docResult => docResult.error);
+    const errorFound = stateResults.find(res => res.error);
     if (errorFound) return response(500, { error: errorFound.error });
-    const docRecords = docResults.map(docResult => docResult.Attributes);
 
-    const exportResult = await exportTable.updateUnexported(docRecords, contextExport);
-    if (exportResult.error) return response(500, { error: exportResult.error });
+    const unexportedResults = await Promise.all(stateResults.map(latestState => {
+        return unexported.updateUnexported(latestState);
+    }));
+    const errorFound2 = unexportedResults.find(res => res.error);
+    if (errorFound2) return response(500, { error: errorFound2.error });
 
     return response(200, { maxExceeded });
 };

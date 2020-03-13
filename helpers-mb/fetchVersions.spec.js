@@ -1,27 +1,17 @@
 // test for syncing moneybird data
 'use strict';
-const mocha = require('mocha');
 const chai = require('chai');
 const expect = chai.expect;
-require('dotenv').config();
+const testhelpers = require('../helpers/test');
+const testIfMb = testhelpers.testIfMb;
+const adminCode = testhelpers.adminCode;
+const access_token = testhelpers.access_token;
+
+const context = { adminCode, access_token };
 
 const fetchVersions = require('./fetchVersions');
 
-const context = {
-    adminCode: process.env.ADMIN_CODE,
-    access_token: process.env.ACCESS_TOKEN,
-    TableName: 'btw-export-dev-docs'
-}
-
-const testMb = (process.env.TEST_MB_ON && process.env.TEST_MB_ON !== "false");
-const testIf = (testFunc) => {
-    if (testMb) return testFunc;
-    return () => {
-        it('moneybird tests did not run', () => {});
-    }
-}
-
-describe('Moneybird sync (fetchVersions) Functions', testIf(() => {
+describe('Moneybird sync (fetchVersions) Functions', testIfMb(() => {
     describe('The mbTypeSync function', () => {
         it('retrieves set of doc ids from moneybird sync', async () => {
             const response = await fetchVersions.mbTypeSync({ ...context, type: 'receipts' });

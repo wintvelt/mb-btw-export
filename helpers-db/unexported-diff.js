@@ -1,4 +1,4 @@
-// exportTable-diff.js
+// unexported-diff.js
 // to calculate the difference between 2 document states
 
 /* list with

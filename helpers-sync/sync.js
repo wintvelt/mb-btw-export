@@ -1,6 +1,6 @@
 // helpers-sync/sync.js
 // to sync database with moneybird latest state
-const dbScan = require('../helpers-db/docTable-scan');
+const dbScan = require('../helpers-db/query');
 const mbDocs = require('../helpers-mb/fetchDocs');
 const mbScan = require('../helpers-mb/fetchVersions');
 

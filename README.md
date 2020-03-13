@@ -36,6 +36,13 @@ TODO:
         - [x] function to add the latestState of docRecords to 1 new exported record (1 update)
         - [x] function to remove all ids from the unexported state (1 update) - add to exportTable:removeExported
         - [x] function to add the exported latestState to all individual docs (many updates) docTable.updateSingle
+
+    - [ ] refactor-db2
+        - [x] changes yml structure + dynamo structure into docTable + index
+        - [x] updateSingle item latestState + unexported of single item
+        - [x] sync udpated
+        - [ ] updates webhook
+
     - [ ] improve max volume for exports
         - [ ] cut exportTable update into chunks of 50 (watch for race conditions)
         - [ ] bundle id states in lists per weekday
