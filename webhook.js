@@ -1,5 +1,5 @@
 'use strict';
-const dbUpdates = require('./helpers-db/updateSingle');
+const latest = require('./helpers-db/latestState');
 const mbHelpers = require('./helpers-mb/fetchDocs');
 const stripRecord = mbHelpers.stripRecord;
 
@@ -11,11 +11,6 @@ const response = (statusCode, bodyOrString) => {
         statusCode,
         body
     }
-}
-
-const context = {
-    docTableName: process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs',
-    exportTableName: process.env.DYNAMODB_EXPORT_TABLE || 'btw-export-dev-docs',
 }
 
 module.exports.main = async event => {
@@ -40,10 +35,14 @@ module.exports.main = async event => {
     const params = {
         adminCode,
         id: record.id,
-        latestState: record.latestState,
-        ...context
+        stateName: 'latestState',
+        itemName: 'state',
+        newState: record.latestState,
     }
-    const updateResponse = await dbUpdates.updateSingle(params);
-    if (updateResponse.error) return response(500, "Error");
+    const latestState = await latest.updateSingle(params);
+    if (latestState.error) return response(500, "Error");
+    const unexportedResult = await unexported.updateUnexported(latestState);
+    if (unexportedResult.error) return response(500, "Error");
+
     return response(200, "OK");
 }

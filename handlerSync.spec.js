@@ -1,32 +1,23 @@
-const mocha = require('mocha');
+'use strict';
 const chai = require('chai');
 const expect = chai.expect;
-require('dotenv').config();
+const testhelpers = require('./helpers/test');
+const testIfMb = testhelpers.testIfMb;
+const adminCode = testhelpers.adminCode;
+const access_token = testhelpers.access_token;
 
 const handler = require('./handlerSync');
 
-const testMb = (process.env.TEST_MB_ON && process.env.TEST_MB_ON !== "false");
-const testDb = (process.env.TEST_DB_ON && process.env.TEST_DB_ON !== "false");
-const testIf = (testFunc) => {
-    if (testMb && testDb) return testFunc;
-    const mbString = testMb? '': 'moneybird';
-    const dbString = testDb? '': 'database';
-    const andString = (!testMb && !testDb)? ' and ' : '';
-    return () => {
-        it(`${mbString}${andString}${dbString} tests off, so sync tests did not run`, () => {});
-    }
-}
-
 const event = {
     headers: {
-        Authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        Authorization: `Bearer ${access_token}`
     },
     pathParameters: {
-        admin: process.env.ADMIN_CODE
+        admin: adminCode
     }
 }
 
-describe("The handlerSync function", testIf(() => {
+describe("The handlerSync function", testIfMb(() => {
     it("does a sync", async () => {
         const response = await handler.main(event);
         expect(response.statusCode).to.equal(200);

@@ -42,6 +42,7 @@ TODO:
         - [x] updateSingle item latestState + unexported of single item
         - [x] sync udpated
         - [ ] updates webhook
+        - [ ] updates export functions
 
     - [ ] improve max volume for exports
         - [ ] cut exportTable update into chunks of 50 (watch for race conditions)

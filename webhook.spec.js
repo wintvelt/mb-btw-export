@@ -1,8 +1,8 @@
-require('dotenv').config();
-
-const mocha = require('mocha');
+'use strict';
 const chai = require('chai');
 const expect = chai.expect;
+const testhelpers = require('./helpers/test');
+const testIfDbMb = testhelpers.testIfDbMb;
 
 const webhook = require('./webhook');
 
@@ -21,15 +21,8 @@ const baseEvent = (body) => ({
     body: JSON.stringify(body)
 });
 
-const testDb = (process.env.TEST_DB_ON && process.env.TEST_DB_ON !== "false");
-const testIf = (testFunc) => {
-    if (testDb) return testFunc;
-    return () => {
-        it('database tests did not run', () => {});
-    }
-}
 
-describe("The webhook function", testIf(() => {
+describe("The webhook function", testIfDbMb(() => {
     it("returns with statusCode of 200", async () => {
         const response = await webhook.main(baseEvent(baseBody));
         expect(response.statusCode).to.equal(200);

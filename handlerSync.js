@@ -4,7 +4,7 @@ const latest = require('./helpers-db/latestState');
 const unexported = require('./helpers-db/unexported');
 
 const docTableName = process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs';
-const maxUpdates = 100;
+const maxUpdates = 50;
 
 const response = (statusCode, bodyOrString) => {
     const body = typeof bodyOrString === 'string' ?
@@ -29,7 +29,7 @@ module.exports.main = async event => {
     if (resultFromDbAndMb.error) return response(500, resultFromDbAndMb.error);
     const { docUpdates, maxExceeded } = resultFromDbAndMb;
 
-    const stateResults = await Promise.all(docUpdates.map(docUpdate => {
+    const results = await Promise.all(docUpdates.map(docUpdate => {
         const params = {
             adminCode,
             id: docUpdate.id,
@@ -37,16 +37,13 @@ module.exports.main = async event => {
             itemName: 'state',
             newState: docUpdate.latestState
         }
-        return latest.updateSingle(params);
+        return latest.updateSingle(params)
+            .then(latestState => {
+                return unexported.updateUnexported(latestState);
+            });
     }));
-    const errorFound = stateResults.find(res => res.error);
+    const errorFound = results.find(res => res.error);
     if (errorFound) return response(500, { error: errorFound.error });
-
-    const unexportedResults = await Promise.all(stateResults.map(latestState => {
-        return unexported.updateUnexported(latestState);
-    }));
-    const errorFound2 = unexportedResults.find(res => res.error);
-    if (errorFound2) return response(500, { error: errorFound2.error });
 
     return response(200, { maxExceeded });
 };
