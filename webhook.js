@@ -1,5 +1,5 @@
 'use strict';
-const latest = require('./helpers-db/latestState');
+const update = require('./helpers-db/update');
 const mbHelpers = require('./helpers-mb/fetchDocs');
 const stripRecord = mbHelpers.stripRecord;
 
@@ -39,7 +39,7 @@ module.exports.main = async event => {
         itemName: 'state',
         newState: record.latestState,
     }
-    const latestState = await latest.updateSingle(params);
+    const latestState = await update.updateSingle(params);
     if (latestState.error) return response(500, "Error");
     const unexportedResult = await unexported.updateUnexported(latestState);
     if (unexportedResult.error) return response(500, "Error");
