@@ -1,5 +1,3 @@
-// helpers-db/scan.js
-// to fiddle with DynamoDB
 'use strict';
 const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 const TableName = process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs';

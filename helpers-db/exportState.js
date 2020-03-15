@@ -58,13 +58,15 @@ module.exports.getUnexported = async ({ adminCode, start_date, end_date, is_full
 }
 
 module.exports.setExport = async ({ unexportedDoc, filename }) => {
-    const { adminCode, id, state } = unexportedDoc;
+    const { adminCode, id, state, exportLogs } = unexportedDoc;
     const params = {
         adminCode,
         id,
         stateName: filename,
-        itemName: 'state',
-        newState: state
-    }
-    return update.single(params);
+        itemUpdates: [
+            { itemName: 'state', newState: state },
+            { itemName: 'exportLogs', newState: exportLogs },
+        ]
+    };
+    return update.singleWithItems(params);
 };

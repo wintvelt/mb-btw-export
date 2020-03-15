@@ -42,7 +42,15 @@ TODO:
         - [x] updateSingle item latestState + unexported of single item
         - [x] sync udpated
         - [x] updates webhook
-        - [ ] updates export functions
+        - [x] updates export functions
+        - [x] implement delete export
+            - [x] query index to get latest export
+            - [x] query latestState for each id
+            - [x] for each item in export:
+                - [x] delete item from table
+                - [x] update latest state: delete export from exportLogs
+                - [x] determine new unexported state
+    - [ ] reregister webhook
     - [ ] check and implement webhook document deletion
 
     - [ ] improve max volume for exports
@@ -148,13 +156,13 @@ Response: `200 OK` with body:
 }
 ```
 
-### `/btw-export/[admin-id]/file/[filename]` DELETE
+### `/btw-export/[admin-id]/export/[filename]` DELETE
 Deletes an export file. **Also updates stats**.
-It is only possible to delete the latest export file, rolling back snapshots one at a time.
+Only possible to delete latest export file (one at a time).
 
 Response: 
 - `200 OK` if all went well.
-- `400 Bad request` if request tried to delete a file other than the latest export.
+- `400 Bad request` if filename does not match latest export.
 
 ### `/btw-export/[admin-id]/webhook` POST
 Webhook endpoint for moneybird for updated or deleted documents.

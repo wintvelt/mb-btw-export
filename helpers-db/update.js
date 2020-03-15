@@ -35,3 +35,38 @@ const single = ({ adminCode, id, stateName, itemName, newState }) => {
         .catch(error => ({ error: error.message }));
 };
 module.exports.single = single;
+
+const singleWithItems = ({ adminCode, id, stateName, itemUpdates }) => {
+    let ExpressionAttributeNames = {
+        '#ac': 'adminCode',
+        '#sn': 'stateName'
+    }
+    let ExpressionAttributeValues = {
+        ':ac': adminCode,
+        ':sn': stateName
+    };
+    let UpdateExpression = 'SET #ac = :ac, #sn = :sn';
+    for (let i = 0; i < itemUpdates.length; i++) {
+        const itemUpdate = itemUpdates[i];
+        ExpressionAttributeNames['#it' + i] = itemUpdate.itemName;
+        ExpressionAttributeValues[':ns' + i] = itemUpdate.newState;
+        UpdateExpression = UpdateExpression + `, #it${i} = :ns${i}`;
+    }
+    const params = {
+        TableName,
+        Key: {
+            adminCodeState: adminCode + stateName,
+            id,
+        },
+        ExpressionAttributeNames,
+        ExpressionAttributeValues,
+        UpdateExpression,
+        ReturnValues: 'ALL_NEW',
+    };
+
+    return dynamoDb.update(params)
+        .promise()
+        .then(res => res.Attributes)
+        .catch(error => ({ error: error.message }));
+};
+module.exports.singleWithItems = singleWithItems;

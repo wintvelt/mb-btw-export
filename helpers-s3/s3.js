@@ -5,11 +5,14 @@ var s3 = new S3({
     region: 'eu-central-1'
 });
 
-module.exports.save = ({ bucketName, filename, content, contentType }) => {
+const bucketName = process.env.PUBLIC_BUCKETNAME || 'moblybird-export-files';
+const folderName = process.env.FOLDER_NAME || 'public';
+
+module.exports.save = ({ adminCode, filename, content, contentType }) => {
     const saveParams = {
         ACL: 'public-read',
         Bucket: bucketName,
-        Key: filename,
+        Key: `${folderName}/${adminCode}/btw-export/${filename}`,
         Body: content,
         ContentType: contentType,
     }
@@ -17,6 +20,14 @@ module.exports.save = ({ bucketName, filename, content, contentType }) => {
         .catch(error => ({ error: error.statusCode + ' - ' + error.message }))
 }
 
+module.exports.delete = ({ adminCode, filename }) => {
+    const params = {
+        Bucket: bucketName,
+        Key: `${folderName}/${adminCode}/btw-export/${filename}`
+    }
+    return s3.deleteObject(params).promise()
+        .catch(error => ({ error: error.statusCode + ' - ' + error.message }))
+}
 
 
 

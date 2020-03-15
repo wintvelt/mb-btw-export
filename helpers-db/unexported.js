@@ -23,7 +23,8 @@ const getLatestExport = async ({ adminCode, latestExportName, id }) => {
         .catch(error => ({ error: error.message }));
 }
 
-const updateUnexported = async ({ adminCode, id, state, exportLogs }) => {
+const updateUnexported = async (latestState) => {
+    const { adminCode, id, state, exportLogs } = latestState;
     const latestExportName = exportLogs && exportLogs.length > 0 && exportLogs[0];
     const latestExport = latestExportName && await getLatestExport({ adminCode, latestExportName, id });
     const latestExportState = latestExport && latestExport.state;

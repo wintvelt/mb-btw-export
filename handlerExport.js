@@ -31,7 +31,7 @@ const makeFilename = () => {
 module.exports.main = async event => {
     const isBadRequest = (!event || !event.pathParameters.admin ||
         !event.headers || !event.headers.Authorization || !event.body);
-    if (isBadRequest) return response(400, "Unauthorized");
+    if (isBadRequest) return response(400, "Bad request");
     const adminCode = event.pathParameters.admin;
     const access_token = event.headers.Authorization.slice(6);
     const filename = makeFilename();
@@ -56,8 +56,8 @@ module.exports.main = async event => {
     const xlsBuffer = await excel.makeXls(xlsRows);
 
     const saveParams = {
-        bucketName,
-        filename: `${folderName}/${adminCode}/btw-export/${filename}`,
+        adminCode,
+        filename,
         content: xlsBuffer,
         contentType: 'application/octet-stream'
     }

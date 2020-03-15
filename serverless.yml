@@ -80,7 +80,19 @@ functions:
             parameters:
               paths:
                 admin: true
-                            
+  deleteExport:
+    handler: handlerDelete.main
+    timeout: 20
+    events:
+      - http:
+          path: btw-export/{admin}/export/{filename}
+          method: delete
+          request:
+            parameters:
+              paths:
+                admin: true
+                filename: true
+                                          
 resources:
   Resources:
     IncomingDynamoDbTable:

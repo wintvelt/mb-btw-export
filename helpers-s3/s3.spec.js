@@ -1,24 +1,13 @@
 // for testing (duh)
-const mocha = require('mocha');
 const chai = require('chai');
 const expect = chai.expect;
-require('dotenv').config();
+const testHelpers = require('../helpers/test');
 
-const AWS = require('aws-sdk');
-
-var AWSS3 = new AWS.S3({
-    region: 'eu-central-1'
-});
+const adminCode = testHelpers.adminCode;
+const access_token = testHelpers.access_token;
 
 const s3 = require('./s3');
 const excel = require('../helpers-excel/excel');
-
-const bucketName = process.env.PUBLIC_BUCKETNAME || 'moblybird-export-files';
-
-const context = {
-    adminCode: process.env.ADMIN_CODE,
-    access_token: process.env.ACCESS_TOKEN
-};
 
 const testContent = JSON.stringify({ message: 'Dit is gewoon een test' }, null, 2);
 const testDocs = [
@@ -48,21 +37,11 @@ const testDocs = [
 
 
 describe('AWS s3 tests', () => {
-    after(async () => {
-        await AWSS3.deleteObject({
-            Bucket: bucketName,
-            Key: 'public-btw/testfile.json'
-        }).promise();
-        await AWSS3.deleteObject({
-            Bucket: bucketName,
-            Key: 'public-btw/test-xls.xlsx'
-        }).promise();
-    })
     describe('The save function', () => {
         it('saves a testDoc json on S3', async () => {
             const saveParams = {
-                bucketName,
-                filename: 'public-btw/testfile.json',
+                adminCode,
+                filename: 'testfile.json',
                 content: testContent,
                 contentType: 'application/json'
             }
@@ -70,12 +49,12 @@ describe('AWS s3 tests', () => {
             expect(result).to.have.property('ETag');
         });
         it('saves a test excel on S3', async () => {
-            const xlsRows = await excel.makeXlsRows({ exportDocs: testDocs, ...context });
+            const xlsRows = await excel.makeXlsRows({ exportDocs: testDocs, adminCode, access_token });
             const buffer = await excel.makeXls(xlsRows);
 
             const saveParams = {
-                bucketName,
-                filename: 'public-btw/test-xls.xlsx',
+                adminCode,
+                filename: 'test-xls.xlsx',
                 content: buffer,
                 contentType: 'application/octet-stream'
             }
@@ -83,4 +62,14 @@ describe('AWS s3 tests', () => {
             expect(result).to.have.property('ETag');
         });
     });
+
+    describe('The delete function', () => {
+        it('deletes a doc from s3', async () => {
+            const result1 = await s3.delete({ adminCode, filename: 'testfile.json' });
+            const result2 = await s3.delete({ adminCode, filename: 'test-xls.xlsx' });
+            expect(result1).to.not.have.property('error');
+            expect(result2).to.not.have.property('error');
+        });
+    });
+
 });

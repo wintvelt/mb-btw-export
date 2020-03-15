@@ -7,6 +7,8 @@ const adminCode = testhelpers.adminCode;
 const access_token = testhelpers.access_token;
 
 const handler = require('./handlerExport');
+const deleteExport = require('./helpers-db/deleteExport');
+const handlerDelete = require('./handlerDelete');
 
 const event = {
     headers: {
@@ -24,6 +26,17 @@ const event = {
 describe("The handlerExport function", testIfDbMb(() => {
     it("creates an export excel file and updates the databases", async () => {
         const response = await handler.main(event);
-        expect(response.statusCode).to.be.within(200,299);
+        expect(response.statusCode).to.be.within(200, 299);
     }).timeout(20000);
+    after(async () => {
+        const filename = await deleteExport.getLatestExport({ adminCode });
+        const deleteEvent = {
+            headers: event.headers,
+            pathParameters: { 
+                admin: adminCode,
+                filename,
+            }
+        };
+        await handlerDelete.main(deleteEvent);
+    });
 }));
