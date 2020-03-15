@@ -31,13 +31,15 @@ module.exports.main = async event => {
     const entity = bodyObj.entity;
     if (!entity || !bodyObj.webhook_token) return response(200, "OK");
     const type = bodyObj.entity_type && bodyObj.entity_type.toLowerCase();
-    const record = stripRecord(type)(entity);
+    const state = (bodyObj.action === 'document_updated') ?
+        stripRecord(type)(entity).latestState
+        : { isDeleted: true };
     const params = {
         adminCode,
         id: record.id,
         stateName: 'latestState',
         itemName: 'state',
-        newState: record.latestState,
+        newState: state,
     }
     const latestState = await update.updateSingle(params);
     if (latestState.error) return response(500, "Error");
