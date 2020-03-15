@@ -28,10 +28,10 @@ module.exports.main = async event => {
     console.log({ requestBody: bodyObj });
     const tokenError = (!bodyObj.webhook_token || bodyObj.webhook_token !== process.env.MB_WEBHOOK_TOKEN);
     if (process.env.MB_WEBHOOK_TOKEN && tokenError) return response(400, "Bad request");
-    const entity = bodyObj.entity;
-    if (!entity || !bodyObj.webhook_token) return response(200, "OK");
-    const type = bodyObj.entity_type && bodyObj.entity_type.toLowerCase();
-    const state = (bodyObj.action === 'document_updated') ?
+    const { entity, entity_type, action , webhook_token } = bodyObj.entity;
+    if (!entity || !webhook_token) return response(200, "OK");
+    const type = entity_type && entity_type.toLowerCase();
+    const state = (action === 'document_updated' && entity) ?
         stripRecord(type)(entity).latestState
         : { isDeleted: true };
     const params = {
