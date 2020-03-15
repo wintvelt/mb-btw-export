@@ -28,7 +28,7 @@ module.exports.main = async event => {
     console.log({ requestBody: bodyObj });
     const tokenError = (!bodyObj.webhook_token || bodyObj.webhook_token !== process.env.MB_WEBHOOK_TOKEN);
     if (process.env.MB_WEBHOOK_TOKEN && tokenError) return response(400, "Bad request");
-    const { entity, entity_type, action , webhook_token } = bodyObj.entity;
+    const { entity, entity_type, action , webhook_token, id } = bodyObj.entity;
     if (!entity || !webhook_token) return response(200, "OK");
     const type = entity_type && entity_type.toLowerCase();
     const state = (action === 'document_updated' && entity) ?
@@ -36,7 +36,7 @@ module.exports.main = async event => {
         : { isDeleted: true };
     const params = {
         adminCode,
-        id: record.id,
+        id,
         stateName: 'latestState',
         itemName: 'state',
         newState: state,
