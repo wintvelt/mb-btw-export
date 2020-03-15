@@ -44,14 +44,20 @@ const updateUnexported = async ({ adminCode, id, state, exportLogs }) => {
     };
     const updateParams = {
         ...params,
-        UpdateExpression: 'SET #state = :newState, diff = :newDiff, #ac = :ac, #sn = :sn',
-        ExpressionAttributeNames: { '#state': 'state', "#ac": 'adminCode', '#sn': 'stateName' },
+        UpdateExpression: 'SET #state = :newState, diff = :newDiff, #ac = :ac, #sn = :sn, #el = :el',
+        ExpressionAttributeNames: {
+            '#state': 'state',
+            "#ac": 'adminCode',
+            '#sn': 'stateName',
+            '#el': 'exportLogs'
+        },
         ExpressionAttributeValues:
         {
             ':ac': adminCode,
             ':sn': 'unexported',
             ':newState': { ...latestExportFacts, ...state },
-            ':newDiff': latestDiff
+            ':newDiff': latestDiff,
+            ':el': exportLogs || []
         },
         ReturnValues: 'ALL_NEW',
     };
@@ -66,3 +72,16 @@ const updateUnexported = async ({ adminCode, id, state, exportLogs }) => {
             .catch(error => ({ error: error.message }));
 };
 module.exports.updateUnexported = updateUnexported;
+
+module.exports.removeUnexported = ({ adminCode, id }) => {
+    return dynamoDb.delete({
+        Key: {
+            adminCodeState: adminCode + 'unexported',
+            id
+        },
+        TableName,
+        ReturnValues: 'NONE'
+    })
+        .promise()
+        .catch(error => ({ error: error.message }));
+}

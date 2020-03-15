@@ -3,6 +3,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const testhelpers = require('../helpers/test');
 const testIfDb = testhelpers.testIfDb;
+const adminCode = testhelpers.adminCode;
 
 const query = require('./query');
 
@@ -34,7 +35,7 @@ describe('DB query tests', () => {
 
     describe('The queryVersions function', testIfDb(() => {
         it('normally returns an object with array for receipts and purchase invoices', async () => {
-            const response = await query.queryVersions({ adminCode: '9999' });
+            const response = await query.queryVersions({ adminCode });
             expect(response).to.have.property('LastEvaluatedKey');
             const items = response.items;
             expect(items).to.have.property('receipts');

@@ -1,40 +1,7 @@
-// helpers-db/docTable.js
+// helpers-db/latestState.js
 // to read/write DynamoDB docTable
 'use strict';
-const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
-const TableName = process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs';
-
-const dynamoDb = new AWS.DynamoDB.DocumentClient({
-    region: 'eu-central-1'
-});
-
-const updateSingle = ({ adminCode, id, stateName, itemName, newState }) => {
-    const params = {
-        TableName,
-        Key: {
-            adminCodeState: adminCode + stateName,
-            id,
-        },
-        ExpressionAttributeNames: {
-            '#ac': 'adminCode',
-            '#sn': 'stateName',
-            "#it": itemName
-        },
-        ExpressionAttributeValues: {
-            ':ac': adminCode,
-            ':sn': stateName,
-            ':ns': newState
-        },
-        UpdateExpression: 'SET #ac = :ac, #sn = :sn, #it = :ns',
-        ReturnValues: 'ALL_NEW',
-    };
-
-    return dynamoDb.update(params)
-        .promise()
-        .then(res => res.Attributes)
-        .catch(error => ({ error: error.message }));
-};
-module.exports.updateSingle = updateSingle;
+const updateSingle = require('./update').single;
 
 module.exports.addExport = ({ latestState, exportName }) => {
     const { adminCode, id, exportLogs } = latestState;

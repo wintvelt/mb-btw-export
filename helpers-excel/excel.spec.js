@@ -24,7 +24,7 @@ const testDocs = [
         id: '244931355136231369',
         date: '2020-01-01',
         type: 'receipt',
-        latestDiff: [{
+        diff: [{
             tax_rate_id: '243232725503313338',
             ledger_account_id: '249389258872194167',
             change: 'added',
@@ -35,7 +35,7 @@ const testDocs = [
         id: '282168015182628005',
         date: '2020-01-02',
         type: 'receipt',
-        latestDiff: [{
+        diff: [{
             tax_rate_id: '249388000037832645',
             ledger_account_id: '249402226459542918',
             change: 'added',

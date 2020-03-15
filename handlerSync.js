@@ -1,6 +1,6 @@
 'use strict';
 const sync = require('./helpers-sync/sync');
-const latest = require('./helpers-db/latestState');
+const update = require('./helpers-db/update');
 const unexported = require('./helpers-db/unexported');
 
 const docTableName = process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs';
@@ -37,13 +37,16 @@ module.exports.main = async event => {
             itemName: 'state',
             newState: docUpdate.latestState
         }
-        return latest.updateSingle(params)
+        return update.single(params)
             .then(latestState => {
                 return unexported.updateUnexported(latestState);
             });
     }));
     const errorFound = results.find(res => res.error);
-    if (errorFound) return response(500, { error: errorFound.error });
+    if (errorFound) {
+        console.log(errorFound);
+        return response(500, { error: errorFound.error });
+    }
 
     return response(200, { maxExceeded });
 };

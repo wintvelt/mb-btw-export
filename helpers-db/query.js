@@ -11,31 +11,30 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
 const query = (params) => {
     return dynamoDb.query(params)
         .promise()
-        .then(res => res.Items)
         .catch(error => ({ error: error.message }));
 };
 
-const queryVersionsParams = {
-    ProjectionExpression: "adminCode, stateName, id, #state",
+const queryBaseParams = {
+    ProjectionExpression: "adminCode, stateName, id, #state, diff, exportLogs",
     KeyConditionExpression: '#acs = :acs',
     ExpressionAttributeNames: {
         '#acs': 'adminCodeState',
         '#state': 'state'
     },
+    TableName
 };
 
-const queryVersionsOnce = ({ adminCode, stateName, ExclusiveStartKey }) => {
+const queryOnce = ({ adminCode, stateName, ExclusiveStartKey }) => {
     const params = {
-        ...queryVersionsParams,
+        ...queryBaseParams,
         ExpressionAttributeValues: {
             ':acs': adminCode + stateName
         },
-        TableName,
         ExclusiveStartKey
     };
     return query(params);
 };
-module.exports.queryVersionsOnce = queryVersionsOnce;
+module.exports.queryOnce = queryOnce;
 
 const makeVersionSet = (dbLatest) => {
     const dbLength = dbLatest.length;
@@ -63,9 +62,11 @@ const makeVersionSet = (dbLatest) => {
 module.exports.makeVersionSet = makeVersionSet;
 
 module.exports.queryVersions = async ({ adminCode, ExclusiveStartKey }) => {
-    const dbLatest = await queryVersionsOnce({ adminCode, stateName: 'latestState', ExclusiveStartKey });
+    const result = await queryOnce({ adminCode, stateName: 'latestState', ExclusiveStartKey });
+    if (result.error) return ({ error: result.error });
+    const { Items: dbLatest, LastEvaluatedKey } = result;
     return {
         items: makeVersionSet(dbLatest),
-        LastEvaluatedKey: dbLatest.LastEvaluatedKey
+        LastEvaluatedKey
     }
 }

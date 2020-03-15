@@ -1,13 +1,12 @@
 'use strict';
-const exportTableExport = require('./helpers-db/exportTable-export');
-const exportTable = require('./helpers-db/exportTable');
-const doubleStr = exportTableExport.doubleStr;
+const exportState = require('./helpers-db/exportState');
+const latestState = require('./helpers-db/latestState');
+const unexported = require('./helpers-db/unexported');
+const doubleStr = exportState.doubleStr;
+
 const excel = require('./helpers-excel/excel');
 const s3 = require('./helpers-s3/s3');
-const docTable = require('./helpers-db/docTable');
 
-const docTableName = process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs';
-const exportTableName = process.env.DYNAMODB_EXPORT_TABLE || 'btw-export-dev-exports';
 const bucketName = process.env.PUBLIC_BUCKETNAME || 'moblybird-export-files';
 const folderName = process.env.FOLDER_NAME || 'public';
 
@@ -38,14 +37,13 @@ module.exports.main = async event => {
     const filename = makeFilename();
 
     const { start_date, end_date, is_full_report } = event.body;
-    const exportDocs = await exportTableExport.getDocsToExport({
+    const exportDocs = await exportState.getUnexported({
         adminCode,
         start_date,
         end_date,
         is_full_report,
-        TableName: exportTableName
     });
-    if (exportDocs.error) return response(500, exportDocs.error);
+    if (exportDocs.error) return response(501, exportDocs.error);
     if (exportDocs.length === 0) return response(200, "OK");
 
     const xlsRows = await excel.makeXlsRows({
@@ -53,7 +51,7 @@ module.exports.main = async event => {
         adminCode,
         access_token
     });
-    if (xlsRows.error) return response(500, xlsRows.error);
+    if (xlsRows.error) return response(502, xlsRows.error);
 
     const xlsBuffer = await excel.makeXls(xlsRows);
 
@@ -65,28 +63,28 @@ module.exports.main = async event => {
     }
     const savePromise = s3.save(saveParams);
 
-    const docUpdatePromises = exportDocs.map((doc) => {
-        const params = {
-            adminCode,
-            id: doc.id,
-            state: filename,
-            newState: { latestState: doc.latestState, latestDiff: doc.latestDiff }
-        };
-        return docTable.updateSingle(params, { TableName: docTableName });
+    const docUpdatePromises = exportDocs.map(async (unexportedDoc) => {
+        const exportInDb = await exportState.setExport({
+            unexportedDoc,
+            filename
+        });
+        const exportLogsInLatest = await latestState.addExport({
+            latestState: unexportedDoc,
+            exportName: filename
+        }); 
+        const removeFromUnexported = await unexported.removeUnexported(unexportedDoc);
+        const errorFound = exportInDb.error || exportLogsInLatest.error || removeFromUnexported.error;
+        return (errorFound)?
+            { error: errorFound }
+            : {};
     });
-
-    const addExportPromise = exportTable.updateExport(exportDocs, filename, { TableName: exportTableName });
-
-    const removeUnexportedPromise = exportTable.removeUnexported(exportDocs, { TableName: exportTableName });
 
     const result = await Promise.all([
         savePromise,
-        ...docUpdatePromises,
-        addExportPromise,
-        removeUnexportedPromise
+        ...docUpdatePromises
     ]);
     const errorFound = result.find(item => item.error);
-    if (errorFound) return response(500, errorFound.error);
+    if (errorFound) return response(503, errorFound.error);
 
     return response(201, "Export created");
 };

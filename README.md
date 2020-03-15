@@ -41,8 +41,9 @@ TODO:
         - [x] changes yml structure + dynamo structure into docTable + index
         - [x] updateSingle item latestState + unexported of single item
         - [x] sync udpated
-        - [ ] updates webhook
+        - [x] updates webhook
         - [ ] updates export functions
+    - [ ] check and implement webhook document deletion
 
     - [ ] improve max volume for exports
         - [ ] cut exportTable update into chunks of 50 (watch for race conditions)
@@ -154,6 +155,12 @@ It is only possible to delete the latest export file, rolling back snapshots one
 Response: 
 - `200 OK` if all went well.
 - `400 Bad request` if request tried to delete a file other than the latest export.
+
+### `/btw-export/[admin-id]/webhook` POST
+Webhook endpoint for moneybird for updated or deleted documents.
+
+Response: 
+- `200 OK`
 
 ### `/btw-export/[admin-id]/sync` POST
 Runs a sync with Moneybird. Can be invoked in first setup and after interruption of the webhook.
