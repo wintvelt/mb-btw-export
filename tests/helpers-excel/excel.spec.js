@@ -4,7 +4,7 @@ const chai = require('chai');
 const expect = chai.expect;
 require('dotenv').config();
 
-const excel = require('./excel');
+const excel = require('../../src/helpers-excel/excel');
 
 const context = {
     adminCode: process.env.ADMIN_CODE,

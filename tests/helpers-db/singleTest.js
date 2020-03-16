@@ -1,6 +1,6 @@
-const exportState = require('../helpers-db/exportState');
+const exportState = require('../../src/helpers-db/exportState');
 
-const adminCode = require('../helpers/test').adminCode;
+const adminCode = require('../../src/helpers/test').adminCode;
 
 describe('The single test', () => {
     it('runs a single test', async () => {

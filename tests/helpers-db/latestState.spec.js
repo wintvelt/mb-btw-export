@@ -1,11 +1,11 @@
 // for testing (duh)
 const chai = require('chai');
 const expect = chai.expect;
-const testhelpers = require('../helpers/test');
+const testhelpers = require('../../src/helpers/test');
 const testIfDb = testhelpers.testIfDb;
 const removeFromDb = testhelpers.removeFromDb;
 
-const latest = require('./latestState');
+const latest = require('../../src/helpers-db/latestState');
 
 const adminCode = '9999';
 const params = { adminCode, stateName: 'latestState' };

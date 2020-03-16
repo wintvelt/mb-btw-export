@@ -1,12 +1,12 @@
 // for testing (duh)
 const chai = require('chai');
 const expect = chai.expect;
-const testhelpers = require('../helpers/test');
+const testhelpers = require('../../src/helpers/test');
 const testIfDb = testhelpers.testIfDb;
 const addToDb = testhelpers.addToDb;
 const removeFromDb = testhelpers.removeFromDb;
 
-const unexported = require('./unexported');
+const unexported = require('../../src/helpers-db/unexported');
 
 const adminCode = '9999';
 

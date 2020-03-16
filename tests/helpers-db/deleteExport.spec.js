@@ -1,11 +1,11 @@
 'use strict';
 const chai = require('chai');
 const expect = chai.expect;
-const testhelpers = require('../helpers/test');
+const testhelpers = require('../../src/helpers/test');
 const testIfDb = testhelpers.testIfDb;
 const adminCode = testhelpers.adminCode;
 
-const deleteExport = require('./deleteExport');
+const deleteExport = require('../../src/helpers-db/deleteExport');
 
 describe("DB deleteExport tests", testIfDb(() => {
     describe('The queryIndexOnce function', async () => {

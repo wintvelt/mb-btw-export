@@ -1,11 +1,11 @@
 // for testing (duh)
 const chai = require('chai');
 const expect = chai.expect;
-const testhelpers = require('../helpers/test');
+const testhelpers = require('../../src/helpers/test');
 const testIfDb = testhelpers.testIfDb;
 const adminCode = testhelpers.adminCode;
 
-const query = require('./query');
+const query = require('../../src/helpers-db/query');
 
 const baseState = {
     type: 'receipt',

@@ -1,13 +1,13 @@
 // for testing (duh)
 const chai = require('chai');
 const expect = chai.expect;
-const testHelpers = require('../helpers/test');
+const testHelpers = require('../../src/helpers/test');
 
 const adminCode = testHelpers.adminCode;
 const access_token = testHelpers.access_token;
 
-const s3 = require('./s3');
-const excel = require('../helpers-excel/excel');
+const s3 = require('../../src/helpers-s3/s3');
+const excel = require('../../src/helpers-excel/excel');
 
 const testContent = JSON.stringify({ message: 'Dit is gewoon een test' }, null, 2);
 const testDocs = [

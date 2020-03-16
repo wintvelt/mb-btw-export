@@ -1,12 +1,12 @@
 'use strict';
 const chai = require('chai');
 const expect = chai.expect;
-const testhelpers = require('./helpers/test');
+const testhelpers = require('../src/helpers/test');
 const testIfMb = testhelpers.testIfMb;
 const adminCode = testhelpers.adminCode;
 const access_token = testhelpers.access_token;
 
-const handler = require('./handlerSync');
+const handler = require('../src/handlerSync');
 
 const event = {
     headers: {

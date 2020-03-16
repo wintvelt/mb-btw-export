@@ -1,11 +1,11 @@
 'use strict';
 const chai = require('chai');
 const expect = chai.expect;
-const testhelpers = require('./helpers/test');
+const testhelpers = require('../src/helpers/test');
 const testIfDbMb = testhelpers.testIfDbMb;
 
-const webhook = require('./webhook');
-const update = require('./helpers-db/update');
+const webhook = require('../src/webhook');
+const update = require('../src/helpers-db/update');
 
 const baseBody = {
     administration_id: "testadmin",

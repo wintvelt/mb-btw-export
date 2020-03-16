@@ -2,14 +2,14 @@
 'use strict';
 const chai = require('chai');
 const expect = chai.expect;
-const testhelpers = require('../helpers/test');
+const testhelpers = require('../../src/helpers/test');
 const testIfMb = testhelpers.testIfMb;
 const adminCode = testhelpers.adminCode;
 const access_token = testhelpers.access_token;
 
 const context = { adminCode, access_token };
 
-const fetchDocs = require('./fetchDocs');
+const fetchDocs = require('../../src/helpers-mb/fetchDocs');
 
 const testReceiptIds = [
     '281006246928057913',

@@ -2,12 +2,12 @@
 'use strict';
 const chai = require('chai');
 const expect = chai.expect;
-const testhelpers = require('../helpers/test');
+const testhelpers = require('../../src/helpers/test');
 const testIfMb = testhelpers.testIfMb;
 const adminCode = testhelpers.adminCode;
 const access_token = testhelpers.access_token;
 
-const fetchBasics = require('./fetchBasics');
+const fetchBasics = require('../../src/helpers-mb/fetchBasics');
 
 describe('Moneybird fetch basics function', testIfMb(() => {
     describe('The fetchBasics function', () => {

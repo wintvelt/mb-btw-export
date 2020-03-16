@@ -2,7 +2,7 @@
 const chai = require('chai');
 const expect = chai.expect;
 
-const diff = require('./unexported-diff');
+const diff = require('../../src/helpers-db/unexported-diff');
 
 const newState = {
     details: [

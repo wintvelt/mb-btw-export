@@ -2,14 +2,14 @@
 'use strict';
 const chai = require('chai');
 const expect = chai.expect;
-const testhelpers = require('../helpers/test');
+const testhelpers = require('../../src/helpers/test');
 const testIfMb = testhelpers.testIfMb;
 const adminCode = testhelpers.adminCode;
 const access_token = testhelpers.access_token;
 
 const context = { adminCode, access_token, year: '2020' };
 
-const fetchVersions = require('./fetchVersions');
+const fetchVersions = require('../../src/helpers-mb/fetchVersions');
 
 describe('Moneybird sync (fetchVersions) Functions', testIfMb(() => {
     describe('The mbTypeSync function', () => {

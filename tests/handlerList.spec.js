@@ -2,7 +2,7 @@ const mocha = require('mocha');
 const chai = require('chai');
 const expect = chai.expect;
 
-const handler = require('./handlerList');
+const handler = require('../src/handlerList');
 
 describe("The handlerList function", () => {
     it("returns a message", async () => {
