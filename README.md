@@ -37,7 +37,7 @@ TODO:
         - [x] function to remove all ids from the unexported state (1 update) - add to exportTable:removeExported
         - [x] function to add the exported latestState to all individual docs (many updates) docTable.updateSingle
 
-    - [ ] refactor-db2
+    - [x] refactor-db2
         - [x] changes yml structure + dynamo structure into docTable + index
         - [x] updateSingle item latestState + unexported of single item
         - [x] sync udpated
@@ -50,8 +50,11 @@ TODO:
                 - [x] delete item from table
                 - [x] update latest state: delete export from exportLogs
                 - [x] determine new unexported state
-    - [ ] reregister webhook
-    - [ ] check and implement webhook document deletion
+    - [x] reregister webhook
+    - [x] check and implement webhook document deletion
+
+    - [ ] implement sync only after 1/1/2020
+    - [ ] check performance of new setup
 
     - [ ] improve max volume for exports
         - [ ] cut exportTable update into chunks of 50 (watch for race conditions)
@@ -172,6 +175,7 @@ Response:
 
 ### `/btw-export/[admin-id]/sync` POST
 Runs a sync with Moneybird. Can be invoked in first setup and after interruption of the webhook.
+Normally runs a sync with all Moneybird docs for the current year. Optionally takes a query parameter `?year=2020` to sync docs from another year.
 
 Response: 
 - `200 OK` if all went well. Always has `body` in response.

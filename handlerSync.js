@@ -25,6 +25,7 @@ module.exports.main = async event => {
         TableName: docTableName,
         maxUpdates
     }
+    console.log(event);
     const resultFromDbAndMb = await sync.getDocUpdates(params);
     if (resultFromDbAndMb.error) return response(500, resultFromDbAndMb.error);
     const { docUpdates, maxExceeded } = resultFromDbAndMb;
