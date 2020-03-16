@@ -3,21 +3,13 @@
 const diff = require('./unexported-diff');
 const query = require('./query');
 const update = require('./update');
+const dateHelpers = require('../helpers/date');
 
 const filterDate = (start_date, end_date) => (doc) => {
     const { state } = doc;
     return (!start_date || state.date >= start_date)
         && (!end_date || state.date <= end_date)
 }
-
-const doubleStr = (num) => (
-    (num < 10) ? '0' + num : '' + num
-);
-module.exports.doubleStr = doubleStr;
-
-const dateStr = (date) => (
-    date.getFullYear() + '-' + doubleStr(date.getMonth() + 1) + '-' + doubleStr(date.getDate())
-);
 
 module.exports.getUnexported = async ({ adminCode, start_date, end_date, is_full_report = false }) => {
     let unexportedDocs = [];
@@ -41,7 +33,7 @@ module.exports.getUnexported = async ({ adminCode, start_date, end_date, is_full
     if (queryError) return queryError;
 
     const now = new Date();
-    const nowStr = dateStr(now);
+    const nowStr = dateHelpers.dateStr(now);
     const safeStartDate = start_date || nowStr.slice(0, 4) + '-01-01';
     const filteredDocs = unexportedDocs.filter(filterDate(safeStartDate, end_date));
     return filteredDocs.map((doc) => ({

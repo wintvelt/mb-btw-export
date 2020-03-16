@@ -2,13 +2,11 @@
 const exportState = require('./helpers-db/exportState');
 const latestState = require('./helpers-db/latestState');
 const unexported = require('./helpers-db/unexported');
-const doubleStr = exportState.doubleStr;
+const dateHelpers = require('./helpers/date');
+const doubleStr = dateHelpers.doubleStr;
 
 const excel = require('./helpers-excel/excel');
 const s3 = require('./helpers-s3/s3');
-
-const bucketName = process.env.PUBLIC_BUCKETNAME || 'moblybird-export-files';
-const folderName = process.env.FOLDER_NAME || 'public';
 
 const response = (statusCode, bodyOrString) => {
     const body = typeof bodyOrString === 'string' ?
