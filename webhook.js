@@ -1,5 +1,6 @@
 'use strict';
 const update = require('./helpers-db/update');
+const unexported = require('./helpers-db/unexported');
 const mbHelpers = require('./helpers-mb/fetchDocs');
 const stripRecord = mbHelpers.stripRecord;
 
