@@ -29,7 +29,7 @@ module.exports.main = async event => {
     // console.log({ requestBody: bodyObj });
     const tokenError = (!bodyObj.webhook_token || bodyObj.webhook_token !== process.env.MB_WEBHOOK_TOKEN);
     if (process.env.MB_WEBHOOK_TOKEN && tokenError) return response(400, "Bad request");
-    const { entity, entity_type, action, entity_id, webhook_token } = bodyObj;
+    const { entity, entity_type, action, entity_id } = bodyObj;
     const id = entity_id;
     console.log(bodyObj);
     if (action === 'test_webhook') return response(200, "OK");

@@ -39,7 +39,7 @@ provider:
   
 functions:
   listing:
-    handler: handlerList.listing
+    handler: src/handlerList.listing
     events:
       - http:
           path: btw-export/{admin}
@@ -49,7 +49,7 @@ functions:
               paths:
                 admin: true
   webhook:
-    handler: webhook.main
+    handler: src/webhook.main
     events:
       - http:
           path: btw-export/{admin}/webhook
@@ -59,7 +59,7 @@ functions:
               paths:
                 admin: true
   sync:
-    handler: handlerSync.main
+    handler: src/handlerSync.main
     timeout: 20
     events:
       - http:
@@ -70,7 +70,7 @@ functions:
               paths:
                 admin: true
   export:
-    handler: handlerExport.main
+    handler: src/handlerExport.main
     timeout: 20
     events:
       - http:
@@ -81,7 +81,7 @@ functions:
               paths:
                 admin: true
   deleteExport:
-    handler: handlerDelete.main
+    handler: src/handlerDelete.main
     timeout: 20
     events:
       - http:

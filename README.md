@@ -52,10 +52,14 @@ TODO:
                 - [x] determine new unexported state
     - [x] reregister webhook
     - [x] check and implement webhook document deletion
+    - [x] implement sync date dependent
 
-    - [ ] implement sync only after 1/1/2020
+    - [ ] adds stats to export (not to unexported or latestState BTW)
+        - [ ] in exportState function to store additional record with id = 'summary'
+        - [ ] in handlerDelete ensure that summary is filtered from id-list, but is included in deletion
+
+
     - [ ] check performance of new setup
-
     - [ ] improve max volume for exports
         - [ ] cut exportTable update into chunks of 50 (watch for race conditions)
         - [ ] bundle id states in lists per weekday
@@ -97,6 +101,8 @@ All endpoints require `headers` with Moneybird Auth Bearer token
 
 ### `/btw-export/[admin-id]` GET
 To retrieve history and summary of VAT exports.
+
+Returns files with start and end date (invoice dates) in current year only. To overrule this behavior, add e.g. `?year=2019` to also include files from earlier year(s).
 
 Response body structure:
 ```json
