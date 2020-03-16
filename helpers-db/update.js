@@ -70,3 +70,18 @@ const singleWithItems = ({ adminCode, id, stateName, itemUpdates }) => {
         .catch(error => ({ error: error.message }));
 };
 module.exports.singleWithItems = singleWithItems;
+
+module.exports.delete = ({ adminCode, id, stateName }) => {
+    const params = {
+        TableName,
+        Key: {
+            adminCodeState: adminCode + stateName,
+            id,
+        },
+        ReturnValues: 'NONE',
+    };
+
+    return dynamoDb.delete(params)
+        .promise()
+        .catch(error => ({ error: error.message }));
+};

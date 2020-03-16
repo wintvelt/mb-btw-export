@@ -26,12 +26,13 @@ module.exports.main = async event => {
     } catch (_) {
         bodyObj = event.body;
     }
-    console.log({ requestBody: bodyObj });
+    // console.log({ requestBody: bodyObj });
     const tokenError = (!bodyObj.webhook_token || bodyObj.webhook_token !== process.env.MB_WEBHOOK_TOKEN);
     if (process.env.MB_WEBHOOK_TOKEN && tokenError) return response(400, "Bad request");
     const { entity, entity_type, action, entity_id, webhook_token } = bodyObj;
     const id = entity_id;
-    if (!entity || !webhook_token) return response(200, "OK");
+    console.log(bodyObj);
+    if (action === 'test_webhook') return response(200, "OK");
     const type = entity_type && entity_type.toLowerCase();
     const state = (action === 'document_updated' && entity) ?
         stripRecord(type)(entity).latestState
