@@ -42,7 +42,7 @@ module.exports.main = async event => {
         itemName: 'state',
         newState: state,
     }
-    const latestState = await update.updateSingle(params);
+    const latestState = await update.single(params);
     if (latestState.error) return response(500, "Error");
     const unexportedResult = await unexported.updateUnexported(latestState);
     if (unexportedResult.error) return response(500, "Error");
