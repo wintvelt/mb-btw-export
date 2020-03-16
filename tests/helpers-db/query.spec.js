@@ -42,4 +42,19 @@ describe('DB query tests', () => {
             expect(items.receipts).to.be.an('array');
         });
     }));
+
+    describe('The queryStats function', testIfDb(() => {
+        it('returns an object with array of stats for past exports', async () => {
+            const response = await query.queryStats({ adminCode });
+            const items = response.Items;
+            expect(items).to.be.an('array');
+            if (items.length > 0) {
+                const item = items[0];
+                expect(item).to.have.property('doc_count');
+                expect(item).to.have.property('start_date');
+                expect(item).to.have.property('end_date');
+                expect(item).to.have.property('url');
+            }
+        });
+    }));
 });

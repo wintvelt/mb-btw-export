@@ -69,10 +69,10 @@ module.exports.main = async event => {
         const exportLogsInLatest = await latestState.addExport({
             latestState: unexportedDoc,
             exportName: filename
-        }); 
+        });
         const removeFromUnexported = await unexported.removeUnexported(unexportedDoc);
         const errorFound = exportInDb.error || exportLogsInLatest.error || removeFromUnexported.error;
-        return (errorFound)?
+        return (errorFound) ?
             { error: errorFound }
             : {};
     });
@@ -84,5 +84,12 @@ module.exports.main = async event => {
     const errorFound = result.find(item => item.error);
     if (errorFound) return response(503, errorFound.error);
 
-    return response(201, "Export created");
+    const exportStats = exportState.makeExportStats({ adminCode, exportDocs, filename });
+    const summarySaveResult = await exportState.saveStats({ adminCode, stateName: filename, exportStats });
+    if (summarySaveResult.error) {
+        console.log(summarySaveResult);
+        return response(500, summarySaveResult.error);
+    }
+
+    return response(201, exportStats);
 };

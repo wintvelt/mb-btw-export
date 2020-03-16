@@ -77,5 +77,5 @@ module.exports.getExportedDocs = async ({ adminCode, exportName }) => {
         };
     } while (ExclusiveStartKey && !queryError);
     if (queryError) return queryError;
-    return exportedDocs;
+    return exportedDocs.filter(doc => doc.id !== 'exportStats');
 }

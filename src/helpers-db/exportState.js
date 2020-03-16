@@ -5,6 +5,10 @@ const query = require('./query');
 const update = require('./update');
 const dateHelpers = require('../helpers/date');
 
+const bucketName = process.env.PUBLIC_BUCKETNAME || 'moblybird-export-files';
+const folderName = process.env.FOLDER_NAME || 'public';
+const s3Url = process.env.S3_URL || 's3.eu-central-1.amazonaws.com';
+
 const filterDate = (start_date, end_date) => (doc) => {
     const { state } = doc;
     return (!start_date || state.date >= start_date)
@@ -62,3 +66,35 @@ module.exports.setExport = async ({ unexportedDoc, filename }) => {
     };
     return update.singleWithItems(params);
 };
+
+module.exports.makeExportStats = ({ adminCode, exportDocs, filename }) => {
+    const create_date = dateHelpers.dateStr(new Date());
+    const url = `https://${bucketName}.${s3Url}/${folderName}/${adminCode}/btw-export/${filename}`
+    let start_date;
+    let end_date;
+    let doc_count = exportDocs.length;
+    for (let i = 0; i < doc_count; i++) {
+        const exportDoc = exportDocs[i];
+        const docDate = exportDoc.date;
+        if (!start_date || docDate < start_date) start_date = docDate;
+        if (!end_date || docDate > end_date) end_date = docDate;
+    }
+    return {
+        filename,
+        url,
+        create_date,
+        start_date,
+        end_date,
+        doc_count
+    }
+}
+
+module.exports.saveStats = ({ adminCode, stateName, exportStats }) => {
+    return update.single({
+        adminCode,
+        id: 'exportStats',
+        stateName,
+        itemName: 'state',
+        newState: exportStats
+    })
+}

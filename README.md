@@ -119,14 +119,16 @@ Response body structure:
             "url": "...",
             "create_date": "2019-02-08",
             "start_date": "2019-01-01",
-            "end_date": "2019-01-31"
+            "end_date": "2019-01-31",
+            "doc_count": 75
         },
         { 
             "filename": "btw-export 2019-02-28T140900 new.xlsx", 
             "url": "...",
             "create_date": "20190306",
             "start_date": "20190101",
-            "end_date": "20190228"
+            "end_date": "20190228",
+            "doc_count": 22
         }
     ]
 }

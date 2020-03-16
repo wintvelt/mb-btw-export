@@ -48,6 +48,9 @@ module.exports.main = async event => {
     const errorFound = deletedExported.find(item => item.error);
     if (errorFound) return response(503, errorFound.error);
 
+    const deletedStats = deleteExport.deleteExportedDoc({ adminCode, stateName: filename, id: 'exportStats' });
+    if (deletedStats.error) return response(500, deletedStats.error);
+
     const deletedXls = await s3.delete({ adminCode, filename });
     if (deletedXls.error) return response(500, deletedXls.error);
 

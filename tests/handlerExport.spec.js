@@ -18,8 +18,8 @@ const event = {
         admin: adminCode
     },
     body: {
-        start_date: '2020-01-20',
-        end_date: '2020-01-20'
+        start_date: '2020-01-01',
+        end_date: '2020-01-31'
     }
 }
 

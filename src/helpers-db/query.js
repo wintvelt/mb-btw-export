@@ -17,7 +17,7 @@ const queryBaseParams = {
     KeyConditionExpression: '#acs = :acs',
     ExpressionAttributeNames: {
         '#acs': 'adminCodeState',
-        '#state': 'state'
+        '#state': 'state',
     },
     TableName
 };
@@ -26,13 +26,34 @@ const queryOnce = ({ adminCode, stateName, ExclusiveStartKey }) => {
     const params = {
         ...queryBaseParams,
         ExpressionAttributeValues: {
-            ':acs': adminCode + stateName
+            ':acs': adminCode + stateName,
         },
-        ExclusiveStartKey
+        ExclusiveStartKey,
+    };
+    return query(params)
+        .then(res => {
+            return { ...res, Items: res.Items && res.Items.filter(item => item.id !== 'exportStats') }
+        });
+};
+module.exports.queryOnce = queryOnce;
+
+module.exports.queryStats = ({ adminCode, filename }) => {
+    const params = {
+        TableName,
+        ProjectionExpression: "adminCode, stateName, id, #state",
+        KeyConditionExpression: '#acs = :acs and #id = :id',
+        ExpressionAttributeNames: {
+            '#acs': 'adminCodeState',
+            '#state': 'state',
+            '#id': 'id'
+        },
+        ExpressionAttributeValues: {
+            ':acs': adminCode + filename,
+            ':id': 'exportStats'
+        },
     };
     return query(params);
 };
-module.exports.queryOnce = queryOnce;
 
 const makeVersionSet = (dbLatest) => {
     const dbLength = dbLatest.length;
