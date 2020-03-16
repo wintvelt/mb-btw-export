@@ -13,12 +13,14 @@ const dedupe = (list) => {
     return outList;
 }
 
-const mbTypeSync = async ({ adminCode, access_token, type }) => {
+const periodFilter = (year) => (`,period:${year}01..${new Date().getFullYear()}12`);
+
+const mbTypeSync = async ({ adminCode, access_token, type, year }) => {
     const headers = {
         Authorization: 'Bearer ' + access_token,
         "Content-Type": "application/json",
     };
-    const filter = encodeURI('filter=state:saved|open|late|paid|pending_payment');
+    const filter = encodeURI('filter=state:saved|open|late|paid|pending_payment' + periodFilter(year));
     const url = `${baseUrl}/${adminCode}/documents/${type}/synchronization.json?${filter}`;
     const response = fetch(url, { headers, method: 'GET' })
         .then(res => res.json())
@@ -27,10 +29,10 @@ const mbTypeSync = async ({ adminCode, access_token, type }) => {
 }
 module.exports.mbTypeSync = mbTypeSync;
 
-const mbSync = async ({ adminCode, access_token }) => {
+const mbSync = async ({ adminCode, access_token, year }) => {
     const [receipts, purchase_invoices] = await Promise.all([
-        mbTypeSync({ adminCode, access_token, type: 'receipts' }),
-        mbTypeSync({ adminCode, access_token, type: 'purchase_invoices' }),
+        mbTypeSync({ adminCode, access_token, type: 'receipts', year }),
+        mbTypeSync({ adminCode, access_token, type: 'purchase_invoices', year }),
     ]);
     const possibleError = receipts.error || purchase_invoices.error;
     if (possibleError) return { error: possibleError };

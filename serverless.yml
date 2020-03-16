@@ -15,8 +15,8 @@ provider:
 
   environment:
     DYNAMODB_DOC_TABLE: ${self:service}-${opt:stage, self:provider.stage}-docs
-    TEST_DB_ON: false
-    TEST_MB_ON: false
+    TEST_DB_ON: true
+    TEST_MB_ON: true
 
   iamRoleStatements:
     - Effect: Allow

@@ -7,7 +7,7 @@ const testIfMb = testhelpers.testIfMb;
 const adminCode = testhelpers.adminCode;
 const access_token = testhelpers.access_token;
 
-const context = { adminCode, access_token };
+const context = { adminCode, access_token, year: '2020' };
 
 const fetchVersions = require('./fetchVersions');
 

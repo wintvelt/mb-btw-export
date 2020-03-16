@@ -175,7 +175,7 @@ Response:
 
 ### `/btw-export/[admin-id]/sync` POST
 Runs a sync with Moneybird. Can be invoked in first setup and after interruption of the webhook.
-Normally runs a sync with all Moneybird docs for the current year. Optionally takes a query parameter `?year=2020` to sync docs from another year.
+Normally runs a sync with all Moneybird docs for the current year. Optionally takes a query parameter `?year=2020` to sync docs from a previous start year. In all cases, the sync will run until the current year.
 
 Response: 
 - `200 OK` if all went well. Always has `body` in response.

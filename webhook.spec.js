@@ -8,7 +8,7 @@ const webhook = require('./webhook');
 const update = require('./helpers-db/update');
 
 const baseBody = {
-    administration_id: "116015326147118082",
+    administration_id: "testadmin",
     entity_type: "Receipt",
     entity_id: "116015245643744263",
     action: "some_action",
@@ -110,6 +110,8 @@ describe("The webhook function", testIfDbMb(() => {
         expect(response.statusCode).to.equal(200);
     });
     after(async () => {
+        const baseParams = { adminCode: baseBody.administration_id, id: baseBody.entity_id };
+        await update.delete({ ...baseParams, stateName: 'latestState' });
         const realParams = { adminCode: realBody.administration_id, id: realBody.entity_id };
         await update.delete({ ...realParams, stateName: 'latestState' });
         await update.delete({ ...realParams, stateName: 'unexported' });

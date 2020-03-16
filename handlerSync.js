@@ -15,17 +15,19 @@ const response = (statusCode, bodyOrString) => {
         body
     }
 }
+
 module.exports.main = async event => {
     const isBadRequest = (!event || !event.pathParameters.admin || !event.headers || !event.headers.Authorization);
     if (isBadRequest) return response(400, "Unauthorized");
     const adminCode = event.pathParameters.admin;
+    const year = (event.queryStringParameters && event.queryStringParameters.year) || new Date().getFullYear();
     const params = {
         adminCode,
         access_token: event.headers.Authorization.slice(6),
         TableName: docTableName,
-        maxUpdates
+        maxUpdates,
+        year
     }
-    console.log(event);
     const resultFromDbAndMb = await sync.getDocUpdates(params);
     if (resultFromDbAndMb.error) return response(500, resultFromDbAndMb.error);
     const { docUpdates, maxExceeded } = resultFromDbAndMb;

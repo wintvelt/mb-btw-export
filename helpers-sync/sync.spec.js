@@ -9,7 +9,7 @@ const access_token = testhelpers.access_token;
 
 const sync = require('./sync');
 
-const context = { adminCode, access_token };
+const context = { adminCode, access_token, year: '2020' };
 
 const oldList = [
     { id: '1', version: '1' },

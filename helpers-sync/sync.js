@@ -58,14 +58,14 @@ const limitChanges = (changeSet, maxUpdates) => {
 }
 module.exports.limitChanges = limitChanges;
 
-const getChangeSet = async ({ adminCode, access_token, TableName }) => {
+const getChangeSet = async ({ adminCode, access_token, TableName, year }) => {
     let changeSet = {
         receipts: { added: [], changed: [], deleted: [] },
         purchase_invoices: { added: [], changed: [], deleted: [] }
     };
     let fullDbVersions = { receipts: [], purchase_invoices: [] };
     let ExclusiveStartKey;
-    const mbVersions = await mbScan.mbSync({ adminCode, access_token });
+    const mbVersions = await mbScan.mbSync({ adminCode, access_token, year });
     if (mbVersions.error) return { error: mbVersions.error };
     const mbReceiptVersions = mbVersions.receipts;
     const mbPurchase_invoiceVersions = mbVersions.purchase_invoices;
@@ -104,8 +104,12 @@ const getChangeSet = async ({ adminCode, access_token, TableName }) => {
 }
 module.exports.getChangeSet = getChangeSet;
 
-module.exports.getDocUpdates = async ({ adminCode, access_token, TableName, maxUpdates }) => {
-    const changeSet = await getChangeSet({ adminCode, access_token, TableName });
+module.exports.getDocUpdates = async ({ adminCode, access_token, TableName, maxUpdates, year }) => {
+    const changeSet = await getChangeSet({ adminCode, access_token, TableName, year });
+    if (changeSet.error) {
+        console.log(changeSet.error);
+        return { error: changeSet.error }
+    }
     const { limitedChangeSet, maxExceeded } = limitChanges(changeSet, maxUpdates);
     const docUpdates = await mbDocs.fullFetch({ adminCode, access_token, changeSet: limitedChangeSet });
     if (docUpdates.error) return { error: docUpdates.error }
