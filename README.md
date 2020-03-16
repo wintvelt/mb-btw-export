@@ -26,7 +26,7 @@ TODO:
 - [x] create `/btw-export/[admin-id]/sync` POST endpoint
 - [x] create fix to update exports table unexported with latest state from docs table
 
-- [ ] implement `/btw-export/[admin-id]/export` POST endpoint
+- [x] implement `/btw-export/[admin-id]/export` POST endpoint
     - [x] add diffing algorithm for latestState -/- lastExportedState
     - [x] add selection of unexported states based on start-date and end-date (json)
     - [x] add create and S3-save of excel-file with new state info
@@ -54,21 +54,21 @@ TODO:
     - [x] check and implement webhook document deletion
     - [x] implement sync date dependent
 
-    - [ ] adds stats to export (not to unexported or latestState BTW)
-        - [ ] in exportState function to store additional record with id = 'summary'
-        - [ ] in handlerDelete ensure that summary is filtered from id-list, but is included in deletion
+    - [x] adds stats to export (not to unexported or latestState BTW)
+        - [x] in exportState function to store additional record with id = 'summary'
+        - [x] in handlerDelete ensure that summary is filtered from id-list, but is included in deletion
 
 
-    - [ ] check performance of new setup
-    - [ ] improve max volume for exports
-        - [ ] cut exportTable update into chunks of 50 (watch for race conditions)
-        - [ ] bundle id states in lists per weekday
-        - [ ] exported states per id as JSON.strings
+- [ ] check performance of new setup
+- [ ] improve max volume for exports
+    - [ ] cut exportTable update into chunks of 50 (watch for race conditions)
+    - [ ] bundle id states in lists per weekday
+    - [ ] exported states per id as JSON.strings
 
 - [ ] create `/btw-export/[admin-id] GET`
     - [ ] implement stats function for 1 exportTable record (unexported)
     - [ ] implement query for all exportTable records
-    - [ ] implement latestExportDate in stats
+    - [x] implement latestExportDate in stats
 
 API to sync and connect with Moneybird.
 Specifically to process purchase invoices and receipts for the purpose of VAT reporting.
@@ -111,11 +111,14 @@ Response body structure:
         "new_docs_after_export_count": 12,
         "new_docs_before_export_count": 4,
         "changed_docs": 8,
-        "deleted_docs": 2
+        "deleted_docs": 2,
+        "start_date": "2019-01-01",
+        "end_date": "2019-01-31",
+        "doc_count": 75
     },
     "files": [
         {
-            "filename": "btw-export 2019-01-31T130823 full.xlsx", 
+            "filename": "btw-export 2019-01-31 13u08m23s full.xlsx", 
             "url": "...",
             "create_date": "2019-02-08",
             "start_date": "2019-01-01",
@@ -123,7 +126,7 @@ Response body structure:
             "doc_count": 75
         },
         { 
-            "filename": "btw-export 2019-02-28T140900 new.xlsx", 
+            "filename": "btw-export 2019-02-28 14u09m00s new.xlsx", 
             "url": "...",
             "create_date": "20190306",
             "start_date": "20190101",
@@ -159,7 +162,7 @@ The `full_report` option exports the latest state of all docs in a time period, 
 Response: `200 OK` with body:
 ```json
 { 
-    "filename": "btw-export 2019-02-28T140900 new.xlsx", 
+    "filename": "btw-export 2019-02-28 14u09m00s new.xlsx", 
     "url": "...",
     "create_date": "2019-03-06",
     "start_date": "2019-01-01",

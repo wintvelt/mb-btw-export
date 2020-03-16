@@ -29,14 +29,14 @@ describe("The handlerExport function", testIfDbMb(() => {
         expect(response.statusCode).to.be.within(200, 299);
     }).timeout(20000);
     after(async () => {
-        const filename = await deleteExport.getLatestExport({ adminCode });
-        const deleteEvent = {
-            headers: event.headers,
-            pathParameters: { 
-                admin: adminCode,
-                filename,
-            }
-        };
-        await handlerDelete.main(deleteEvent);
+        // const filename = await deleteExport.getLatestExport({ adminCode });
+        // const deleteEvent = {
+        //     headers: event.headers,
+        //     pathParameters: { 
+        //         admin: adminCode,
+        //         filename,
+        //     }
+        // };
+        // await handlerDelete.main(deleteEvent);
     });
 }));

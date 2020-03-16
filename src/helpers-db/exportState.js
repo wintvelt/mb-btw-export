@@ -4,16 +4,12 @@ const diff = require('./unexported-diff');
 const query = require('./query');
 const update = require('./update');
 const dateHelpers = require('../helpers/date');
+const filterDate = dateHelpers.filterDate;
 
 const bucketName = process.env.PUBLIC_BUCKETNAME || 'moblybird-export-files';
 const folderName = process.env.FOLDER_NAME || 'public';
 const s3Url = process.env.S3_URL || 's3.eu-central-1.amazonaws.com';
 
-const filterDate = (start_date, end_date) => (doc) => {
-    const { state } = doc;
-    return (!start_date || state.date >= start_date)
-        && (!end_date || state.date <= end_date)
-}
 
 module.exports.getUnexported = async ({ adminCode, start_date, end_date, is_full_report = false }) => {
     let unexportedDocs = [];
