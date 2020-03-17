@@ -22,16 +22,9 @@ const event = {
 
 describe("The handlerList function", testIfDb(() => {
     it("returns a list, with unexported stats + stats per exported file", async () => {
-        const response = await handler.main(event);
+        const response = await handler.listing(event);
+        let body = JSON.parse(response.body);
+        console.log(body);
         expect(response.statusCode).to.be.within(200,299);
     }).timeout(20000);
 }));
-
-describe("The handlerList function", () => {
-    it("returns a message", async () => {
-        const response = await handler.listing(undefined);
-        expect(response.statusCode).to.be.within(200,299);
-        let body = JSON.parse(response.body);
-        expect(body.message).to.equal('Go Serverless v1.0! Your function executed successfully!');
-    });
-});

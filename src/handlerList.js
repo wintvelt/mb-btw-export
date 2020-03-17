@@ -1,4 +1,5 @@
 'use strict';
+const request = require('./helpers/request');
 
 module.exports.listing = async event => {
   return {

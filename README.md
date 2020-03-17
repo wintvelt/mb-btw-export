@@ -58,17 +58,21 @@ TODO:
         - [x] in exportState function to store additional record with id = 'summary'
         - [x] in handlerDelete ensure that summary is filtered from id-list, but is included in deletion
 
+- [ ] create `/btw-export/[admin-id] GET`
+    - [x] implement stats function for 1 exportTable record (unexported)
+    - [x] implement query for all exportTable records
+    - [x] implement latestExportDate in stats
+    - [ ] implement listing function in handler
+        - [ ] move response function to helpers folder in all handlers
+        - [ ] get unexported stats
+        - [ ] get export stats
+        - [ ] filter export stats for start-year
 
 - [ ] check performance of new setup
 - [ ] improve max volume for exports
     - [ ] cut exportTable update into chunks of 50 (watch for race conditions)
     - [ ] bundle id states in lists per weekday
     - [ ] exported states per id as JSON.strings
-
-- [ ] create `/btw-export/[admin-id] GET`
-    - [ ] implement stats function for 1 exportTable record (unexported)
-    - [ ] implement query for all exportTable records
-    - [x] implement latestExportDate in stats
 
 API to sync and connect with Moneybird.
 Specifically to process purchase invoices and receipts for the purpose of VAT reporting.

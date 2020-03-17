@@ -2,23 +2,14 @@
 const sync = require('./helpers-sync/sync');
 const update = require('./helpers-db/update');
 const unexported = require('./helpers-db/unexported');
+const request = require('./helpers/request');
 
 const docTableName = process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs';
 const maxUpdates = 50;
 
-const response = (statusCode, bodyOrString) => {
-    const body = typeof bodyOrString === 'string' ?
-        bodyOrString
-        : JSON.stringify(bodyOrString, null, 2);
-    return {
-        statusCode,
-        body
-    }
-}
-
 module.exports.main = async event => {
     const isBadRequest = (!event || !event.pathParameters.admin || !event.headers || !event.headers.Authorization);
-    if (isBadRequest) return response(400, "Unauthorized");
+    if (isBadRequest) return request.response(400, "Unauthorized");
     const adminCode = event.pathParameters.admin;
     const year = (event.queryStringParameters && event.queryStringParameters.year) || new Date().getFullYear();
     const params = {
@@ -29,7 +20,7 @@ module.exports.main = async event => {
         year
     }
     const resultFromDbAndMb = await sync.getDocUpdates(params);
-    if (resultFromDbAndMb.error) return response(500, resultFromDbAndMb.error);
+    if (resultFromDbAndMb.error) return request.response(500, resultFromDbAndMb.error);
     const { docUpdates, maxExceeded } = resultFromDbAndMb;
 
     const results = await Promise.all(docUpdates.map(docUpdate => {
@@ -48,8 +39,8 @@ module.exports.main = async event => {
     const errorFound = results.find(res => res.error);
     if (errorFound) {
         console.log(errorFound);
-        return response(500, { error: errorFound.error });
+        return request.response(500, { error: errorFound.error });
     }
 
-    return response(200, { maxExceeded });
+    return request.response(200, { maxExceeded });
 };
