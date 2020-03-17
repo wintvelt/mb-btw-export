@@ -18,11 +18,14 @@ module.exports.listing = async event => {
 
   const filteredExportStats = exportStats.filter(stat => {
     return (stat.end_date.slice(0,4) >= year);
-  })
+  });
+
+  const hasOlder = (exportStats.length > filteredExportStats.length);
 
   const responseBody = {
     unexported: unexportedStats,
-    files: filteredExportStats
+    files: filteredExportStats,
+    hasOlder
   };
   return request.response(200, responseBody);
 };

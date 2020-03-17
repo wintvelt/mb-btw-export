@@ -150,10 +150,12 @@ Response body structure:
             "end_date": "20190228",
             "doc_count": 22
         }
-    ]
+    ],
+    "hasOlder": false
 }
 ```
 The variables `new_docs_after_export_count` and `new_docs_before_export_count` relate to the creation date of the latest export.
+The `hasOlder` boolean can be used to retrieve stats from earlier exports.
 
 ### `/btw-export/[admin-id]/export` POST
 Will create a new export file (see below) for download.

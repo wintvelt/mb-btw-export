@@ -27,6 +27,7 @@ describe("The handlerList function", testIfDb(() => {
         let body = JSON.parse(response.body);
         expect(body).to.have.property('unexported');
         expect(body).to.have.property('files');
+        expect(body).to.have.property('hasOlder');
     });
 
     it("for a future year, returns an empty files list", async () => {
