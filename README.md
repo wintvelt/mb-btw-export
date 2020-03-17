@@ -58,15 +58,15 @@ TODO:
         - [x] in exportState function to store additional record with id = 'summary'
         - [x] in handlerDelete ensure that summary is filtered from id-list, but is included in deletion
 
-- [ ] create `/btw-export/[admin-id] GET`
+- [x] create `/btw-export/[admin-id] GET`
     - [x] implement stats function for 1 exportTable record (unexported)
     - [x] implement query for all exportTable records
     - [x] implement latestExportDate in stats
     - [ ] implement listing function in handler
-        - [ ] move response function to helpers folder in all handlers
-        - [ ] get unexported stats
-        - [ ] get export stats
-        - [ ] filter export stats for start-year
+        - [x] move response function to helpers folder in all handlers
+        - [x] get unexported stats
+        - [x] get export stats
+        - [x] filter export stats for start-year
 
 - [ ] check performance of new setup
 - [ ] improve max volume for exports
@@ -95,10 +95,23 @@ This function allows to create an export from a Moneybird administration, with t
 
 The export created will include changes since the previous exports too, to make sure that the exported state continues to be in sync with the state of Moneybird.
 
+The excel file contains the following columns:
+- `tax-rate`: text description of applied tax-rate code
+- `account`: text description of ledger acccount where the invoice was booked
+- `docId`: the moneybird id of the invoice document (NB each line on the invoice is a separate line in the excel file, so same docId may appear on multiple rows)
+- `moneybird`: link to the document in moneybird
+- `type`: receipt or purchase invoice
+- `date`: the booking date of the invoice
+- `change`: the kind of change that this line applies to:
+    - added: the line is new/ document or detail is added to moneybird
+    - changed: the detail was exported before, the line reflects the change since the last export
+    - deleted: the detail was deleted since the last export
+- `bedrag`: the amount, ***excluding*** tax
+
 ---
 
 ## API
-All endpoints require `headers` with Moneybird Auth Bearer token
+All endpoints require `headers` with a valid Moneybird Auth Bearer token
 ```json
 { "Authorization" : "Bearer xxxxxxx" }
 ```
@@ -164,14 +177,15 @@ NB: A better solution is to (manually) change the invoice date on the documents 
 
 The `full_report` option exports the latest state of all docs in a time period, ignoring any previous exports or changes. When `full_report` is set, `start_date` and `end_date` are also required.
 
-Response: `200 OK` with body:
+Response: `200 OK` with body including the stats of the created export:
 ```json
 { 
     "filename": "btw-export 2019-02-28 14u09m00s new.xlsx", 
     "url": "...",
     "create_date": "2019-03-06",
     "start_date": "2019-01-01",
-    "end_date": "2019-02-28"
+    "end_date": "2019-02-28",
+    "doc_count": 17
 }
 ```
 
@@ -191,7 +205,7 @@ Response:
 
 ### `/btw-export/[admin-id]/sync` POST
 Runs a sync with Moneybird. Can be invoked in first setup and after interruption of the webhook.
-Normally runs a sync with all Moneybird docs for the current year. Optionally takes a query parameter `?year=2020` to sync docs from a previous start year. In all cases, the sync will run until the current year.
+Normally runs a sync with all Moneybird docs for the current year. Optionally takes a query parameter for year (e.g. `?year=2019`) to sync docs from a previous start year. The year parameter only sets the start year. In all cases, the sync will run until the current year.
 
 Response: 
 - `200 OK` if all went well. Always has `body` in response.
@@ -202,77 +216,8 @@ Response:
 
 ## Under the hood
 
-State data and export history situation is stored in the following structure:
-```json
-[
-    {
-        "id": "123456789",
-        "latest_state": {
-            "type": "receipt",
-            "version": 2234,
-            "date": "2020-02-01",
-            "isDeleted": false,
-            "details": [
-                {
-                    "id": "1345",
-                    "total_price_excl_tax_with_discount_base": "1210.00",
-                    "tax_rate_id": "1234567",
-                    "ledger_account_id": "12324567"
-                }
-            ]
-        },
-        "exports": [
-            {
-                "file": { 
-                    "filename": "btw-export 2019-02-28T140900 new.xlsx", 
-                    "url": "...",
-                    "create_date": "2019-03-06",
-                    "start_date": "2019-01-01",
-                    "end_date": "2019-02-28"
-                },
-                "type": "receipt",
-                "version": 2234,
-                "date": "2020-02-01",
-                "isDeleted": false,
-                "details": [
-                    {
-                        "id": "1345",
-                        "total_price_excl_tax_with_discount_base": "1210.00",
-                        "tax_rate_id": "1234567",
-                        "ledger_account_id": "12324567"
-                    }
-                ]
-            }
-        ]
-    }
-]
-```
-
-File is created on first sync, and updated on subsequent syncs.
-
-### Example
-When an export is made for Feb (start + end date in Feb filled out), the following documents are included in export:
-- new docs: with an invoice date in Feb, not previously exported
-- changed docs: with invoice date in Feb, where the last exported state was different (checking price + tax_rate_id in details)
-- deleted docs: with invoice date in Feb, and isDeleted is true, where the last exported state was not isDeleted
-
-In this example, the following documents will ***not*** be included in the export:
-- new docs with an invoice date after Feb or before Feb
-- changed docs with an invoice date before or after Feb
-- deleted docs with an invoice date before or after Feb
-
-But this is OK: they will continue to be available for a future export.
-
-### Function structure
-
-`sync.getChangeSet`:
-- gets MB receipt and purchase invoice latest versions (all) (`sync.mbSync`)
-- gets DB docs latestState (maybe all) 
-    - compare versions of DB records (exclude isDeleted)
-        - add db record not in MB to 'deleted'
-        - add db record newer in MB to 'changed'
-    - if not last from DB: run again with more DB docs
-- after last DB docs are processed
-- select all MB docs not in DB
-- add to 'new'
-- return the changeSet (ready for MB fetch and update)
+- handlerList
+- handlerExport
+- handlerSync
+- handlerDelete
+- webhook
