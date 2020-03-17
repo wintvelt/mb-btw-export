@@ -23,8 +23,22 @@ const event = {
 describe("The handlerList function", testIfDb(() => {
     it("returns a list, with unexported stats + stats per exported file", async () => {
         const response = await handler.listing(event);
-        let body = JSON.parse(response.body);
-        console.log(body);
         expect(response.statusCode).to.be.within(200,299);
-    }).timeout(20000);
+        let body = JSON.parse(response.body);
+        expect(body).to.have.property('unexported');
+        expect(body).to.have.property('files');
+    });
+
+    it("for a future year, returns an empty files list", async () => {
+        const futureYearEvent = {
+            ...event,
+            queryStringParameters: {
+                year: '2028'
+            }
+        }
+        const response = await handler.listing(futureYearEvent);
+        expect(response.statusCode).to.be.within(200,299);
+        let body = JSON.parse(response.body);
+        expect(body.files).to.have.lengthOf(0);
+    });
 }));

@@ -20,7 +20,7 @@ const makeFilename = () => {
 module.exports.main = async event => {
     const isBadRequest = (!event || !event.pathParameters.admin ||
         !event.headers || !event.headers.Authorization || !event.body);
-    if (isBadRequest) return request.response(400, "Bad request");
+    if (isBadRequest) return request.response(401, "Unauthorized");
     const adminCode = event.pathParameters.admin;
     const access_token = event.headers.Authorization.slice(6);
     const filename = makeFilename();

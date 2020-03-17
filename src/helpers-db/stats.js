@@ -45,8 +45,9 @@ module.exports.getUnexportedStats = async ({ adminCode }) => {
     for (let i = 0; i < doc_count; i++) {
         const doc = unexportedDocs[i];
         const docState = doc.state;
-        if (!start_date || docState.date < start_date) start_date = docState.date;
-        if (!end_date || docState.date > end_date) end_date = docState.date;
+        const docDate = docState.date;
+        if (!start_date || docDate < start_date) start_date = docDate;
+        if (!end_date || docDate > end_date) end_date = docDate;
         if (docState.exportLogs && docState.exportLogs.length > 0) {
             if (docState.isDeleted) {
                 deleted_docs++
@@ -54,7 +55,7 @@ module.exports.getUnexportedStats = async ({ adminCode }) => {
                 changed_docs++
             };
         } else {
-            if (latestExportDate && docState.date > latestExportDate) {
+            if (latestExportDate && docDate > latestExportDate) {
                 new_docs_after_export_count++
             } else {
                 new_docs_before_export_count++

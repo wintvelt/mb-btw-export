@@ -140,6 +140,7 @@ Response body structure:
     ]
 }
 ```
+The variables `new_docs_after_export_count` and `new_docs_before_export_count` relate to the creation date of the latest export.
 
 ### `/btw-export/[admin-id]/export` POST
 Will create a new export file (see below) for download.
