@@ -16,14 +16,22 @@ module.exports.listing = async event => {
   const exportStats = await stats.queryExportStats({ adminCode });
   if (exportStats.error) return request.response(500, exportStats);
 
+  let latest_export_create_date;
+  for (let i = 0; i < exportStats.length; i++) {
+    const exportFile = exportStats[i];
+    if (!latest_export_create_date || exportFile.create_date > latest_export_create_date) {
+      latest_export_create_date = exportFile.create_date
+    }
+  }
+
   const filteredExportStats = exportStats.filter(stat => {
-    return (stat.end_date.slice(0,4) >= year);
+    return (stat.end_date.slice(0, 4) >= year);
   });
 
   const hasOlder = (exportStats.length > filteredExportStats.length);
 
   const responseBody = {
-    unexported: unexportedStats,
+    unexported: { ...unexportedStats, latest_export_create_date },
     files: filteredExportStats,
     hasOlder
   };

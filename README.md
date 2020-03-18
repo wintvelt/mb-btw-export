@@ -125,6 +125,7 @@ Response body structure:
 ```json
 {
     "unexported": {
+        "latest_export_create_date": "2019-4-01",
         "new_docs_after_export_count": 12,
         "new_docs_before_export_count": 4,
         "changed_docs": 8,
