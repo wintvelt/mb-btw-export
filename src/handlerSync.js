@@ -36,6 +36,7 @@ module.exports.main = async event => {
             .then(latestState => {
                 if (!latestState || !latestState.state) {
                     console.log('strange error');
+                    console.log({params, latestState});
                     return { error: 'strange error when updating DB'};
                 }
                 return unexported.updateUnexported(latestState);

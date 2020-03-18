@@ -8,6 +8,14 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
 });
 
+const removeEmptyStrings = (obj) => {
+    let outObj = {}
+    Object.keys(obj).forEach(key => {
+        if (obj[key] !== '') outObj[key] = obj[key];
+    })
+    return outObj;
+}
+
 const single = ({ adminCode, id, stateName, itemName, newState }) => {
     const params = {
         TableName,
@@ -23,7 +31,7 @@ const single = ({ adminCode, id, stateName, itemName, newState }) => {
         ExpressionAttributeValues: {
             ':ac': adminCode,
             ':sn': stateName,
-            ':ns': newState
+            ':ns': removeEmptyStrings(newState)
         },
         UpdateExpression: 'SET #ac = :ac, #sn = :sn, #it = :ns',
         ReturnValues: 'ALL_NEW',
