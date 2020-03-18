@@ -43,9 +43,8 @@ functions:
     events:
       - http:
           path: btw-export/{admin}
-          method: 
-            - get
-            - options
+          method: get
+          cors: true
           request:
             parameters:
               paths:
