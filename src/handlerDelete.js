@@ -11,7 +11,7 @@ module.exports.main = async event => {
     if (isBadRequest) return request.response(400, "Bad request");
     const adminCode = event.pathParameters.admin;
     const filename = decodeURI(event.pathParameters.filename);
-    console.log(request);
+    console.log(event);
 
     const latestExportName = await deleteExport.getLatestExport({ adminCode });
     if (latestExportName.error) return request.response(500, latestExportName.error);
