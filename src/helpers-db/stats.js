@@ -68,7 +68,7 @@ module.exports.getUnexportedStats = async ({ adminCode }) => {
     }
 
     return {
-        latestExportName,
+        latest_export_name: latestExportName,
         new_docs_after_export_count,
         new_docs_before_export_count,
         changed_docs,
