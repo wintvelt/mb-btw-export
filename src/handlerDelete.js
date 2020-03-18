@@ -11,13 +11,18 @@ module.exports.main = async event => {
     if (isBadRequest) return request.response(400, "Bad request");
     const adminCode = event.pathParameters.admin;
     const filename = decodeURI(event.pathParameters.filename);
-    console.log(event);
 
     const latestExportName = await deleteExport.getLatestExport({ adminCode });
-    if (latestExportName.error) return request.response(500, latestExportName.error);
+    if (latestExportName.error) {
+        console.log('failed to retrieve latest exportName')
+        return request.response(500, latestExportName.error)
+    };
 
     const latestExport = await deleteExport.getExportedDocs({ adminCode, exportName: filename });
-    if (latestExport.error) return request.response(500, latestExport.error);
+    if (latestExport.error) {
+        console.log('failed to retrieve latest export docs');
+        return request.response(500, latestExport.error)
+    };
     if (!latestExport) return request.response(200, 'Nothing to delete');
 
     const exportedDocs = latestExport;
@@ -39,13 +44,22 @@ module.exports.main = async event => {
             : {};
     }));
     const errorFound = deletedExported.find(item => item.error);
-    if (errorFound) return request.response(500, errorFound.error);
+    if (errorFound) {
+        console.log('failed to delete latest export from docs');
+        return request.response(500, errorFound.error)
+    };
 
     const deletedStats = deleteExport.deleteExportedDoc({ adminCode, stateName: filename, id: 'exportStats' });
-    if (deletedStats.error) return request.response(500, deletedStats.error);
+    if (deletedStats.error) {
+        console.log('failed to delete exportStats');
+        return request.response(500, deletedStats.error)
+    };
 
     const deletedXls = await s3.delete({ adminCode, filename });
-    if (deletedXls.error) return request.response(500, deletedXls.error);
+    if (deletedXls.error) {
+        console.log('failed to delete xls from S3')
+        return request.response(500, deletedXls.error)
+    };
 
     return request.response(200, 'Deleted export');
 };
