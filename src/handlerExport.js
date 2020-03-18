@@ -26,6 +26,9 @@ module.exports.main = async event => {
     const filename = makeFilename();
 
     const { start_date, end_date, is_full_report } = event.body;
+    console.log(end_date);
+    console.log(event.body);
+    console.log(typeof event.body);
     const exportDocs = await exportState.getUnexported({
         adminCode,
         start_date,
