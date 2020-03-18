@@ -16,7 +16,7 @@ const exportDocs = [
     { id: '6', date: '2020-02-08' },
 ]
 
-describe('Dynamo DB exporState tests', () => {
+describe('Dynamo DB exportState tests', () => {
     describe('The getUnexported function', testIfDb(() => {
         it('retrieves docIds from unexported list that match the date range', async () => {
             const params = {
@@ -24,6 +24,16 @@ describe('Dynamo DB exporState tests', () => {
                 start_date: '2019-01-01',
             }
             const result = await exportState.getUnexported(params);
+            expect(result).to.be.an('array');
+        });
+        it('retrieves docIds not after the provided end_date', async () => {
+            const params = {
+                adminCode,
+                end_date: '2020-01-31',
+            }
+            const result = await exportState.getUnexported(params);
+            const itemsAfter = result.filter(it => it.date > params.end_date);
+            expect(itemsAfter).to.have.lengthOf(0);
             expect(result).to.be.an('array');
         });
     }));
