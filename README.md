@@ -125,7 +125,7 @@ Response body structure:
 ```json
 {
     "unexported": {
-        "latest_export_create_date": "2019-4-01",
+        "latest_export_name": "btw-export 2019-01-31 13u08m23s.xlsx",
         "new_docs_after_export_count": 12,
         "new_docs_before_export_count": 4,
         "changed_docs": 8,
@@ -136,7 +136,7 @@ Response body structure:
     },
     "files": [
         {
-            "filename": "btw-export 2019-01-31 13u08m23s full.xlsx", 
+            "filename": "btw-export 2019-01-31 13u08m23s.xlsx", 
             "url": "...",
             "create_date": "2019-02-08",
             "start_date": "2019-01-01",
@@ -144,7 +144,7 @@ Response body structure:
             "doc_count": 75
         },
         { 
-            "filename": "btw-export 2019-02-28 14u09m00s new.xlsx", 
+            "filename": "btw-export 2019-02-28 14u09m00s.xlsx", 
             "url": "...",
             "create_date": "20190306",
             "start_date": "20190101",
@@ -183,7 +183,7 @@ The `full_report` option exports the latest state of all docs in a time period, 
 Response: `200 OK` with body including the stats of the created export:
 ```json
 { 
-    "filename": "btw-export 2019-02-28 14u09m00s new.xlsx", 
+    "filename": "btw-export 2019-02-28 14u09m00s.xlsx", 
     "url": "...",
     "create_date": "2019-03-06",
     "start_date": "2019-01-01",
