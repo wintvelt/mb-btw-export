@@ -5,7 +5,7 @@ const Excel = require('exceljs');
 const fetchBasics = require('../helpers-mb/fetchBasics');
 
 const columnHeaders = ['tax-rate', 'account', 'docId', 'moneybird', 
-    'company', 'country', 'type', 'date', 'change', 'bedrag'];
+    'company', 'country', 'type', 'date', 'change', 'bedrag EX BTW'];
 
 const findName = (id, listWithIds) => {
     const safeList = listWithIds || [];
