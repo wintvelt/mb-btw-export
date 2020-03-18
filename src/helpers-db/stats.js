@@ -44,6 +44,10 @@ module.exports.getUnexportedStats = async ({ adminCode }) => {
     const doc_count = unexportedDocs.length;
     for (let i = 0; i < doc_count; i++) {
         const doc = unexportedDocs[i];
+        if (!doc) {
+            console.log('STRANGE');
+            console.log(unexportedDocs)
+        }
         const docState = doc.state;
         const docDate = docState.date;
         if (!start_date || docDate < start_date) start_date = docDate;
@@ -98,7 +102,7 @@ module.exports.queryExportStats = async ({ adminCode }) => {
             },
             ReturnValue: 'ALL_NEW'
         }).promise()
-            .then(res => res.Item.state)
+            .then(res => (res.Item && res.Item.state))
             .catch(error => ({ error: error.message }));
     }));
     const errorFound = exportStats.find(exportStat => exportStat.error);
