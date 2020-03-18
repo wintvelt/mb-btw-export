@@ -25,10 +25,14 @@ module.exports.main = async event => {
     const access_token = event.headers.Authorization.slice(6);
     const filename = makeFilename();
 
-    const { start_date, end_date, is_full_report } = event.body;
-    console.log(end_date);
-    console.log(event.body);
-    console.log(typeof event.body);
+    let body;
+    try {
+        body = JSON.parse(event.body);
+    } catch (error) {
+        body = event.body;
+    }
+
+    const { start_date, end_date, is_full_report } = body;
     const exportDocs = await exportState.getUnexported({
         adminCode,
         start_date,
