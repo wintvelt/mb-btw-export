@@ -55,6 +55,7 @@ functions:
       - http:
           path: btw-export/{admin}/webhook
           method: post
+          cors: true
           request:
             parameters:
               paths:
@@ -66,6 +67,7 @@ functions:
       - http:
           path: btw-export/{admin}/sync
           method: post
+          cors: true
           request:
             parameters:
               paths:
@@ -77,6 +79,7 @@ functions:
       - http:
           path: btw-export/{admin}/export
           method: post
+          cors: true
           request:
             parameters:
               paths:
@@ -88,6 +91,7 @@ functions:
       - http:
           path: btw-export/{admin}/export/{filename}
           method: delete
+          cors: true
           request:
             parameters:
               paths:
