@@ -5,7 +5,7 @@ const updateSingle = require('./update').single;
 
 module.exports.addExport = ({ latestState, exportName }) => {
     const { adminCode, id, exportLogs } = latestState;
-    const newExportLogs = (exportLogs) ?
+    const newExportLogs = (exportLogs && Array.isArray(exportLogs)) ?
         [exportName, ...exportLogs]
         : [exportName];
     const params = {

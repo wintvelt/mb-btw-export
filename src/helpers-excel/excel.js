@@ -8,7 +8,7 @@ const columnHeaders = ['tax-rate', 'account', 'docId', 'moneybird',
     'company', 'country', 'type', 'date', 'change', 'bedrag EX BTW'];
 
 const findName = (id, listWithIds) => {
-    const safeList = listWithIds || [];
+    const safeList = Array.isArray(listWithIds) ? listWithIds : [];
     const itemFound = safeList.find(item => item.id === id);
     return (itemFound) ?
         itemFound.name
@@ -21,8 +21,7 @@ module.exports.makeXlsRows = async ({ exportDocs, adminCode, access_token }) => 
     const docsLength = exportDocs.length;
     for (let i = 0; i < docsLength; i++) {
         const exportDoc = exportDocs[i];
-        const { id, date, type, state } = exportDoc;
-        const { company, country } = state;
+        const { id, date, type, company, country } = exportDoc;
         const details = exportDoc.diff;
         const detailsLength = details.length;
         for (let j = 0; j < detailsLength; j++) {

@@ -42,6 +42,8 @@ module.exports.getUnexported = async ({ adminCode, start_date, end_date, is_full
         adminCode,
         type: doc.state.type,
         date: doc.state.date,
+        company: doc.state.company,
+        country: doc.state.country,
         diff: (is_full_report) ?
             diff.diff(null, doc.state)
             : doc.diff,
