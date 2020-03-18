@@ -43,7 +43,7 @@ const sameType = (oldDetail, newDetail) => (
 
 const diff = (oldState, newState) => {
     let diffArray = [];
-    if ((!oldState || oldState.isDeleted) && newState.isDeleted) return diffArray;
+    if ((!oldState || oldState.isDeleted) && newState && newState.isDeleted) return diffArray;
 
     const oldDetails = (oldState && oldState.details) ? [...oldState.details] : [];
     let oldAmounts = oldDetails.map(mapAmount);

@@ -114,7 +114,7 @@ module.exports.getDocUpdates = async ({ adminCode, access_token, TableName, maxU
     const docUpdates = await mbDocs.fullFetch({ adminCode, access_token, changeSet: limitedChangeSet });
     if (docUpdates.error) return { error: docUpdates.error }
     return {
-        docUpdates,
+        docUpdates: docUpdates.filter(content => !!content),
         maxExceeded
     }
 }
