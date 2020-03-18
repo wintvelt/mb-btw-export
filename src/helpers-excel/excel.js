@@ -4,7 +4,7 @@
 const Excel = require('exceljs');
 const fetchBasics = require('../helpers-mb/fetchBasics');
 
-const columnHeaders = ['tax-rate', 'account', 'docId', 'moneybird', 
+const columnHeaders = ['tax-rate', 'account', 'docId', 'moneybird',
     'company', 'country', 'type', 'date', 'change', 'bedrag EX BTW'];
 
 const findName = (id, listWithIds) => {
@@ -21,7 +21,8 @@ module.exports.makeXlsRows = async ({ exportDocs, adminCode, access_token }) => 
     const docsLength = exportDocs.length;
     for (let i = 0; i < docsLength; i++) {
         const exportDoc = exportDocs[i];
-        const { id, date, type, company, country } = exportDoc;
+        const { id, date, type, state } = exportDoc;
+        const { company, country } = state;
         const details = exportDoc.diff;
         const detailsLength = details.length;
         for (let j = 0; j < detailsLength; j++) {
