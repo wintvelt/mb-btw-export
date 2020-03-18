@@ -34,6 +34,8 @@ const updateUnexported = async (latestState) => {
     const latestExportFacts = {
         type: latestExportState && latestExportState.type,
         date: latestExportState && latestExportState.date,
+        company: latestExportState && latestExportState.company,
+        country: latestExportState && latestExportState.country,
     }
     const params = {
         TableName,

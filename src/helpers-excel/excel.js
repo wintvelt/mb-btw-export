@@ -4,7 +4,8 @@
 const Excel = require('exceljs');
 const fetchBasics = require('../helpers-mb/fetchBasics');
 
-const columnHeaders = ['tax-rate', 'account', 'docId', 'moneybird', 'type', 'date', 'change', 'bedrag'];
+const columnHeaders = ['tax-rate', 'account', 'docId', 'moneybird', 
+    'company', 'country', 'type', 'date', 'change', 'bedrag'];
 
 const findName = (id, listWithIds) => {
     const safeList = listWithIds || [];
@@ -20,7 +21,7 @@ module.exports.makeXlsRows = async ({ exportDocs, adminCode, access_token }) => 
     const docsLength = exportDocs.length;
     for (let i = 0; i < docsLength; i++) {
         const exportDoc = exportDocs[i];
-        const { id, date, type } = exportDoc;
+        const { id, date, type, company, country } = exportDoc;
         const details = exportDoc.diff;
         const detailsLength = details.length;
         for (let j = 0; j < detailsLength; j++) {
@@ -34,6 +35,8 @@ module.exports.makeXlsRows = async ({ exportDocs, adminCode, access_token }) => 
                     hyperlink: `https://moneybird.com/${adminCode}/documents/${id}`,
                     tooltip: 'Klik om naar Moneybird doc te gaan',
                 },
+                company,
+                country,
                 type,
                 date,
                 detail.change,
@@ -75,7 +78,15 @@ module.exports.makeXls = async (exportRows) => {
         if (cell.text === 'link') cell.font = { color: { argb: 'FF00ACC2' } }
     });
 
-    const widths = [30, 30, 20, 10, 20, 20, 10, 10];
+    sheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) {
+            row.font = { bold: true }
+        } else {
+            row.font = { bold: false }
+        }
+    });
+
+    const widths = [30, 30, 20, 10, 30, 10, 20, 20, 10, 10];
     widths.forEach((v, i) => {
         sheet.getColumn(i + 1).width = v;
     })
