@@ -29,6 +29,7 @@ provider:
         - dynamodb:DeleteItem
       Resource: 
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_DOC_TABLE}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_DOC_TABLE}/index/*"
     - Effect: Allow
       Action:
         - s3:GetObject
