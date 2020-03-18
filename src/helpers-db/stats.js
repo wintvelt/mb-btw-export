@@ -83,7 +83,9 @@ module.exports.queryExportStats = async ({ adminCode }) => {
         if (result.error) queryError = { error: result.error };
         const { Items, LastEvaluatedKey } = result;
         ExclusiveStartKey = LastEvaluatedKey;
-        exportNames = [...exportNames, ...[...new Set(Items.map(Item => Item.stateName))]];
+        if (Items) {
+            exportNames = [...exportNames, ...[...new Set(Items.map(Item => Item.stateName))]];
+        }
     } while (ExclusiveStartKey && !queryError);
     if (queryError) return queryError;
 
