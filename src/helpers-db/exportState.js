@@ -12,6 +12,7 @@ const s3Url = process.env.S3_URL || 's3.eu-central-1.amazonaws.com';
 
 
 module.exports.getUnexported = async ({ adminCode, start_date, end_date, is_full_report = false }) => {
+    console.log({end_date});
     let unexportedDocs = [];
     let ExclusiveStartKey;
     let queryError;
