@@ -12,7 +12,7 @@ const baseHeaders =
 
 module.exports.response = (statusCode, bodyOrString) => {
     const body = typeof bodyOrString === 'string' ?
-        bodyOrString
+        JSON.stringify({ message: bodyOrString }, null, 2)
         : JSON.stringify(bodyOrString, null, 2);
     return {
         headers: baseHeaders,
