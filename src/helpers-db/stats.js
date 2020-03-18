@@ -107,5 +107,5 @@ module.exports.queryExportStats = async ({ adminCode }) => {
     }));
     const errorFound = exportStats.find(exportStat => exportStat && exportStat.error);
     if (errorFound) return errorFound;
-    return exportStats;
+    return exportStats.filter(stat => !!stat);
 }
