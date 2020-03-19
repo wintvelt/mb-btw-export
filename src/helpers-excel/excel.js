@@ -74,16 +74,16 @@ module.exports.makeXls = async (exportRows) => {
     linkCol.font = { color: { argb: 'FF00ACC2' } };
     sheet.getCell('D1').font = { color: { argb: 'FF000000' } };
 
-    sheet.getColumn(4).eachCell(cell => {
-        if (cell.text === 'link') cell.font = { color: { argb: 'FF00ACC2' } }
-    });
-
     sheet.eachRow((row, rowNumber) => {
         if (rowNumber === 1) {
             row.font = { bold: true }
         } else {
             row.font = { bold: false }
         }
+    });
+
+    sheet.getColumn(4).eachCell(cell => {
+        if (cell.text === 'link') cell.font = { color: { argb: 'FF00ACC2' } }
     });
 
     const widths = [30, 30, 20, 10, 30, 10, 20, 20, 10, 10];

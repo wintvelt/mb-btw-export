@@ -18,7 +18,7 @@ module.exports.main = async event => {
         return request.response(500, latestExportName.error)
     };
 
-    const latestExport = await deleteExport.getExportedDocs({ adminCode, exportName: filename });
+    const latestExport = await deleteExport.getExportedDocs({ adminCode, exportName: latestExportName });
     if (latestExport.error) {
         console.log('failed to retrieve latest export docs');
         return request.response(500, latestExport.error)
@@ -37,7 +37,7 @@ module.exports.main = async event => {
         });
         const unexportedDoc = (!latestState.error) && await unexported.updateUnexported(latestState);
         const deletedDoc = (unexportedDoc && !unexportedDoc.error) &&
-            await deleteExport.deleteExportedDoc({ ...unexportedDoc, stateName: filename });
+            await deleteExport.deleteExportedDoc({ ...unexportedDoc, stateName: latestExportName });
         const errorFound = latestState.error || (unexportedDoc && unexportedDoc.error) || (deletedDoc && deletedDoc.error);
         return (errorFound) ?
             { error: errorFound }
@@ -49,13 +49,13 @@ module.exports.main = async event => {
         return request.response(500, errorFound.error)
     };
 
-    const deletedStats = deleteExport.deleteExportedDoc({ adminCode, stateName: filename, id: 'exportStats' });
+    const deletedStats = deleteExport.deleteExportedDoc({ adminCode, stateName: latestExportName, id: 'exportStats' });
     if (deletedStats.error) {
         console.log('failed to delete exportStats');
         return request.response(500, deletedStats.error)
     };
 
-    const deletedXls = await s3.delete({ adminCode, filename });
+    const deletedXls = await s3.delete({ adminCode, latestExportName });
     if (deletedXls.error) {
         console.log('failed to delete xls from S3')
         return request.response(500, deletedXls.error)
