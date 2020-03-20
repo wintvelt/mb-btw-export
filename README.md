@@ -68,7 +68,11 @@ TODO:
         - [x] get export stats
         - [x] filter export stats for start-year
 
-- [ ] add 
+- [ ] add integrity
+    - [ ] for updating latestState: latestState + unexported
+    - [ ] for creating exports: adding exported record + updating latestState + deleting unexported
+        (not possible for exportStats, but these can be recreated)
+    - [ ] for deleting an export: deleting export + updating latestState + updating unexported
 
 - [ ] check performance of new setup
 - [ ] improve max volume for exports
@@ -222,7 +226,72 @@ Response:
 ## Under the hood
 
 - handlerList
+    - stats
+        - deleteExport
+            getLatestExport
+            queryIndexOnce
+        - query
+            queryOnce
+    - request
 - handlerExport
+    - exportState
+        getUnexported
+        - query
+            queryOnce
+        - diff
+            diff
+        setExport
+        - update
+            singleWithItems
+        saveStats
+    - latestState
+        addExport
+        - update
+            single
+    - unexported
+        removeUnexported
+    - dateHelpers
+        doubleStr
+    - s3
+        save
+    - excel
+        makeXlsRows
+        makeXls
+    - request
 - handlerSync
+    - sync
+        getDocUpdates
+        - query
+            queryVersions
+    - update
+        single
+    - unexported
+        updateUnexported
 - handlerDelete
+    - deleteExport
+        getLatestExport
+        getExportedDocs
+        - query
+            queryOnce
+        deleteExportedDoc
+    - update
+        single
+    - unexported
+        updateUnexported
+    - s3
+        delete
 - webhook
+    - update
+        single
+    - unexported
+        updateUnexported
+
+
+
+- [ ] add integrity
+    - [ ] for updating latestState: latestState + unexported
+        - webhook = single
+        - sync = multiple
+    - [ ] for creating exports: adding exported record + updating latestState + deleting unexported
+        (not possible for exportStats, but these can be recreated)
+    - [ ] for deleting an export: deleting export + updating latestState + updating unexported
