@@ -21,7 +21,8 @@ module.exports.makeXlsRows = async ({ exportDocs, adminCode, access_token }) => 
     const docsLength = exportDocs.length;
     for (let i = 0; i < docsLength; i++) {
         const exportDoc = exportDocs[i];
-        const { id, date, type, company, country } = exportDoc;
+        const { id, state } = exportDoc;
+        const { date, type, company, country } = state;
         const details = exportDoc.diff;
         const detailsLength = details.length;
         for (let j = 0; j < detailsLength; j++) {

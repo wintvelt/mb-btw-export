@@ -286,12 +286,45 @@ Response:
     - unexported
         updateUnexported
 
+- [ ] idea to refactor
+    - [x] add a dateTime stamp to 
+        - [x] latestState, 
+        - [x] unexported, 
+        - [x] exported (not in stats)
+    - [ ] create new function that does TransactWrite collection of multiple updates
+    - transactWrites:
+        [ ] webhook and sync: 
+            read latestState for latestExportName + get that exported State (used for unexported)
+            check = state in latestState
+            save state in latestState
+            save diff in unexported + exportLogs (for export) + state (to save more info if deleted)
+        [ ] delete:
+            read latestState for state + latestExportName (for previous export, if exists)
+            check = state in latestState
+            delete exported record
+            save exportLogs in latestState (without deleted export)
+            save diff in unexported + exportLogs + state (to save more info if deleted)
+        [ ] export:
+            read unexported for diff + exportLogs
+            check = diff in unexported
+            save exported doc
+            save exportLogs in latestState (with new export)
+            delete unexported
 
+    - [ ] make the dynamoDb.update only return params
+        - in unexported this can be update/ delete/ none
+        - in update in 2 functions
+    - [ ] make dynamoDb.delete only return params
+        - in deleteExport for deleting exported doc
+        - in unexported see above
+        - in update (for webhook test cleanup only)
 
 - [ ] add integrity
     - [ ] for updating latestState: latestState + unexported
         - webhook = single
         - sync = multiple
+        in id: only state update
+        in unexported: state + diff + exportLogs
     - [ ] for creating exports: adding exported record + updating latestState + deleting unexported
         (not possible for exportStats, but these can be recreated)
     - [ ] for deleting an export: deleting export + updating latestState + updating unexported

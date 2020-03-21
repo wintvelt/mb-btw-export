@@ -5,6 +5,8 @@ const query = require('./query');
 const update = require('./update');
 const dateHelpers = require('../helpers/date');
 const filterDate = dateHelpers.filterDate;
+const errorLog = require('../helpers/request').errorLog;
+
 
 const bucketName = process.env.PUBLIC_BUCKETNAME || 'moblybird-export-files';
 const folderName = process.env.FOLDER_NAME || 'public';
@@ -12,7 +14,6 @@ const s3Url = process.env.S3_URL || 's3.eu-central-1.amazonaws.com';
 
 
 module.exports.getUnexported = async ({ adminCode, start_date, end_date, is_full_report = false }) => {
-    console.log({end_date});
     let unexportedDocs = [];
     let ExclusiveStartKey;
     let queryError;
@@ -31,7 +32,7 @@ module.exports.getUnexported = async ({ adminCode, start_date, end_date, is_full
         };
     } while (ExclusiveStartKey && !queryError);
 
-    if (queryError) return queryError;
+    if (queryError) return errorLog('Failed to get unexported in exportState', queryError);
 
     const now = new Date();
     const nowStr = dateHelpers.dateStr(now);
@@ -40,15 +41,11 @@ module.exports.getUnexported = async ({ adminCode, start_date, end_date, is_full
     return filteredDocs.map((doc) => ({
         id: doc.id,
         adminCode,
-        type: doc.state.type,
-        date: doc.state.date,
-        company: doc.state.company,
-        country: doc.state.country,
         diff: (is_full_report) ?
             diff.diff(null, doc.state)
             : doc.diff,
         state: doc.state,
-        exportLogs: doc.exportLogs
+        exportLogs: doc.exportLogs,
     }));
 }
 

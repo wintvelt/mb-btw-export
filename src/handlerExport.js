@@ -39,7 +39,7 @@ module.exports.main = async event => {
         end_date,
         is_full_report,
     });
-    if (exportDocs.error) return request.response(501, exportDocs.error);
+    if (exportDocs.error) return request.response(500, exportDocs.error);
     if (exportDocs.length === 0) return request.response(200, "Nothing to export");
 
     const xlsRows = await excel.makeXlsRows({

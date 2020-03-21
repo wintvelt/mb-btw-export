@@ -3,7 +3,10 @@
 'use strict';
 const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 const TableName = process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs';
+
 const diff = require('./unexported-diff');
+const update = require('./update');
+const errorLog = require('../helpers/request').errorLog;
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
@@ -36,8 +39,8 @@ const updateUnexported = async (latestState) => {
         date: latestExportState && latestExportState.date,
         company: latestExportState && latestExportState.company,
         country: latestExportState && latestExportState.country,
-    }
-    const params = {
+    };
+    const deleteParams = {
         TableName,
         Key: {
             adminCodeState: adminCode + 'unexported',
@@ -45,34 +48,17 @@ const updateUnexported = async (latestState) => {
         },
         ReturnValues: 'NONE'
     };
-    const updateParams = {
-        ...params,
-        UpdateExpression: 'SET #state = :newState, diff = :newDiff, #ac = :ac, #sn = :sn, #el = :el',
-        ExpressionAttributeNames: {
-            '#state': 'state',
-            "#ac": 'adminCode',
-            '#sn': 'stateName',
-            '#el': 'exportLogs'
-        },
-        ExpressionAttributeValues:
-        {
-            ':ac': adminCode,
-            ':sn': 'unexported',
-            ':newState': { ...latestExportFacts, ...state },
-            ':newDiff': latestDiff,
-            ':el': exportLogs || []
-        },
-        ReturnValues: 'ALL_NEW',
-    };
+    const itemUpdates = [
+        { itemName: 'state', newState: { ...latestExportFacts, ...state } },
+        { itemName: 'diff', newState: latestDiff },
+        { itemName: 'exportLogs', newState: exportLogs || [] },
+    ];
 
     return (shouldBeInUnexported) ?
-        dynamoDb.update(updateParams)
+        update.singleWithItems({ adminCode, id, stateName: 'unexported', itemUpdates })
+        : dynamoDb.delete(deleteParams)
             .promise()
-            .then(res => res.Attributes)
-            .catch(error => ({ error: error.message }))
-        : dynamoDb.delete(params)
-            .promise()
-            .catch(error => ({ error: error.message }));
+            .catch(error => errorLog('could not delete unexported', { error: error.message }));
 };
 module.exports.updateUnexported = updateUnexported;
 

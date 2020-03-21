@@ -13,8 +13,10 @@ const testContent = JSON.stringify({ message: 'Dit is gewoon een test' }, null, 
 const testDocs = [
     {
         id: '282167354227426465',
-        date: '2020-01-01',
-        type: 'purchase_invoice',
+        state: {
+            date: '2020-01-01',
+            type: 'purchase_invoice',
+        },
         diff: [{
             tax_rate_id: '243231935134958924',
             ledger_account_id: '249402224261727583',
@@ -24,8 +26,10 @@ const testDocs = [
     },
     {
         id: '282168015182628005',
-        date: '2020-01-02',
-        type: 'receipt',
+        state: {
+            date: '2020-01-02',
+            type: 'receipt',
+        },
         diff: [{
             tax_rate_id: '249388000037832645',
             ledger_account_id: '249402226459542918',
