@@ -292,21 +292,25 @@ Response:
         - [x] unexported, 
         - [x] exported (not in stats)
     - [ ] create new function that does TransactWrite collection of multiple updates
+        - [ ] change unexported to params version
+            - [ ] change in handlerSync
+            - [ ] change in handlerDelete
+            - [ ] change in webhook
     - transactWrites:
         [ ] webhook and sync: 
-            read latestState for latestExportName + get that exported State (used for unexported)
-            check = state in latestState
+            read latestState for latestExportName + get that exported State (to use for unexported)
+            check = timeStamp in latestState
             save state in latestState
             save diff in unexported + exportLogs (for export) + state (to save more info if deleted)
         [ ] delete:
             read latestState for state + latestExportName (for previous export, if exists)
-            check = state in latestState
+            check = timeStamp in latestState
             delete exported record
             save exportLogs in latestState (without deleted export)
             save diff in unexported + exportLogs + state (to save more info if deleted)
         [ ] export:
             read unexported for diff + exportLogs
-            check = diff in unexported
+            check = timeStamp in unexported
             save exported doc
             save exportLogs in latestState (with new export)
             delete unexported

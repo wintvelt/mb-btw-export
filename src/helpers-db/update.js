@@ -18,7 +18,7 @@ const removeEmptyStrings = (obj) => {
     return outObj;
 }
 
-const singleWithItems = ({ adminCode, id, stateName, itemUpdates }) => {
+const singleWithItemsParams = ({ adminCode, id, stateName, itemUpdates }) => {
     const timeStamp = Date.now();
     let ExpressionAttributeNames = {
         '#ac': 'adminCode',
@@ -49,7 +49,13 @@ const singleWithItems = ({ adminCode, id, stateName, itemUpdates }) => {
         ReturnValues: 'ALL_NEW',
     };
 
-    return dynamoDb.update(params)
+    return { Update: params }
+};
+module.exports.singleWithItemsParams = singleWithItemsParams;
+
+const singleWithItems = ({ adminCode, id, stateName, itemUpdates }) => {
+    const params = singleWithItemsParams({ adminCode, id, stateName, itemUpdates });
+    return dynamoDb.update(params.Update)
         .promise()
         .then(res => res.Attributes)
         .catch(error => {

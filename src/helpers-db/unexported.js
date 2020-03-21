@@ -26,10 +26,13 @@ const getLatestExport = async ({ adminCode, latestExportName, id }) => {
         .catch(error => ({ error: error.message }));
 }
 
-const updateUnexported = async (latestState) => {
+const updateUnexportedParams = async (latestState) => {
     const { adminCode, id, state, exportLogs } = latestState;
     const latestExportName = exportLogs && exportLogs.length > 0 && exportLogs[0];
     const latestExport = latestExportName && await getLatestExport({ adminCode, latestExportName, id });
+    if (latestExport && latestExport.error) {
+        return errorLog(`Failed to get state of export ${latestExportName}`, latestExport);
+    };
     const latestExportState = latestExport && latestExport.state;
 
     const latestDiff = diff.diff(latestExportState, state);
@@ -55,12 +58,27 @@ const updateUnexported = async (latestState) => {
     ];
 
     return (shouldBeInUnexported) ?
-        update.singleWithItems({ adminCode, id, stateName: 'unexported', itemUpdates })
-        : dynamoDb.delete(deleteParams)
+        update.singleWithItemsParams({ adminCode, id, stateName: 'unexported', itemUpdates })
+        : { Delete: deleteParams };
+};
+module.exports.updateUnexportedParams = updateUnexportedParams;
+
+module.exports.updateUnexported = async (latestState) => {
+    const params = await updateUnexportedParams(latestState);
+    if (params.error) {
+        return errorLog('Failed to create update parameters for unexported', params);
+    };
+
+    return (params.Update) ?
+        dynamoDb.update(params.Update)
+            .promise()
+            .then(res => res.Attributes)
+            .catch(error => errorLog('could not update unexported', { error: error.message }))
+        : dynamoDb.delete(params.Delete)
             .promise()
             .catch(error => errorLog('could not delete unexported', { error: error.message }));
-};
-module.exports.updateUnexported = updateUnexported;
+
+}
 
 module.exports.removeUnexported = ({ adminCode, id }) => {
     return dynamoDb.delete({

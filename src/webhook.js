@@ -1,5 +1,7 @@
 'use strict';
+const updateConsistent = require('./helpers-db/updateConsistent');
 const update = require('./helpers-db/update');
+const get = require('./helpers-db/get');
 const unexported = require('./helpers-db/unexported');
 const mbHelpers = require('./helpers-mb/fetchDocs');
 const stripRecord = mbHelpers.stripRecord;
@@ -17,7 +19,6 @@ module.exports.main = async event => {
     } catch (_) {
         bodyObj = event.body;
     }
-    // console.log({ requestBody: bodyObj });
     const tokenError = (!bodyObj.webhook_token || bodyObj.webhook_token !== process.env.MB_WEBHOOK_TOKEN);
     if (process.env.MB_WEBHOOK_TOKEN && tokenError) return request.response(400, "Bad request");
     const { entity, entity_type, action, entity_id } = bodyObj;
@@ -28,17 +29,33 @@ module.exports.main = async event => {
     const state = (action === 'document_updated' && entity) ?
         stripRecord(type)(entity).latestState
         : { isDeleted: true };
-    const params = {
+
+    const keys = {
         adminCode,
         id,
         stateName: 'latestState',
-        itemName: 'state',
-        newState: state,
-    }
-    const latestState = await update.single(params);
-    if (latestState.error) return request.response(500, "Error");
-    const unexportedResult = await unexported.updateUnexported(latestState);
-    if (unexportedResult.error) return request.response(500, "Error");
+    };
+    const latestStateFromDb = await get.get(keys);
+    const latestState = {
+        ...keys,
+        ...latestStateFromDb,
+        state
+    };
+
+    const latestStateUpdateParams = {
+        ...keys,
+        itemUpdates: [
+            { itemName: 'state', newState: state }
+        ]
+    };
+    const unexportedUpdateParams = await unexported.updateUnexportedParams(latestState);
+    const result = await updateConsistent.transact({
+        updates: [
+            update.singleWithItemsParams(latestStateUpdateParams),
+            unexportedUpdateParams
+        ]
+    });
+    if (result.error) return request.response(500, "Error");
 
     return request.response(200, "OK");
 }
