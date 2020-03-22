@@ -19,8 +19,9 @@ const removeEmptyStrings = (obj) => {
     return outObj;
 }
 
-const singleWithItemsParams = ({ adminCode, id, stateName, itemUpdates }) => {
-    const timeStamp = Date.now();
+const singleWithItemsParams = ({ adminCode, id, stateName, itemUpdates, timeStampCheck }) => {
+    const itemUpdatesTimeStamp = itemUpdates.find(it => it.itemName === 'timeStamp');
+    const timeStamp = itemUpdatesTimeStamp ? itemUpdatesTimeStamp.newState : Date.now();
     let ExpressionAttributeNames = {
         '#ac': 'adminCode',
         '#sn': 'stateName',
@@ -34,9 +35,17 @@ const singleWithItemsParams = ({ adminCode, id, stateName, itemUpdates }) => {
     let UpdateExpression = 'SET #ac = :ac, #sn = :sn, #ts = :ts';
     for (let i = 0; i < itemUpdates.length; i++) {
         const itemUpdate = itemUpdates[i];
-        ExpressionAttributeNames['#it' + i] = itemUpdate.itemName;
-        ExpressionAttributeValues[':ns' + i] = removeEmptyStrings(itemUpdate.newState);
-        UpdateExpression = UpdateExpression + `, #it${i} = :ns${i}`;
+        if (itemUpdate.itemName !== 'timeStamp') {
+            ExpressionAttributeNames['#it' + i] = itemUpdate.itemName;
+            ExpressionAttributeValues[':ns' + i] = removeEmptyStrings(itemUpdate.newState);
+            UpdateExpression = UpdateExpression + `, #it${i} = :ns${i}`;
+        }
+    }
+    let ConditionExpression;
+    if (timeStampCheck) {
+        ConditionExpression = '#tscheck = :tscheck';
+        ExpressionAttributeNames['#tscheck'] = 'timeStamp';
+        ExpressionAttributeValues[':tscheck'] = timeStampCheck;
     }
     const params = {
         TableName,
@@ -44,6 +53,7 @@ const singleWithItemsParams = ({ adminCode, id, stateName, itemUpdates }) => {
             adminCodeState: adminCode + stateName,
             id,
         },
+        ConditionExpression,
         ExpressionAttributeNames,
         ExpressionAttributeValues,
         UpdateExpression,

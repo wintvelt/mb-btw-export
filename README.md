@@ -297,6 +297,11 @@ Response:
         - [x] change in handlerDelete
         - [x] change in webhook
         - [x] change in handlerExport
+    - [ ] add ConditionExpression for updates:
+        - [ ] webhook: only if the timestamp on latestState matches, otherwise read latestState again
+        - [ ] sync: only if the timestamp on latestState matches, otherwise read latestState again
+        - [ ] export: only if timestamp from unexported matches that of latestState, otherwise read unexported again
+        - [ ] delete: only if timestamp from unexported matches that of latestState, otherwise read unexported again
     - transactWrites:
         [ ] webhook and sync: 
             read latestState for latestExportName + get that exported State (to use for unexported)
@@ -315,14 +320,6 @@ Response:
             save exported doc
             save exportLogs in latestState (with new export)
             delete unexported
-
-    - [ ] make the dynamoDb.update only return params
-        - in unexported this can be update/ delete/ none
-        - in update in 2 functions
-    - [ ] make dynamoDb.delete only return params
-        - in deleteExport for deleting exported doc
-        - in unexported see above
-        - in update (for webhook test cleanup only)
 
 - [ ] add integrity
     - [ ] for updating latestState: latestState + unexported

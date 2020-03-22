@@ -35,17 +35,20 @@ module.exports.main = async event => {
         id,
         stateName: 'latestState',
     };
+    const newTimeStamp = Date.now();
     const latestStateFromDb = await get.get(keys);
     const latestState = {
         ...keys,
         ...latestStateFromDb,
-        state
+        state,
+        timeStamp: newTimeStamp
     };
 
     const latestStateUpdateParams = {
         ...keys,
         itemUpdates: [
-            { itemName: 'state', newState: state }
+            { itemName: 'state', newState: state },
+            { itemName: 'timeStamp', newState: newTimeStamp }
         ]
     };
     const unexportedUpdateParams = await unexported.updateUnexportedParams(latestState);

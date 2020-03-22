@@ -19,7 +19,8 @@ const baseDetails = {
 const beforeExport = {
     adminCode, id: '1234',
     stateName: 'export123',
-    state: { type: 'receipt', date: '2020-01-08', version: 12, details: [baseDetails] }
+    state: { type: 'receipt', date: '2020-01-08', version: 12, details: [baseDetails] },
+    timeStamp: 'sometime'
 };
 const newChangedRecord = {
     adminCode, id: '1234',
@@ -31,7 +32,8 @@ const newChangedRecord = {
             total_price_excl_tax_with_discount_base: '150',
         }]
     },
-    exportLogs: ['export123']
+    exportLogs: ['export123'],
+    timeStamp: 'sometime'
 };
 const newUnchangedStateRecord = {
     ...newChangedRecord,
@@ -43,12 +45,14 @@ const newDeletedStateRecord = {
     adminCode, id: '1234',
     stateName: 'latestState',
     state: { isDeleted: true },
-    exportLogs: ['export123']
+    exportLogs: ['export123'],
+    timeStamp: 'sometime'
 };
 const beforeExportDeleted = {
     adminCode, id: '1235',
     stateName: 'export123',
-    state: { type: 'receipt', date: '2020-01-08', isDeleted: true }
+    state: { type: 'receipt', date: '2020-01-08', isDeleted: true },
+    timeStamp: 'sometime'
 };
 const newDeletedStateRecord2 = {
     ...newDeletedStateRecord,
@@ -58,7 +62,8 @@ const neverExportedDeletedRecord = {
     adminCode, id: '1234',
     stateName: 'latestState',
     state: { isDeleted: true },
-    exportLogs: []
+    exportLogs: [],
+    timeStamp: 'sometime'
 };
 
 describe('The DB unexported.updateUnexported function', testIfDb(() => {

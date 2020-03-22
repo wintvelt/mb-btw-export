@@ -5,16 +5,17 @@ const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-depe
 const TableName = process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs';
 
 const errorLog = require('../helpers/request').errorLog;
+const get = require('./get');
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
 });
 
-module.exports.conditionCheck = ({ adminCode, stateName, id, timeStamp }) => {
+const conditionCheckParams = ({ adminCode, id, timeStamp }) => {
     return {
         ConditionCheck: {
             Key: {
-                adminCodeState: adminCode + stateName,
+                adminCodeState: adminCode + 'latestState',
                 id
             },
             ConditionExpression: '#ts = :ts',
@@ -40,7 +41,8 @@ const timeout = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-module.exports.transact = async ({ conditionCheck, updates }) => {
+module.exports.transact = async ({ stateCheck, updates }) => {
+    let conditionCheck = stateCheck? conditionCheckParams(stateCheck) : null;
     let retryIntervals = [0, 400, 1000];
     let result;
     do {
@@ -48,6 +50,10 @@ module.exports.transact = async ({ conditionCheck, updates }) => {
             transactSingle({ conditionCheck, updates }),
             timeout(retryIntervals[0])
         ]);
+        if (result.error && result.error.includes('ConditionalCheckFailed')) {
+            const newStateCheck = await get.get(stateCheck);
+            conditionCheck = conditionCheckParams(newStateCheck);
+        }
         retryIntervals = retryIntervals.slice(1);
     } while (result.error && retryIntervals.length > 0);
     return result;

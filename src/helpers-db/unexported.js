@@ -27,7 +27,7 @@ const getLatestExport = async ({ adminCode, latestExportName, id }) => {
 }
 
 const updateUnexportedParams = async (latestState) => {
-    const { adminCode, id, state, exportLogs } = latestState;
+    const { adminCode, id, state, exportLogs, timeStamp } = latestState;
     const latestExportName = exportLogs && exportLogs.length > 0 && exportLogs[0];
     const latestExport = latestExportName && await getLatestExport({ adminCode, latestExportName, id });
     if (latestExport && latestExport.error) {
@@ -52,6 +52,7 @@ const updateUnexportedParams = async (latestState) => {
         ReturnValues: 'NONE'
     };
     const itemUpdates = [
+        { itemName: 'timeStamp', newState: timeStamp },
         { itemName: 'state', newState: { ...latestExportFacts, ...state } },
         { itemName: 'diff', newState: latestDiff },
         { itemName: 'exportLogs', newState: exportLogs || [] },
@@ -91,4 +92,5 @@ module.exports.removeUnexportedParams = ({ adminCode, id }) => {
             ReturnValues: 'NONE'
         }
     }
-s}
+    s
+}
