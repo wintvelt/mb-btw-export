@@ -49,7 +49,7 @@ module.exports.getUnexported = async ({ adminCode, start_date, end_date, is_full
     }));
 }
 
-module.exports.setExportParams = ({ unexportedDoc, filename, timeStampCheck }) => {
+module.exports.setExportParams = ({ unexportedDoc, filename }) => {
     const { adminCode, id, state, exportLogs } = unexportedDoc;
     const params = {
         adminCode,
@@ -58,8 +58,7 @@ module.exports.setExportParams = ({ unexportedDoc, filename, timeStampCheck }) =
         itemUpdates: [
             { itemName: 'state', newState: state },
             { itemName: 'exportLogs', newState: exportLogs },
-        ],
-        timeStampCheck
+        ]
     };
     return update.singleWithItemsParams(params);
 };

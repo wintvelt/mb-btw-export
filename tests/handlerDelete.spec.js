@@ -14,7 +14,7 @@ const event = {
     },
     pathParameters: {
         admin: adminCode,
-        filename: 'btw-export 2020-03-22 18u26m17s.xlsx'
+        filename: 'btw-export 2020-03-22 21u18m04s.xlsx'
     }
 }
 

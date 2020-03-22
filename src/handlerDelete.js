@@ -49,6 +49,13 @@ module.exports.main = async event => {
             timeStamp: Date.now()
         }
 
+        const previousExportName = (newExportLogs.length > 0) ? newExportLogs[0] : null;
+        const previousExport = previousExportName && await get.get({
+            adminCode,
+            stateName: previousExportName,
+            id: exportedDoc.id
+        });
+
         const removeExportFromLatestParams = update.singleWithItemsParams({
             ...docKeys,
             itemUpdates: [{ itemName: 'exportLogs', newState: newExportLogs }],
@@ -56,11 +63,11 @@ module.exports.main = async event => {
         });
         const newUnexportedParams = unexported.updateUnexportedParams({
             latestState: newLatestState,
-            latestExport: exportedDoc
+            latestExport: previousExport
         });
         const deleteExportParams = deleteExport.deleteExportedDocParams({
             ...docKeys,
-            stateName: latestExportName
+            stateName: exportedDoc.stateName
         });
 
         const result = await updateConsistent.transact({
