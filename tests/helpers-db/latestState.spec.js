@@ -1,9 +1,6 @@
 // for testing (duh)
 const chai = require('chai');
 const expect = chai.expect;
-const testhelpers = require('../../src/helpers/test');
-const testIfDb = testhelpers.testIfDb;
-const removeFromDb = testhelpers.removeFromDb;
 
 const latest = require('../../src/helpers-db/latestState');
 
@@ -19,22 +16,18 @@ const newDocUpdate = { ...params, id: '1234', itemName: 'state', newState: baseS
 
 const latestState = { ...params, id: '1234', state: baseState, exportLogs: ['export1', 'export2'] }
 
-describe('DB latestState tests', testIfDb(() => {
-    after(async () => {
-        await removeFromDb(newDocUpdate);
-    });
-
-    describe('The addExport function', () => {
-        it('adds an export file to the exportLogs of a doc', async () => {
-            const result = await latest.addExport({ latestState, exportName: 'newexport' });
-            expect(result.exportLogs[0]).to.equal('newexport');
+describe('DB latestState tests', () => {
+    describe('The addExportParams function', () => {
+        it('adds an export file to the exportLogs of a doc', () => {
+            const result = latest.addExportParams({ latestState, exportName: 'newexport' });
+            expect(result.Update.ExpressionAttributeValues[':ns0'][0]).to.equal('newexport');
         });
     });
 
-    describe('The removeExport function', () => {
+    describe('The removeExportParams function', () => {
         it('removes the latest exported state from a single doc', async () => {
-            const result = await latest.removeExport({ latestState });
-            expect(result.exportLogs[0]).to.equal('export2');
+            const result = await latest.removeExportParams({ latestState });
+            expect(result.Update.ExpressionAttributeValues[':ns0'][0]).to.equal('export2');
         });
     });
-}));
+});

@@ -39,16 +39,14 @@ module.exports.main = async event => {
             stateName: 'latestState',
             id: exportedDoc.id
         }
-        const latestState = await get.get(docKeys);
-        const newExportLogs = (latestState && latestState.exportLogs && Array.isArray(latestState.exportLogs)) ?
-            latestState.exportLogs.slice(1) : [];
+        const newExportLogs = (exportedDoc.exportLogs)? exportedDoc.exportLogs.slice(1) : [];
 
         const removeExportFromLatestParams = update.singleWithItemsParams({
             ...docKeys,
             itemUpdates: [{ itemName: 'exportLogs', newState: newExportLogs }]
         });
         const newUnexportedParams = await unexported.updateUnexportedParams({
-            ...latestState,
+            ...exportedDoc,
             exportLogs: newExportLogs
         });
         const deleteExportParams = deleteExport.deleteExportedDocParams({

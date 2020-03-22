@@ -80,15 +80,15 @@ module.exports.updateUnexported = async (latestState) => {
 
 }
 
-module.exports.removeUnexported = ({ adminCode, id }) => {
-    return dynamoDb.delete({
-        Key: {
-            adminCodeState: adminCode + 'unexported',
-            id
-        },
-        TableName,
-        ReturnValues: 'NONE'
-    })
-        .promise()
-        .catch(error => ({ error: error.message }));
-}
+module.exports.removeUnexportedParams = ({ adminCode, id }) => {
+    return {
+        Delete: {
+            Key: {
+                adminCodeState: adminCode + 'unexported',
+                id
+            },
+            TableName,
+            ReturnValues: 'NONE'
+        }
+    }
+s}

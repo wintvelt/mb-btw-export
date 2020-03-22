@@ -292,11 +292,11 @@ Response:
         - [x] latestState, 
         - [x] unexported, 
         - [x] exported (not in stats)
-    - [ ] create new function that does TransactWrite collection of multiple updates
-        - [ ] change unexported to params version
-            - [x] change in handlerSync
-            - [ ] change in handlerDelete
-            - [x] change in webhook
+    - [x] create new function that does TransactWrite collection of multiple updates
+        - [x] change in handlerSync
+        - [x] change in handlerDelete
+        - [x] change in webhook
+        - [x] change in handlerExport
     - transactWrites:
         [ ] webhook and sync: 
             read latestState for latestExportName + get that exported State (to use for unexported)

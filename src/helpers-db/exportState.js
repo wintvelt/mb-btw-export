@@ -49,7 +49,7 @@ module.exports.getUnexported = async ({ adminCode, start_date, end_date, is_full
     }));
 }
 
-module.exports.setExport = async ({ unexportedDoc, filename }) => {
+module.exports.setExportParams = ({ unexportedDoc, filename }) => {
     const { adminCode, id, state, exportLogs } = unexportedDoc;
     const params = {
         adminCode,
@@ -60,7 +60,7 @@ module.exports.setExport = async ({ unexportedDoc, filename }) => {
             { itemName: 'exportLogs', newState: exportLogs },
         ]
     };
-    return update.singleWithItems(params);
+    return update.singleWithItemsParams(params);
 };
 
 module.exports.makeExportStats = ({ adminCode, exportDocs, filename }) => {
@@ -71,7 +71,7 @@ module.exports.makeExportStats = ({ adminCode, exportDocs, filename }) => {
     let doc_count = exportDocs.length;
     for (let i = 0; i < doc_count; i++) {
         const exportDoc = exportDocs[i];
-        const docDate = exportDoc.date;
+        const docDate = exportDoc.state.date;
         if (!start_date || docDate < start_date) start_date = docDate;
         if (!end_date || docDate > end_date) end_date = docDate;
     }

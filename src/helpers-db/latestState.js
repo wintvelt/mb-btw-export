@@ -1,34 +1,40 @@
 // helpers-db/latestState.js
 // to read/write DynamoDB docTable
 'use strict';
-const updateSingle = require('./update').single;
+const update = require('./update');
 
-module.exports.addExport = ({ latestState, exportName }) => {
+module.exports.addExportParams = ({ latestState, exportName }) => {
     const { adminCode, id, exportLogs } = latestState;
     const newExportLogs = (exportLogs && Array.isArray(exportLogs)) ?
         [exportName, ...exportLogs]
         : [exportName];
     const params = {
         adminCode,
-        id, 
-        stateName: 'latestState', 
-        itemName: 'exportLogs', 
-        newState: newExportLogs
+        id,
+        stateName: 'latestState',
+        itemUpdates: [
+            {
+                itemName: 'exportLogs',
+                newState: newExportLogs
+            }
+        ]
     };
-    return updateSingle(params);
+    return update.singleWithItemsParams(params);
 };
 
-module.exports.removeExport = ({ latestState }) => {
+module.exports.removeExportParams = ({ latestState }) => {
     const { adminCode, id, exportLogs } = latestState;
     const newExportLogs = (exportLogs) ?
         exportLogs.slice(1)
         : [];
     const params = {
         adminCode,
-        id, 
-        stateName: 'latestState', 
-        itemName: 'exportLogs', 
-        newState: newExportLogs
+        id,
+        stateName: 'latestState',
+        itemUpdates: [{
+            itemName: 'exportLogs',
+            newState: newExportLogs
+        }]
     };
-    return updateSingle(params);
+    return update.singleWithItemsParams(params);
 };

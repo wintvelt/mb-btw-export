@@ -8,12 +8,12 @@ const adminCode = testhelpers.adminCode;
 const exportState = require('../../src/helpers-db/exportState');
 
 const exportDocs = [
-    { id: '1', date: '2020-01-09' },
-    { id: '2', date: '2020-01-10' },
-    { id: '3', date: '2020-01-12' },
-    { id: '4', date: '2020-02-01' },
-    { id: '5', date: '2020-01-01' },
-    { id: '6', date: '2020-02-08' },
+    { id: '1', state: { date: '2020-01-09' } },
+    { id: '2', state: { date: '2020-01-10' } },
+    { id: '3', state: { date: '2020-01-12' } },
+    { id: '4', state: { date: '2020-02-01' } },
+    { id: '5', state: { date: '2020-01-01' } },
+    { id: '6', state: { date: '2020-02-08' } },
 ]
 
 describe('Dynamo DB exportState tests', () => {

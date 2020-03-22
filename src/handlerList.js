@@ -23,7 +23,6 @@ module.exports.listing = async event => {
       latest_export_create_date = exportFile.create_date
     }
   }
-
   const filteredExportStats = exportStats.filter(stat => {
     return (stat.end_date.slice(0, 4) >= year);
   });

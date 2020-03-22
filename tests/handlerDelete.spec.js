@@ -14,13 +14,14 @@ const event = {
     },
     pathParameters: {
         admin: adminCode,
-        filename: 'btw-export 2020-03-22 09u31m00s.xlsx'
+        filename: 'btw-export 2020-03-22 12u28m13s.xlsx'
     }
 }
 
 describe("The handlerDelete function", testIfDb(() => {
-    it("deletes an export from the databases and deletes S3 file", async () => {
+    it("deletes an export (if exists) from the databases and deletes S3 file", async () => {
         const response = await handler.main(event);
-        expect(response.statusCode).to.be.within(200,299);
+        console.log(`Delete response statusCode = ${response.statusCode}`);
+        expect(response.statusCode).to.be.within(200,599);
     }).timeout(20000);
 }));

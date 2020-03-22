@@ -11,6 +11,7 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
 });
 
 const removeEmptyStrings = (obj) => {
+    if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
     let outObj = {}
     Object.keys(obj).forEach(key => {
         if (obj[key] !== '') outObj[key] = obj[key];

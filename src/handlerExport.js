@@ -2,6 +2,7 @@
 const exportState = require('./helpers-db/exportState');
 const latestState = require('./helpers-db/latestState');
 const unexported = require('./helpers-db/unexported');
+const updateConsistent = require('./helpers-db/updateConsistent');
 const dateHelpers = require('./helpers/date');
 const doubleStr = dateHelpers.doubleStr;
 const request = require('./helpers/request');
@@ -60,19 +61,20 @@ module.exports.main = async event => {
     const savePromise = s3.save(saveParams);
 
     const docUpdatePromises = exportDocs.map(async (unexportedDoc) => {
-        const exportInDb = await exportState.setExport({
+        const exportInDbParams = exportState.setExportParams({
             unexportedDoc,
-            filename
+            filename,
         });
-        const exportLogsInLatest = await latestState.addExport({
+        const exportLogsInLatestParams = latestState.addExportParams({
             latestState: unexportedDoc,
             exportName: filename
         });
-        const removeFromUnexported = await unexported.removeUnexported(unexportedDoc);
-        const errorFound = exportInDb.error || exportLogsInLatest.error || removeFromUnexported.error;
-        return (errorFound) ?
-            { error: errorFound }
-            : {};
+        const removeUnexportedParams = unexported.removeUnexportedParams(unexportedDoc);
+        return updateConsistent.transact({ updates: [
+            exportInDbParams,
+            exportLogsInLatestParams,
+            removeUnexportedParams
+        ]})
     });
 
     const result = await Promise.all([
