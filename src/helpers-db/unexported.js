@@ -26,13 +26,8 @@ const getLatestExport = async ({ adminCode, latestExportName, id }) => {
         .catch(error => ({ error: error.message }));
 }
 
-const updateUnexportedParams = async (latestState) => {
+const updateUnexportedParams = ({ latestState, latestExport }) => {
     const { adminCode, id, state, exportLogs, timeStamp } = latestState;
-    const latestExportName = exportLogs && exportLogs.length > 0 && exportLogs[0];
-    const latestExport = latestExportName && await getLatestExport({ adminCode, latestExportName, id });
-    if (latestExport && latestExport.error) {
-        return errorLog(`Failed to get state of export ${latestExportName}`, latestExport);
-    };
     const latestExportState = latestExport && latestExport.state;
 
     const latestDiff = diff.diff(latestExportState, state);

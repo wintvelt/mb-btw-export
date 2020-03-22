@@ -1,8 +1,5 @@
 'use strict';
-const updateConsistent = require('./helpers-db/updateConsistent');
-const update = require('./helpers-db/update');
-const get = require('./helpers-db/get');
-const unexported = require('./helpers-db/unexported');
+const latestState = require('./helpers-db/latestState');
 const mbHelpers = require('./helpers-mb/fetchDocs');
 const stripRecord = mbHelpers.stripRecord;
 const request = require('./helpers/request');
@@ -30,34 +27,13 @@ module.exports.main = async event => {
         stripRecord(type)(entity).latestState
         : { isDeleted: true };
 
-    const keys = {
+    const newLatestState = {
         adminCode,
         id,
-        stateName: 'latestState',
-    };
-    const newTimeStamp = Date.now();
-    const latestStateFromDb = await get.get(keys);
-    const latestState = {
-        ...keys,
-        ...latestStateFromDb,
         state,
-        timeStamp: newTimeStamp
     };
+    const result = await latestState.updateStateAndUnexported({ latestState: newLatestState });
 
-    const latestStateUpdateParams = {
-        ...keys,
-        itemUpdates: [
-            { itemName: 'state', newState: state },
-            { itemName: 'timeStamp', newState: newTimeStamp }
-        ]
-    };
-    const unexportedUpdateParams = await unexported.updateUnexportedParams(latestState);
-    const result = await updateConsistent.transact({
-        updates: [
-            update.singleWithItemsParams(latestStateUpdateParams),
-            unexportedUpdateParams
-        ]
-    });
     if (result.error) return request.response(500, "Error");
 
     return request.response(200, "OK");

@@ -1,9 +1,6 @@
 'use strict';
 const sync = require('./helpers-sync/sync');
-const update = require('./helpers-db/update');
-const updateConsistent = require('./helpers-db/updateConsistent');
-const get = require('./helpers-db/get');
-const unexported = require('./helpers-db/unexported');
+const latestState = require('./helpers-db/latestState');
 const request = require('./helpers/request');
 
 const docTableName = process.env.DYNAMODB_DOC_TABLE || 'btw-export-dev-docs';
@@ -27,31 +24,13 @@ module.exports.main = async event => {
     const { docUpdates, maxExceeded } = resultFromDbAndMb;
 
     const results = await Promise.all(docUpdates.map(async (docUpdate) => {
-        const keys = {
+        const newLatestState = {
             adminCode,
             id: docUpdate.id,
             stateName: 'latestState',
-        };
-        const latestStateFromDb = await get.get(keys);
-        const latestState = {
-            ...keys,
-            ...latestStateFromDb,
             state: docUpdate.latestState
         };
-
-        const latestStateUpdateParams = {
-            ...keys,
-            itemUpdates: [
-                { itemName: 'state', newState: latestState.state }
-            ]
-        };
-        const unexportedUpdateParams = await unexported.updateUnexportedParams(latestState);
-        const result = await updateConsistent.transact({
-            updates: [
-                update.singleWithItemsParams(latestStateUpdateParams),
-                unexportedUpdateParams
-            ]
-        });
+        const result = await latestState.updateStateAndUnexported({ latestState: newLatestState });
         return result;
     }));
     const errorFound = results.find(res => res.error);

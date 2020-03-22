@@ -67,7 +67,8 @@ module.exports.main = async event => {
         });
         const exportLogsInLatestParams = latestState.addExportParams({
             latestState: unexportedDoc,
-            exportName: filename
+            exportName: filename,
+            timeStampCheck: unexportedDoc.timeStamp
         });
         const removeUnexportedParams = unexported.removeUnexportedParams(unexportedDoc);
         return updateConsistent.transact({ updates: [
