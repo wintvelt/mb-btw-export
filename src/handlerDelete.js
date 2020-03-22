@@ -1,6 +1,8 @@
 'use strict';
 const deleteExport = require('./helpers-db/deleteExport');
 const update = require('./helpers-db/update');
+const updateConsistent = require('./helpers-db/updateConsistent');
+const get = require('./helpers-db/get');
 const unexported = require('./helpers-db/unexported');
 const s3 = require('./helpers-s3/s3');
 const request = require('./helpers/request');
@@ -17,6 +19,10 @@ module.exports.main = async event => {
         console.log('failed to retrieve latest exportName')
         return request.response(500, latestExportName.error)
     };
+    if (latestExportName !== filename) {
+        console.log(400, 'Cannot delete this file.')
+        return request.response(500, latestExportName.error)
+    };
 
     const latestExport = await deleteExport.getExportedDocs({ adminCode, exportName: latestExportName });
     if (latestExport.error) {
@@ -28,20 +34,36 @@ module.exports.main = async event => {
     const exportedDocs = latestExport;
 
     const deletedExported = await Promise.all(exportedDocs.map(async (exportedDoc) => {
-        const latestState = await update.single({
+        const docKeys = {
             adminCode,
             stateName: 'latestState',
-            id: exportedDoc.id,
-            itemName: 'exportLogs',
-            newState: exportedDoc.exportLogs
+            id: exportedDoc.id
+        }
+        const latestState = await get.get(docKeys);
+        const newExportLogs = (latestState && latestState.exportLogs && Array.isArray(latestState.exportLogs)) ?
+            latestState.exportLogs.slice(1) : [];
+
+        const removeExportFromLatestParams = update.singleWithItemsParams({
+            ...docKeys,
+            itemUpdates: [{ itemName: 'exportLogs', newState: newExportLogs }]
         });
-        const unexportedDoc = (!latestState.error) && await unexported.updateUnexported(latestState);
-        const deletedDoc = (unexportedDoc && !unexportedDoc.error) &&
-            await deleteExport.deleteExportedDoc({ ...unexportedDoc, stateName: latestExportName });
-        const errorFound = latestState.error || (unexportedDoc && unexportedDoc.error) || (deletedDoc && deletedDoc.error);
-        return (errorFound) ?
-            { error: errorFound }
-            : {};
+        const newUnexportedParams = await unexported.updateUnexportedParams({
+            ...latestState,
+            exportLogs: newExportLogs
+        });
+        const deleteExportParams = deleteExport.deleteExportedDocParams({
+            ...docKeys,
+            stateName: latestExportName
+        });
+
+        const result = await updateConsistent.transact({
+            updates: [
+                removeExportFromLatestParams,
+                newUnexportedParams,
+                deleteExportParams
+            ]
+        });
+        return result;
     }));
     const errorFound = deletedExported.find(item => item.error);
     if (errorFound) {
@@ -49,7 +71,7 @@ module.exports.main = async event => {
         return request.response(500, errorFound.error)
     };
 
-    const deletedStats = deleteExport.deleteExportedDoc({ adminCode, stateName: latestExportName, id: 'exportStats' });
+    const deletedStats = await deleteExport.deleteExportedDoc({ adminCode, stateName: latestExportName, id: 'exportStats' });
     if (deletedStats.error) {
         console.log('failed to delete exportStats');
         return request.response(500, deletedStats.error)

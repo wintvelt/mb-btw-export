@@ -132,6 +132,7 @@ Response body structure:
 {
     "unexported": {
         "latest_export_name": "btw-export 2019-01-31 13u08m23s.xlsx",
+        "latest_export_create_date": "2019-01-31",
         "new_docs_after_export_count": 12,
         "new_docs_before_export_count": 4,
         "changed_docs": 8,
@@ -293,9 +294,9 @@ Response:
         - [x] exported (not in stats)
     - [ ] create new function that does TransactWrite collection of multiple updates
         - [ ] change unexported to params version
-            - [ ] change in handlerSync
+            - [x] change in handlerSync
             - [ ] change in handlerDelete
-            - [ ] change in webhook
+            - [x] change in webhook
     - transactWrites:
         [ ] webhook and sync: 
             read latestState for latestExportName + get that exported State (to use for unexported)

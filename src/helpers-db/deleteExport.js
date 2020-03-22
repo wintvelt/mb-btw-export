@@ -44,16 +44,23 @@ module.exports.getLatestExport = ({ adminCode }) => {
         })
 };
 
-module.exports.deleteExportedDoc = ({ adminCode, stateName, id }) => {
-    const params = {
-        TableName,
-        Key: {
-            adminCodeState: adminCode + stateName,
-            id
-        },
-        ReturnValue: 'ALL_OLD'
+const deleteExportedDocParams = ({ adminCode, stateName, id }) => {
+    return {
+        Delete: {
+            TableName,
+            Key: {
+                adminCodeState: adminCode + stateName,
+                id
+            },
+            ReturnValue: 'ALL_OLD'
+        }
     };
-    return dynamoDb.delete(params)
+};
+module.exports.deleteExportedDocParams = deleteExportedDocParams;
+
+module.exports.deleteExportedDoc = ({ adminCode, stateName, id }) => {
+    const params = deleteExportedDocParams({ adminCode, stateName, id });
+    return dynamoDb.delete(params.Delete)
         .promise()
         .catch(error => ({ error: error.message }));
 };

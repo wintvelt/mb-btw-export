@@ -1,6 +1,8 @@
 'use strict';
 const sync = require('./helpers-sync/sync');
 const update = require('./helpers-db/update');
+const updateConsistent = require('./helpers-db/updateConsistent');
+const get = require('./helpers-db/get');
 const unexported = require('./helpers-db/unexported');
 const request = require('./helpers/request');
 
@@ -24,23 +26,33 @@ module.exports.main = async event => {
     if (resultFromDbAndMb.error) return request.response(500, resultFromDbAndMb.error);
     const { docUpdates, maxExceeded } = resultFromDbAndMb;
 
-    const results = await Promise.all(docUpdates.map(docUpdate => {
-        const params = {
+    const results = await Promise.all(docUpdates.map(async (docUpdate) => {
+        const keys = {
             adminCode,
             id: docUpdate.id,
             stateName: 'latestState',
-            itemName: 'state',
-            newState: docUpdate.latestState
-        }
-        return update.single(params)
-            .then(latestState => {
-                if (!latestState || !latestState.state) {
-                    console.log('strange error');
-                    console.log({params, latestState});
-                    return { error: 'strange error when updating DB'};
-                }
-                return unexported.updateUnexported(latestState);
-            });
+        };
+        const latestStateFromDb = await get.get(keys);
+        const latestState = {
+            ...keys,
+            ...latestStateFromDb,
+            state: docUpdate.latestState
+        };
+
+        const latestStateUpdateParams = {
+            ...keys,
+            itemUpdates: [
+                { itemName: 'state', newState: latestState.state }
+            ]
+        };
+        const unexportedUpdateParams = await unexported.updateUnexportedParams(latestState);
+        const result = await updateConsistent.transact({
+            updates: [
+                update.singleWithItemsParams(latestStateUpdateParams),
+                unexportedUpdateParams
+            ]
+        });
+        return result;
     }));
     const errorFound = results.find(res => res.error);
     if (errorFound) {

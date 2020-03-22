@@ -22,11 +22,26 @@ const getParams = ({ adminCode, id, stateName }) => {
     return params
 };
 
+const makeList = (key, maybeList) => {
+    return (maybeList)? 
+        { [key]: Object.keys(maybeList).map(key => maybeList[key])}
+        : {};    
+}
+
+const convertLists = (item) => {
+    if (!item) return item;
+    return {
+        ...item,
+        ...makeList('exportLogs', item.exportLogs),
+        ...makeList('diff', item.diff),
+    }
+}
+
 module.exports.get = ({ adminCode, id, stateName }) => {
     const params = getParams({ adminCode, id, stateName });
     return dynamoDb.get(params)
         .promise()
-        .then(res => res.Item)
+        .then(res => convertLists(res.Item))
         .catch(error => {
             const err = { error: error.message };
             return errorLog(`could not retrieve Db @state ${stateName} @id ${id}`, err);
