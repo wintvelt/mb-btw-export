@@ -80,7 +80,8 @@ describe('excel creation tests', testIf(() => {
         it('creates xls sum rows', async () => {
             const rows = await excel.makeXlsRows({ exportDocs: testDocs, ...context });
             const result = excel.makeXlsSumRows({exportRows: rows});
-            expect(result).to.be.an('array');
+            expect(result.sumRows).to.be.an('array');
+            expect(result.catRows).to.be.an('array');
         });
     });
     describe('The makeXls function', () => {

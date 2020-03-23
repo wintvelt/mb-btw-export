@@ -8,6 +8,7 @@ const columnHeaders = ['tax-rate', 'account', 'account Id', 'docId', 'moneybird'
     'company', 'country', 'type', 'date', 'change', 'bedrag EX BTW'];
 
 const summaryHeaders = ['tax-rate', 'change', 'bedrag EX BTW', 'totaal bedrag EX BTW'];
+const catHeaders = ['account', 'change', 'bedrag EX BTW', 'totaal bedrag EX BTW'];
 
 const findKey = (key) => (id, listWithIds) => {
     const safeList = Array.isArray(listWithIds) ? listWithIds : [];
@@ -56,6 +57,7 @@ module.exports.makeXlsRows = async ({ exportDocs, adminCode, access_token }) => 
 
 const makeXlsSumRows = ({ exportRows }) => {
     let sumObj = {};
+    let catObj = {};
     const exportRowsLength = exportRows.length;
     for (let i = 0; i < exportRowsLength; i++) {
         const row = exportRows[i];
@@ -67,6 +69,12 @@ const makeXlsSumRows = ({ exportRows }) => {
         if (!sumObj[tax_rate].total) sumObj[tax_rate].total = 0;
         sumObj[tax_rate][change] += amount;
         sumObj[tax_rate].total += amount;
+        const account = row[1] + ' - ' + row[2];
+        if (!catObj[account]) catObj[account] = {};
+        if (!catObj[account][change]) catObj[account][change] = 0;
+        if (!sumObj[account].total) catObj[account].total = 0;
+        catObj[account][change] += amount;
+        catObj[account].total += amount;
     }
     let sumRows = [];
     let taxRates = Object.keys(sumObj);
@@ -86,7 +94,25 @@ const makeXlsSumRows = ({ exportRows }) => {
             sumRows.push(newSumRow);
         }
     }
-    return sumRows;
+    let catRows = [];
+    let accounts = Object.keys(catObj);
+    for (let i = 0; i < accounts.length; i++) {
+        const account = accounts[i];
+        const lines = Object.keys(catObj[account]);
+        for (let j = 0; j < lines.length; j++) {
+            const line = lines[j];
+            let newCatRow = [];
+            newCatRow[0] = account;
+            if (line !== 'total') {
+                newCatRow[1] = line;
+                newCatRow[2] = sumObj[account][line];
+            } else {
+                newCatRow[3] = sumObj[account].total;
+            }
+            catRows.push(newCatRow);
+        }
+    }
+    return { sumRows, catRows };
 }
 module.exports.makeXlsSumRows = makeXlsSumRows;
 
@@ -97,11 +123,11 @@ module.exports.makeXls = async (exportRows) => {
     workbook.lastModifiedBy = 'Moblybird';
     workbook.created = new Date();
 
+    const { sumRows, catRows } = makeXlsSumRows({ exportRows });
+
     // summary sheet
     let summarySheet = workbook.addWorksheet('btw-export overzicht');
     summarySheet.addRow(summaryHeaders);
-
-    const sumRows = makeXlsSumRows({ exportRows });
 
     for (let i = 0; i < sumRows.length; i++) {
         const newRow = sumRows[i];
@@ -122,6 +148,29 @@ module.exports.makeXls = async (exportRows) => {
     });
     summarySheet.getColumn(3).numFmt = '€#,##0.00;[Red]-€#,##.00';
     summarySheet.getColumn(4).numFmt = '€#,##0.00;[Red]-€#,##0.00';
+
+    // category sheet
+    let catSheet = workbook.addWorksheet('rekeningen overzicht');
+    catSheet.addRow(catHeaders);
+
+    for (let i = 0; i < catRows.length; i++) {
+        const newRow = catRows[i];
+        catSheet.addRow(newRow);
+    }
+
+    catSheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) {
+            row.font = { bold: true }
+        } else {
+            row.font = { bold: false }
+        }
+    });
+
+    sumWidths.forEach((v, i) => {
+        catSheet.getColumn(i + 1).width = v;
+    });
+    catSheet.getColumn(3).numFmt = '€#,##0.00;[Red]-€#,##.00';
+    catSheet.getColumn(4).numFmt = '€#,##0.00;[Red]-€#,##0.00';
 
     // details sheet
     let detailSheet = workbook.addWorksheet('btw-export details');
