@@ -14,24 +14,6 @@ otherwise: make new line
 for all remaining old lines, make deleted line
 */
 
-const getLatestExport = (docRecord) => {
-    const allExportKeys = Object.keys(docRecord).filter(key => (
-        key !== 'id' && key !== 'latestState' && key !== 'adminCode' && key !== 'latestDiff'
-    ));
-    let latestExportState = null;
-    for (let i = 0; i < allExportKeys.length; i++) {
-        const key = allExportKeys[i];
-        const state = docRecord[key];
-        if (!latestExportState || state.latestState.isDeleted 
-            || state.latestState.version > latestExportState.latestState.version) {
-            latestExportState = state;
-        }
-        if (state.latestState.isDeleted) break;
-    }
-    return latestExportState;
-};
-module.exports.getLatestExport = getLatestExport;
-
 const toNum = (str) => (Math.round(parseFloat(str.replace(',', '.')) * 100) / 100);
 
 const mapAmount = (detail) => ({ ...detail, amount: toNum(detail.total_price_excl_tax_with_discount_base) });
@@ -40,11 +22,15 @@ const sameType = (oldDetail, newDetail) => (
     oldDetail.tax_rate_id === newDetail.tax_rate_id
     && oldDetail.ledger_account_id === newDetail.ledger_account_id
 );
+const sameAll = (oldDetail, newDetail) => (
+    oldDetail.tax_rate_id === newDetail.tax_rate_id
+    && oldDetail.ledger_account_id === newDetail.ledger_account_id
+    && oldDetail.total_price_excl_tax_with_discount_base === newDetail.total_price_excl_tax_with_discount_base
+);
 
 const diff = (oldState, newState) => {
     let diffArray = [];
     if ((!oldState || oldState.isDeleted) && newState && newState.isDeleted) return diffArray;
-
     const oldDetails = (oldState && oldState.details) ? [...oldState.details] : [];
     let oldAmounts = oldDetails.map(mapAmount);
     const newDetails = (newState.details) ? newState.details : [];
@@ -54,14 +40,19 @@ const diff = (oldState, newState) => {
         const newDetail = newAmounts[i];
         let amount = newDetail.amount;
         let change = 'added';
+        let foundIndex = -1;
         for (let j = 0; j < oldAmounts.length; j++) {
             const oldDetail = oldAmounts[j];
-            if (sameType(oldDetail, newDetail)) {
+            if (sameAll(oldDetail, newDetail)) {
+                amount = 0;
+                foundIndex = j;
+            } else if (foundIndex === -1 && sameType(oldDetail, newDetail)) {
                 amount = Math.round((amount - oldDetail.amount) * 100) / 100;
                 change = 'changed';
+                foundIndex = j;
             }
         }
-        oldAmounts = oldAmounts.filter((oldDetail) => !sameType(oldDetail, newDetail));
+        if (foundIndex >= 0) oldAmounts = oldAmounts.filter((oldDetail, i) => i !== foundIndex);
         if (amount !== 0) {
             diffArray.push({
                 tax_rate_id: newDetail.tax_rate_id,
@@ -83,8 +74,3 @@ const diff = (oldState, newState) => {
     return diffArray;
 }
 module.exports.diff = diff;
-
-module.exports.diffState = (docRecord) => {
-    const latestExport = getLatestExport(docRecord);
-    return diff(latestExport? latestExport.latestState : null, docRecord.latestState);
-}

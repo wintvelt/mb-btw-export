@@ -21,6 +21,6 @@ describe("The handlerSync function", testIfMb(() => {
     it("does a sync", async () => {
         const response = await handler.main(event);
         expect(response.statusCode).to.equal(200);
-        console.log(response.body);
+        if (response.statusCode !== 200) console.log(response);
     }).timeout(20000);
 }));

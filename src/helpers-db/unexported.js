@@ -12,20 +12,6 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
     region: 'eu-central-1'
 });
 
-const getLatestExport = async ({ adminCode, latestExportName, id }) => {
-    const params = {
-        Key: {
-            adminCodeState: adminCode + latestExportName,
-            id
-        },
-        TableName
-    }
-    return dynamoDb.get(params)
-        .promise()
-        .then(res => res.Item)
-        .catch(error => ({ error: error.message }));
-}
-
 const updateUnexportedParams = ({ latestState, latestExport }) => {
     const { adminCode, id, state, exportLogs, timeStamp } = latestState;
     const latestExportState = latestExport && latestExport.state;
@@ -46,12 +32,16 @@ const updateUnexportedParams = ({ latestState, latestExport }) => {
         },
         ReturnValues: 'NONE'
     };
-    const itemUpdates = [
+    let itemUpdates = [
         { itemName: 'timeStamp', newState: timeStamp },
         { itemName: 'state', newState: { ...latestExportFacts, ...state } },
         { itemName: 'diff', newState: latestDiff },
         { itemName: 'exportLogs', newState: exportLogs || [] },
     ];
+    if (latestExportState) itemUpdates.push({
+        itemName: 'previousState',
+        newState: latestExportState
+    });
 
     return (shouldBeInUnexported) ?
         update.singleWithItemsParams({ adminCode, id, stateName: 'unexported', itemUpdates })

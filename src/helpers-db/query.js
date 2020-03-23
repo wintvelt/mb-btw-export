@@ -13,23 +13,25 @@ const query = (params) => {
 };
 
 const queryBaseParams = {
-    ProjectionExpression: "adminCode, stateName, id, #state, diff, exportLogs",
+    ProjectionExpression: "adminCode, stateName, id, #state, diff, exportLogs, #ts, previousState",
     KeyConditionExpression: '#acs = :acs',
     ExpressionAttributeNames: {
         '#acs': 'adminCodeState',
         '#state': 'state',
+        '#ts': 'timeStamp'
     },
     TableName
 };
 
-const queryOnce = ({ adminCode, stateName, ExclusiveStartKey }) => {
-    const params = {
+const queryOnce = ({ adminCode, stateName, ExclusiveStartKey, Limit }) => {
+    let params = {
         ...queryBaseParams,
         ExpressionAttributeValues: {
             ':acs': adminCode + stateName,
         },
         ExclusiveStartKey,
     };
+    if (Limit) params.Limit = Limit;
     return query(params)
         .then(res => {
             return { ...res, Items: res.Items && res.Items.filter(item => item.id !== 'exportStats') }

@@ -100,7 +100,19 @@ functions:
               paths:
                 admin: true
                 filename: true
-                                          
+  verify:
+    handler: src/handlerVerify.main
+    timeout: 20
+    events:
+      - http:
+          path: btw-export/{admin}/verify
+          method: post
+          cors: true
+          request:
+            parameters:
+              paths:
+                admin: true
+                                                        
 resources:
   Resources:
     IncomingDynamoDbTable:

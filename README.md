@@ -226,7 +226,32 @@ Response:
     "max_exceeded": true
 }
 ```
+
+### `/btw-export/[admin-id]/verify` POST
+Does a check on the integrity of the database.
+Requires a (maybe empty) `body` object:
+
+```json
+{ 
+    "ExclusiveStartKey": "[some key]",
+}
+```
+Response: 
+- `200 OK` if all went well. Always has `body` in response.
+```json
+{
+    "verified": 100,
+    "issues": [
+
+    ],
+    "LastEvaluatedKey": "[some key]";
+}
+```
+If the response body contains a `LastEvaluatedKey`, this means that the verification is not yet finished, and needs to be run again, by providing the key as the `ExclusiveStartKey` in the next request.
+
+
 ---
+
 
 ## Under the hood
 

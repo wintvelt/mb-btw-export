@@ -50,15 +50,19 @@ module.exports.getUnexported = async ({ adminCode, start_date, end_date, is_full
 }
 
 module.exports.setExportParams = ({ unexportedDoc, filename }) => {
-    const { adminCode, id, state, exportLogs } = unexportedDoc;
+    const { adminCode, id, state, exportLogs, previousState } = unexportedDoc;
+    let itemUpdates = [
+        { itemName: 'state', newState: state },
+        { itemName: 'exportLogs', newState: exportLogs },
+    ];
+    if (previousState) itemUpdates.push({
+        itemName: 'previousState', newState: previousState
+    });
     const params = {
         adminCode,
         id,
         stateName: filename,
-        itemUpdates: [
-            { itemName: 'state', newState: state },
-            { itemName: 'exportLogs', newState: exportLogs },
-        ]
+        itemUpdates
     };
     return update.singleWithItemsParams(params);
 };
