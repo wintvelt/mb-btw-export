@@ -13,7 +13,7 @@ const findKey = (key) => (id, listWithIds) => {
     const safeList = Array.isArray(listWithIds) ? listWithIds : [];
     const itemFound = safeList.find(item => item.id === id);
     return (itemFound) ?
-        itemFound.name
+        itemFound[key]
         : '';
 }
 const findName = (id, listWithIds) => findKey('name')(id, listWithIds);
