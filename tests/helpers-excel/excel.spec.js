@@ -81,7 +81,6 @@ describe('excel creation tests', testIf(() => {
             const rows = await excel.makeXlsRows({ exportDocs: testDocs, ...context });
             const result = excel.makeXlsSumRows({exportRows: rows});
             expect(result).to.be.an('array');
-            console.log(result);
         });
     });
     describe('The makeXls function', () => {
