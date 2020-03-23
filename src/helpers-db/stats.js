@@ -52,7 +52,7 @@ module.exports.getUnexportedStats = async ({ adminCode }) => {
         const docDate = docState.date;
         if (!start_date || docDate < start_date) start_date = docDate;
         if (!end_date || docDate > end_date) end_date = docDate;
-        if (docState.exportLogs && docState.exportLogs.length > 0) {
+        if (doc.exportLogs && doc.exportLogs.length > 0) {
             if (docState.isDeleted) {
                 deleted_docs++
             } else {
