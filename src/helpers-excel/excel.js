@@ -115,7 +115,9 @@ module.exports.makeXls = async (exportRows) => {
     const sumWidths = [30, 20, 20, 20];
     sumWidths.forEach((v, i) => {
         summarySheet.getColumn(i + 1).width = v;
-    })
+    });
+    summarySheet.getColumn(3).numFmt = '€#.##0,00;[Red]-€#.##0,00';
+    summarySheet.getColumn(4).numFmt = '€#.##0,00;[Red]-€#.##0,00';
 
     // details sheet
     let detailSheet = workbook.addWorksheet('btw-export details');
@@ -145,7 +147,8 @@ module.exports.makeXls = async (exportRows) => {
     const widths = [30, 30, 20, 10, 30, 10, 20, 20, 10, 10];
     widths.forEach((v, i) => {
         detailSheet.getColumn(i + 1).width = v;
-    })
+    });
+    detailSheet.getColumn(10).numFmt = '€#.##0,00;[Red]-€#.##0,00';
 
     const xlsBuffer = await workbook.xlsx.writeBuffer();
     return xlsBuffer;
