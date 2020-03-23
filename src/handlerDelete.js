@@ -42,7 +42,7 @@ module.exports.main = async event => {
         const latestStateFromDb = await get.get(docKeys);
         if (latestStateFromDb.error) return { error: latestStateFromDb.error };
 
-        const newExportLogs = (exportedDoc.exportLogs) ? exportedDoc.exportLogs.slice(1) : [];
+        const newExportLogs = exportedDoc.exportLogs || [];
         const newLatestState = {
             ...latestStateFromDb,
             exportLogs: newExportLogs,

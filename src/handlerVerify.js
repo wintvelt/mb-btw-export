@@ -57,6 +57,7 @@ module.exports.main = async event => {
             const diffCheck = diff.diff(previous.previousState, current.state);
             if (diffCheck.length > 0) {
                 issues.push({
+                    message: 'current state of id is not equal to previous state of previous snapshot',
                     id: item.id,
                     stateName: current.stateName,
                     diffCheck: diffCheck,
@@ -65,6 +66,31 @@ module.exports.main = async event => {
                 });
             }
         }
+    }
+
+    let allExportNames = [];
+    for (let i = 0; i < itemsLength; i++) {
+        const item = Items[i];
+        const exportLogs = item.exportLogs || [];
+        for (let j = 0; j < exportLogs.length; j++) {
+            const exportName = exportLogs[j];
+            allExportNames.push(exportName);
+        }
+    }
+    const uniqueExportNames = [...new Set([...allExportNames])];
+    const exportStats = await Promise.all(uniqueExportNames.map(name => {
+        return get.get({
+            adminCode,
+            stateName: name,
+            id: 'exportStats'
+        })
+    }));
+    for (let i = 0; i < exportStats.length; i++) {
+        const foundStats = exportStats[i];
+        if (!foundStats) issues.push({
+            message: 'exportStats not found',
+            stateName: uniqueExportNames[i]
+        });       
     }
 
     return request.response(201, {
