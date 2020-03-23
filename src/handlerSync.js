@@ -21,7 +21,7 @@ module.exports.main = async event => {
     }
     const resultFromDbAndMb = await sync.getDocUpdates(params);
     if (resultFromDbAndMb.error) return request.response(500, resultFromDbAndMb.error);
-    const { docUpdates, maxExceeded } = resultFromDbAndMb;
+    const { docUpdates, synced, not_synced, maxExceeded } = resultFromDbAndMb;
 
     const results = await Promise.all(docUpdates.map(async (docUpdate) => {
         const newLatestState = {
@@ -39,5 +39,5 @@ module.exports.main = async event => {
         return request.response(500, { error: errorFound.error });
     }
 
-    return request.response(200, { maxExceeded });
+    return request.response(200, { synced, not_synced, maxExceeded });
 };

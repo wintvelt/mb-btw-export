@@ -33,6 +33,7 @@ const limitChanges = (changeSet, maxUpdates) => {
         changeSet.purchase_invoices.changed.length,
         changeSet.purchase_invoices.deleted.length
     ];
+    const docCount = lengths.reduce((totalCount, count) => totalCount+count, 0)
     const lengthsCumStart = [
         0,
         lengths[0],
@@ -54,7 +55,9 @@ const limitChanges = (changeSet, maxUpdates) => {
             deleted: changeSet.purchase_invoices.deleted.slice(0, Math.max(0, maxUpdates - lengthsCumStart[5])),
         }
     }
-    return { limitedChangeSet, maxExceeded };
+    const synced = (docCount > maxUpdates)? maxUpdates : docCount;
+    const not_synced = (docCount > maxUpdates)? docCount - maxUpdates : 0;
+    return { limitedChangeSet, synced, not_synced, maxExceeded };
 }
 module.exports.limitChanges = limitChanges;
 
@@ -110,11 +113,13 @@ module.exports.getDocUpdates = async ({ adminCode, access_token, TableName, maxU
         console.log(changeSet.error);
         return { error: changeSet.error }
     }
-    const { limitedChangeSet, maxExceeded } = limitChanges(changeSet, maxUpdates);
+    const { limitedChangeSet, synced, not_synced, maxExceeded } = limitChanges(changeSet, maxUpdates);
     const docUpdates = await mbDocs.fullFetch({ adminCode, access_token, changeSet: limitedChangeSet });
     if (docUpdates.error) return { error: docUpdates.error }
     return {
         docUpdates: docUpdates.filter(content => !!content),
+        synced,
+        not_synced,
         maxExceeded
     }
 }

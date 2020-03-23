@@ -219,9 +219,13 @@ Normally runs a sync with all Moneybird docs for the current year. Optionally ta
 
 Response: 
 - `200 OK` if all went well. Always has `body` in response.
-    - body may be empty object (full sync was completed), 
-    - or body contains `maxExceeded: true`: in which case sync incomplete, and needs to be run again (may be required multiple times)
-
+```json
+{
+    "synced": 100,
+    "not_synced": 233,
+    "max_exceeded": true
+}
+```
 ---
 
 ## Under the hood
