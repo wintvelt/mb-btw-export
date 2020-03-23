@@ -73,7 +73,7 @@ describe('excel creation tests', testIf(() => {
             const result = await excel.makeXlsRows({ exportDocs: testDocs, ...context });
             expect(result).to.be.an('array');
             const firstRow = result[0];
-            expect(firstRow).to.be.an('array').and.have.lengthOf(10);
+            expect(firstRow).to.be.an('array').and.have.lengthOf(11);
         });
     });
     describe('The makeXlsSumRows function', () => {

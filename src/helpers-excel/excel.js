@@ -72,7 +72,7 @@ const makeXlsSumRows = ({ exportRows }) => {
         const account = row[1] + ' - ' + row[2];
         if (!catObj[account]) catObj[account] = {};
         if (!catObj[account][change]) catObj[account][change] = 0;
-        if (!sumObj[account].total) catObj[account].total = 0;
+        if (!catObj[account].total) catObj[account].total = 0;
         catObj[account][change] += amount;
         catObj[account].total += amount;
     }
@@ -105,9 +105,9 @@ const makeXlsSumRows = ({ exportRows }) => {
             newCatRow[0] = account;
             if (line !== 'total') {
                 newCatRow[1] = line;
-                newCatRow[2] = sumObj[account][line];
+                newCatRow[2] = catObj[account][line];
             } else {
-                newCatRow[3] = sumObj[account].total;
+                newCatRow[3] = catObj[account].total;
             }
             catRows.push(newCatRow);
         }
