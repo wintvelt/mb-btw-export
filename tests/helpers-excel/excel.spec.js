@@ -36,6 +36,21 @@ const testDocs = [
         }]
     },
     {
+        id: 'other id',
+        state: {
+            date: '2020-02-01',
+            type: 'receipt',
+            company: 'test supplier 2',
+            country: 'BE'
+        },
+        diff: [{
+            tax_rate_id: '243232725503313338',
+            ledger_account_id: '249402226459542918',
+            change: 'added',
+            amount: 56.7
+        }]
+    },
+    {
         id: '282168015182628005',
         state: {
             date: '2020-01-02',
@@ -59,6 +74,14 @@ describe('excel creation tests', testIf(() => {
             expect(result).to.be.an('array');
             const firstRow = result[0];
             expect(firstRow).to.be.an('array').and.have.lengthOf(10);
+        });
+    });
+    describe('The makeXlsSumRows function', () => {
+        it('creates xls sum rows', async () => {
+            const rows = await excel.makeXlsRows({ exportDocs: testDocs, ...context });
+            const result = excel.makeXlsSumRows({exportRows: rows});
+            expect(result).to.be.an('array');
+            console.log(result);
         });
     });
     describe('The makeXls function', () => {

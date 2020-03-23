@@ -7,6 +7,8 @@ const fetchBasics = require('../helpers-mb/fetchBasics');
 const columnHeaders = ['tax-rate', 'account', 'docId', 'moneybird',
     'company', 'country', 'type', 'date', 'change', 'bedrag EX BTW'];
 
+const summaryHeaders = ['tax-rate', 'change', 'bedrag EX BTW', 'totaal bedrag EX BTW'];
+
 const findName = (id, listWithIds) => {
     const safeList = Array.isArray(listWithIds) ? listWithIds : [];
     const itemFound = safeList.find(item => item.id === id);
@@ -48,6 +50,42 @@ module.exports.makeXlsRows = async ({ exportDocs, adminCode, access_token }) => 
     return exportRows;
 }
 
+const makeXlsSumRows = ({ exportRows }) => {
+    let sumObj = {};
+    const exportRowsLength = exportRows.length;
+    for (let i = 0; i < exportRowsLength; i++) {
+        const row = exportRows[i];
+        const tax_rate = row[0];
+        const change = row[8];
+        const amount = row[9];
+        if (!sumObj[tax_rate]) sumObj[tax_rate] = {};
+        if (!sumObj[tax_rate][change]) sumObj[tax_rate][change] = 0;
+        if (!sumObj[tax_rate].total) sumObj[tax_rate].total = 0;
+        sumObj[tax_rate][change] += amount;
+        sumObj[tax_rate].total += amount;
+    }
+    let sumRows = [];
+    let taxRates = Object.keys(sumObj);
+    for (let i = 0; i < taxRates.length; i++) {
+        const tax_rate = taxRates[i];
+        const lines = Object.keys(sumObj[tax_rate]);
+        for (let j = 0; j < lines.length; j++) {
+            const line = lines[j];
+            let newSumRow = [];
+            newSumRow[0] = tax_rate;
+            if (line !== 'total') {
+                newSumRow[1] = line;
+                newSumRow[2] = sumObj[tax_rate][line];
+            } else {
+                newSumRow[3] = sumObj[tax_rate].total;
+            }
+            sumRows.push(newSumRow);
+        }
+    }
+    return sumRows;
+}
+module.exports.makeXlsSumRows = makeXlsSumRows;
+
 module.exports.makeXls = async (exportRows) => {
     if (!exportRows || exportRows.length === 0) return null;
     let workbook = new Excel.Workbook();
@@ -55,15 +93,40 @@ module.exports.makeXls = async (exportRows) => {
     workbook.lastModifiedBy = 'Moblybird';
     workbook.created = new Date();
 
-    let sheet = workbook.addWorksheet('Moblybird btw-export');
-    sheet.addRow(columnHeaders);
+    // summary sheet
+    let summarySheet = workbook.addWorksheet('btw-export overzicht');
+    summarySheet.addRow(summaryHeaders);
+
+    const sumRows = makeXlsSumRows({ exportRows });
+
+    for (let i = 0; i < sumRows.length; i++) {
+        const newRow = sumRows[i];
+        summarySheet.addRow(newRow);
+    }
+
+    summarySheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) {
+            row.font = { bold: true }
+        } else {
+            row.font = { bold: false }
+        }
+    });
+
+    const sumWidths = [30, 20, 20, 20];
+    sumWidths.forEach((v, i) => {
+        summarySheet.getColumn(i + 1).width = v;
+    })
+
+    // details sheet
+    let detailSheet = workbook.addWorksheet('btw-export details');
+    detailSheet.addRow(columnHeaders);
 
     for (let i = 0; i < exportRows.length; i++) {
         const newRow = exportRows[i];
-        sheet.addRow(newRow);
+        detailSheet.addRow(newRow);
     }
 
-    sheet.eachRow((row, rowNumber) => {
+    detailSheet.eachRow((row, rowNumber) => {
         if (rowNumber === 1) {
             row.font = { bold: true }
         } else {
@@ -71,25 +134,17 @@ module.exports.makeXls = async (exportRows) => {
         }
     });
 
-    let linkCol = sheet.getColumn(4);
+    let linkCol = detailSheet.getColumn(4);
     linkCol.font = { color: { argb: 'FF00ACC2' } };
-    sheet.getCell('D1').font = { color: { argb: 'FF000000' } };
+    detailSheet.getCell('D1').font = { color: { argb: 'FF000000' } };
 
-    sheet.eachRow((row, rowNumber) => {
-        if (rowNumber === 1) {
-            row.font = { bold: true }
-        } else {
-            row.font = { bold: false }
-        }
-    });
-
-    sheet.getColumn(4).eachCell(cell => {
+    detailSheet.getColumn(4).eachCell(cell => {
         if (cell.text === 'link') cell.font = { color: { argb: 'FF00ACC2' } }
     });
 
     const widths = [30, 30, 20, 10, 30, 10, 20, 20, 10, 10];
     widths.forEach((v, i) => {
-        sheet.getColumn(i + 1).width = v;
+        detailSheet.getColumn(i + 1).width = v;
     })
 
     const xlsBuffer = await workbook.xlsx.writeBuffer();
