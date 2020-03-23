@@ -4,18 +4,21 @@
 const Excel = require('exceljs');
 const fetchBasics = require('../helpers-mb/fetchBasics');
 
-const columnHeaders = ['tax-rate', 'account', 'docId', 'moneybird',
+const columnHeaders = ['tax-rate', 'account', 'account Id', 'docId', 'moneybird',
     'company', 'country', 'type', 'date', 'change', 'bedrag EX BTW'];
 
 const summaryHeaders = ['tax-rate', 'change', 'bedrag EX BTW', 'totaal bedrag EX BTW'];
 
-const findName = (id, listWithIds) => {
+const findKey = (key) => (id, listWithIds) => {
     const safeList = Array.isArray(listWithIds) ? listWithIds : [];
     const itemFound = safeList.find(item => item.id === id);
     return (itemFound) ?
         itemFound.name
         : '';
 }
+const findName = (id, listWithIds) => findKey('name')(id, listWithIds);
+const findAccountId = (id, listWithIds) => findKey('account_id')(id, listWithIds);
+
 
 module.exports.makeXlsRows = async ({ exportDocs, adminCode, access_token }) => {
     const [taxRates, ledgerAccounts] = await fetchBasics.fetchBasics({ adminCode, access_token });
@@ -32,6 +35,7 @@ module.exports.makeXlsRows = async ({ exportDocs, adminCode, access_token }) => 
             exportRows.push([
                 findName(detail.tax_rate_id, taxRates),
                 findName(detail.ledger_account_id, ledgerAccounts),
+                findAccountId(detail.ledger_account_id, ledgerAccounts),
                 id,
                 {
                     text: 'link',
@@ -56,8 +60,8 @@ const makeXlsSumRows = ({ exportRows }) => {
     for (let i = 0; i < exportRowsLength; i++) {
         const row = exportRows[i];
         const tax_rate = row[0];
-        const change = row[8];
-        const amount = row[9];
+        const change = row[9];
+        const amount = row[10];
         if (!sumObj[tax_rate]) sumObj[tax_rate] = {};
         if (!sumObj[tax_rate][change]) sumObj[tax_rate][change] = 0;
         if (!sumObj[tax_rate].total) sumObj[tax_rate].total = 0;
@@ -136,19 +140,19 @@ module.exports.makeXls = async (exportRows) => {
         }
     });
 
-    let linkCol = detailSheet.getColumn(4);
+    let linkCol = detailSheet.getColumn(5);
     linkCol.font = { color: { argb: 'FF00ACC2' } };
     detailSheet.getCell('D1').font = { color: { argb: 'FF000000' } };
 
-    detailSheet.getColumn(4).eachCell(cell => {
+    detailSheet.getColumn(5).eachCell(cell => {
         if (cell.text === 'link') cell.font = { color: { argb: 'FF00ACC2' } }
     });
 
-    const widths = [30, 30, 20, 10, 30, 10, 20, 20, 10, 10];
+    const widths = [30, 30, 10, 20, 10, 30, 10, 20, 20, 10, 10];
     widths.forEach((v, i) => {
         detailSheet.getColumn(i + 1).width = v;
     });
-    detailSheet.getColumn(10).numFmt = '€#,##0.00;[Red]-€#,##0.00';
+    detailSheet.getColumn(11).numFmt = '€#,##0.00;[Red]-€#,##0.00';
 
     const xlsBuffer = await workbook.xlsx.writeBuffer();
     return xlsBuffer;
