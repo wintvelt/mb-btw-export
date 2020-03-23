@@ -77,7 +77,7 @@ functions:
                 admin: true
   export:
     handler: src/handlerExport.main
-    timeout: 20
+    timeout: 30
     events:
       - http:
           path: btw-export/{admin}/export
@@ -89,7 +89,7 @@ functions:
                 admin: true
   deleteExport:
     handler: src/handlerDelete.main
-    timeout: 20
+    timeout: 30
     events:
       - http:
           path: btw-export/{admin}/export/{filename}
