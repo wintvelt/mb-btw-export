@@ -9,6 +9,7 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
 
 const testDb = (process.env.TEST_DB_ON && process.env.TEST_DB_ON !== "false");
 const testMb = (process.env.TEST_MB_ON && process.env.TEST_MB_ON !== "false");
+const testS3 = (process.env.TEST_S3_ON && process.env.TEST_S3_ON !== "false");
 
 module.exports.adminCode = process.env.ADMIN_CODE;
 module.exports.access_token = process.env.ACCESS_TOKEN;
@@ -22,6 +23,13 @@ module.exports.testIfDb = (testFunc) => {
 
 module.exports.testIfMb = (testFunc) => {
     if (testMb) return testFunc;
+    return () => {
+        it('moneybird tests did not run', () => {});
+    }
+}
+
+module.exports.testIfS3 = (testFunc) => {
+    if (testS3) return testFunc;
     return () => {
         it('moneybird tests did not run', () => {});
     }

@@ -1,23 +1,12 @@
 // for testing (duh)
-const mocha = require('mocha');
+'use strict';
 const chai = require('chai');
 const expect = chai.expect;
-require('dotenv').config();
+const testhelpers = require('../../src/helpers/test');
+const testIfS3 = testhelpers.testIfS3;
+const adminCode = testhelpers.adminCode;
 
 const excel = require('../../src/helpers-excel/excel');
-
-const context = {
-    adminCode: process.env.ADMIN_CODE,
-    access_token: process.env.ACCESS_TOKEN
-};
-
-const testMb = (process.env.TEST_MB_ON && process.env.TEST_MB_ON !== "false");
-const testIf = (testFunc) => {
-    if (testMb) return testFunc;
-    return () => {
-        it('moneybird tests did not run', () => { });
-    }
-}
 
 const testDocs = [
     {
@@ -67,10 +56,10 @@ const testDocs = [
     },
 ]
 
-describe('excel creation tests', testIf(() => {
+describe('excel creation tests', testIfS3(() => {
     describe('The makeXlsRows function', () => {
         it('creates xls rows', async () => {
-            const result = await excel.makeXlsRows({ exportDocs: testDocs, ...context });
+            const result = await excel.makeXlsRows({ exportDocs: testDocs, adminCode });
             expect(result).to.be.an('array');
             const firstRow = result[0];
             expect(firstRow).to.be.an('array').and.have.lengthOf(11);
@@ -78,7 +67,7 @@ describe('excel creation tests', testIf(() => {
     });
     describe('The makeXlsSumRows function', () => {
         it('creates xls sum rows', async () => {
-            const rows = await excel.makeXlsRows({ exportDocs: testDocs, ...context });
+            const rows = await excel.makeXlsRows({ exportDocs: testDocs, adminCode });
             const result = excel.makeXlsSumRows({exportRows: rows});
             expect(result.sumRows).to.be.an('array');
             expect(result.catRows).to.be.an('array');
@@ -86,7 +75,7 @@ describe('excel creation tests', testIf(() => {
     });
     describe('The makeXls function', () => {
         it('returns an xls buffer when provided with xlsRows', async () => {
-            const xlsRows = await excel.makeXlsRows({ exportDocs: testDocs, ...context });
+            const xlsRows = await excel.makeXlsRows({ exportDocs: testDocs, adminCode });
             const buffer = await excel.makeXls(xlsRows);
         });
     });

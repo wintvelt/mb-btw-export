@@ -17,6 +17,7 @@ provider:
     DYNAMODB_DOC_TABLE: ${self:service}-${opt:stage, self:provider.stage}-docs
     TEST_DB_ON: true
     TEST_MB_ON: true
+    TEST_S3_ON: false
 
   iamRoleStatements:
     - Effect: Allow
