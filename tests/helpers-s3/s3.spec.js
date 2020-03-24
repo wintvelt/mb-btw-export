@@ -2,6 +2,7 @@
 const chai = require('chai');
 const expect = chai.expect;
 const testHelpers = require('../../src/helpers/test');
+const testIfS3 = testHelpers.testIfS3;
 
 const adminCode = testHelpers.adminCode;
 const access_token = testHelpers.access_token;
@@ -40,7 +41,7 @@ const testDocs = [
 ];
 
 
-describe('AWS s3 tests', () => {
+describe('AWS s3 tests', testIfS3(() => {
     describe('The save function', () => {
         it('saves a testDoc json on S3', async () => {
             const saveParams = {
@@ -76,4 +77,4 @@ describe('AWS s3 tests', () => {
         });
     });
 
-});
+}));
