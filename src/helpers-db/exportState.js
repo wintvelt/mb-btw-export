@@ -8,7 +8,7 @@ const filterDate = dateHelpers.filterDate;
 const errorLog = require('../helpers/request').errorLog;
 
 
-const bucketName = process.env.PUBLIC_BUCKETNAME || 'moblybird-export-files';
+const bucketName = process.env.PUBLIC_BUCKETNAME || 'moblybird-folders';
 const folderName = process.env.FOLDER_NAME || 'public';
 const s3Url = process.env.S3_URL || 's3.eu-central-1.amazonaws.com';
 

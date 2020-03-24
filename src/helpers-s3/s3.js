@@ -5,7 +5,7 @@ var s3 = new S3({
     region: 'eu-central-1'
 });
 
-const bucketName = process.env.PUBLIC_BUCKETNAME || 'moblybird-export-files';
+const bucketName = process.env.PUBLIC_BUCKETNAME || 'moblybird-folders';
 const folderName = process.env.FOLDER_NAME || 'public';
 
 module.exports.save = ({ adminCode, filename, content, contentType }) => {
