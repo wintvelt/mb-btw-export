@@ -78,19 +78,16 @@ module.exports.main = async event => {
         ]})
     });
 
+    const exportStats = exportState.makeExportStats({ adminCode, exportDocs, filename });
+    const summarySaveResultPromise = await exportState.saveStats({ adminCode, stateName: filename, exportStats });
+
     const result = await Promise.all([
+        ...docUpdatePromises,
+        summarySaveResultPromise,
         savePromise,
-        ...docUpdatePromises
     ]);
     const errorFound = result.find(item => item.error);
     if (errorFound) return request.response(500, errorFound.error);
-
-    const exportStats = exportState.makeExportStats({ adminCode, exportDocs, filename });
-    const summarySaveResult = await exportState.saveStats({ adminCode, stateName: filename, exportStats });
-    if (summarySaveResult.error) {
-        console.log(summarySaveResult);
-        return request.response(500, summarySaveResult.error);
-    }
 
     return request.response(201, exportStats);
 };
