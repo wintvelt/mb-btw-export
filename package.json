@@ -6,7 +6,7 @@
   "dependencies": {
     "aws-sdk": "^2.634.0",
     "exceljs": "^3.8.1",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.7"
   },
   "devDependencies": {
     "arkit": "^1.6.4",
