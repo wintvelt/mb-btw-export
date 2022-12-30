@@ -12,7 +12,7 @@
     "arkit": "^1.6.4",
     "chai": "^4.2.0",
     "dotenv": "^8.2.0",
-    "mocha": "^7.1.0"
+    "mocha": "^10.2.0"
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha \"**/*.spec.js\" --timeout 5000"
